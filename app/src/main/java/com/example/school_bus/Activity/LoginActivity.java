@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -35,7 +34,7 @@ public class LoginActivity extends BaseActivity {
 
     public void initData(){
         //查找是否有存储的账号密码
-        SharedPreferences sharedPreferences=getSharedPreferences("user",MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences("user",MODE_PRIVATE);
         loginAccount.setText(sharedPreferences.getString("userName",""));
         loginPassword.setText(sharedPreferences.getString("userPassword",""));
     }
@@ -43,13 +42,13 @@ public class LoginActivity extends BaseActivity {
     @OnClick(R.id.login_btn)
     public void onViewClicked() {
         //存储输入的账号密码
-        SharedPreferences.Editor editor=getSharedPreferences("user",MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor = getSharedPreferences("user",MODE_PRIVATE).edit();
         editor.putString("userName",loginAccount.getText().toString());
         editor.putString("userPassword",loginPassword.getText().toString());
         editor.apply();
 
         if (loginAccount.getText().toString().equals("xyh")&&loginPassword.getText().toString().equals("123456")){
-            Intent intent=new Intent(LoginActivity.this,MapActivity.class);
+            Intent intent = new Intent(LoginActivity.this,MapActivity.class);
             startActivity(intent);
         }else {
             showToast("账号或密码错误，请重新输入!");

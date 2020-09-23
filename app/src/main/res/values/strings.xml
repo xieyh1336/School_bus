@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">School_bus</string>
+    <string name="app_name">我的地图</string>
 
     // 登录相关
     <string name="account">用户名</string>

@@ -5,7 +5,7 @@
     xmlns:tl="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
-    <androidx.viewpager.widget.ViewPager
+    <com.example.school_bus.View.MyViewPager
         android:id="@+id/vp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

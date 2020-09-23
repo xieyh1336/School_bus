@@ -1,6 +1,5 @@
 package com.example.school_bus.Activity;
 
-import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -14,6 +13,7 @@ import com.example.school_bus.Fragment.MapFragment;
 import com.example.school_bus.Fragment.MoreFragment;
 import com.example.school_bus.Fragment.NavigationFragment;
 import com.example.school_bus.R;
+import com.example.school_bus.View.MyViewPager;
 import com.flyco.tablayout.CommonTabLayout;
 import com.flyco.tablayout.listener.CustomTabEntity;
 import com.flyco.tablayout.listener.OnTabSelectListener;
@@ -26,7 +26,7 @@ import butterknife.ButterKnife;
 public class MapActivity extends BaseActivity {
 
     @BindView(R.id.vp)
-    ViewPager vp;
+    MyViewPager vp;
     @BindView(R.id.tl)
     CommonTabLayout tl;
     private ArrayList<Fragment> fragmentList = new ArrayList<>();
@@ -34,9 +34,9 @@ public class MapActivity extends BaseActivity {
     private MyPagerAdapter myPagerAdapter;
     private ArrayList<CustomTabEntity> mTabEntities = new ArrayList<>();
     private int[] mIconUnselectIds =
-            {R.mipmap.tab_map_unselect,R.mipmap.tab_navigation_unselect,R.mipmap.tab_more_unselect};
+            {R.mipmap.tab_map_unselect, R.mipmap.tab_navigation_unselect, R.mipmap.tab_more_unselect};
     private int[] mIconSelectIds =
-            {R.mipmap.tab_map_select,R.mipmap.tab_navigation_select,R.mipmap.tab_more_select};
+            {R.mipmap.tab_map_select, R.mipmap.tab_navigation_select, R.mipmap.tab_more_select};
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -58,9 +58,10 @@ public class MapActivity extends BaseActivity {
             mTabEntities.add(new TabEntity(titles[i], mIconSelectIds[i], mIconUnselectIds[i]));
         }
 
-        myPagerAdapter=new MyPagerAdapter(getSupportFragmentManager());
+        myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         vp.setAdapter(myPagerAdapter);
         vp.setOffscreenPageLimit(3);
+        vp.setStopForViewPager(true);
         tl.setTabData(mTabEntities);
         //相互绑定
         tl.setOnTabSelectListener(new OnTabSelectListener() {

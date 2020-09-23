@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -25,6 +25,124 @@
             android:layout_alignParentRight="true"
             android:layout_marginBottom="100dp"
             android:layout_marginRight="5dp"/>
+
+        <ImageView
+            android:id="@+id/iv_memu"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@mipmap/ic_memu"
+            android:padding="5dp"
+            android:background="@drawable/rounded_rectangle_white"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginBottom="155dp"
+            android:layout_marginRight="5dp"/>
+
+        <LinearLayout
+            android:id="@+id/ll_left"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/rounded_rectangle_white">
+
+            <TextView
+                android:id="@+id/tv_left_click"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="点击位置："/>
+
+            <TextView
+                android:id="@+id/tv_left_click_latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="纬度：266"/>
+
+            <TextView
+                android:id="@+id/tv_left_click_longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="经度：306"/>
+
+            <TextView
+                android:id="@+id/tv_left_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="我的位置："
+                android:layout_marginTop="5dp"/>
+
+            <TextView
+                android:id="@+id/tv_left_me_latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="纬度：266"/>
+
+            <TextView
+                android:id="@+id/tv_left_me_longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="经度：306"/>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_right"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:layout_margin="10dp"
+            android:background="@drawable/rounded_rectangle_white"
+            android:layout_alignParentRight="true">
+
+            <TextView
+                android:id="@+id/tv_right_click"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="点击位置："/>
+
+            <TextView
+                android:id="@+id/tv_right_click_latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="纬度：266"/>
+
+            <TextView
+                android:id="@+id/tv_right_click_longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="经度：305"/>
+
+            <TextView
+                android:id="@+id/tv_right_me"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="我的位置："
+                android:layout_marginTop="5dp"/>
+
+            <TextView
+                android:id="@+id/tv_right_me_latitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="纬度：266"/>
+
+            <TextView
+                android:id="@+id/tv_right_me_longitude"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                tools:text="经度：305"/>
+
+        </LinearLayout>
 
     </RelativeLayout>
 
