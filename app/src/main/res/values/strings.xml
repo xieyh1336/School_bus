@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">School_bus</string>
+
+    // 登录相关
+    <string name="account">用户名</string>
+    <string name="password">密码</string>
+</resources>
