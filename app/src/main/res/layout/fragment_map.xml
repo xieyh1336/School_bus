@@ -39,59 +39,6 @@
             android:layout_marginRight="5dp"/>
 
         <LinearLayout
-            android:id="@+id/ll_left"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp"
-            android:layout_margin="10dp"
-            android:background="@drawable/rounded_rectangle_white">
-
-            <TextView
-                android:id="@+id/tv_left_click"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="点击位置："/>
-
-            <TextView
-                android:id="@+id/tv_left_click_latitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                tools:text="纬度：266"/>
-
-            <TextView
-                android:id="@+id/tv_left_click_longitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                tools:text="经度：306"/>
-
-            <TextView
-                android:id="@+id/tv_left_me"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="我的位置："
-                android:layout_marginTop="5dp"/>
-
-            <TextView
-                android:id="@+id/tv_left_me_latitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                tools:text="纬度：266"/>
-
-            <TextView
-                android:id="@+id/tv_left_me_longitude"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp"
-                tools:text="经度：306"/>
-
-
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/ll_right"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -34,7 +34,7 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 import com.example.school_bus.R;
-import com.example.school_bus.View.PagerDrawerPopup;
+import com.example.school_bus.View.PagerDrawerPopupView;
 import com.lxj.xpopup.XPopup;
 
 import java.text.DecimalFormat;
@@ -54,18 +54,8 @@ public class MapFragment extends BaseFragment {
     MapView mapView;
     @BindView(R.id.iv_lock)
     ImageView ivLock;
-    @BindView(R.id.ll_left)
-    LinearLayout llLeft;
     @BindView(R.id.ll_right)
     LinearLayout llRight;
-    @BindView(R.id.tv_left_click_latitude)
-    TextView tvLeftClickLatitude;
-    @BindView(R.id.tv_left_click_longitude)
-    TextView tvLeftClickLongitude;
-    @BindView(R.id.tv_left_me_latitude)
-    TextView tvLeftMeLatitude;
-    @BindView(R.id.tv_left_me_longitude)
-    TextView tvLeftMeLongitude;
     @BindView(R.id.tv_right_click_latitude)
     TextView tvRightClickLatitude;
     @BindView(R.id.tv_right_click_longitude)
@@ -76,10 +66,6 @@ public class MapFragment extends BaseFragment {
     TextView tvRightMeLongitude;
     @BindView(R.id.iv_memu)
     ImageView ivMemu;
-    @BindView(R.id.tv_left_click)
-    TextView tvLeftClick;
-    @BindView(R.id.tv_left_me)
-    TextView tvLeftMe;
     @BindView(R.id.tv_right_click)
     TextView tvRightClick;
     @BindView(R.id.tv_right_me)
@@ -96,7 +82,7 @@ public class MapFragment extends BaseFragment {
     private BitmapDescriptor bitmapDescriptor;//地图点击出现的图标
     private MarkerOptions markerOptions = new MarkerOptions();//用于在地图上添加Market
     private DecimalFormat decimalFormat = new DecimalFormat("#.00");//保留小数点后两位
-    private PagerDrawerPopup pagerDrawerPopup;//侧边弹窗
+    private PagerDrawerPopupView pagerDrawerPopupView;//侧边弹窗
 
     public static MapFragment getInstance() {
         if (mapFragment == null) {
@@ -124,17 +110,14 @@ public class MapFragment extends BaseFragment {
         initView();
         initMap(view);
         interactive();
+        initData();
         return view;
     }
 
     public void initView() {
-        pagerDrawerPopup = new PagerDrawerPopup(getContext());
+        pagerDrawerPopupView = new PagerDrawerPopupView(getContext());
 
-        tvLeftClick.setVisibility(View.GONE);
-        tvLeftClickLatitude.setVisibility(View.GONE);
-        tvLeftClickLongitude.setVisibility(View.GONE);
-        tvLeftClickLatitude.setText("0");
-        tvLeftClickLongitude.setText("0");
+        llRight.setVisibility(View.GONE);
 
         tvRightClick.setVisibility(View.GONE);
         tvRightClickLatitude.setVisibility(View.GONE);
@@ -171,7 +154,20 @@ public class MapFragment extends BaseFragment {
         myLocationListener = new MyLocationListener();
         locationClient.registerLocationListener(myLocationListener);
         locationClient.start();
+    }
 
+    public void initData(){
+        //接口回调
+        pagerDrawerPopupView.setDataResult(new PagerDrawerPopupView.DataResult() {
+            @Override
+            public void isShowLocation(boolean show) {
+                if (show){
+                    llRight.setVisibility(View.VISIBLE);
+                }else {
+                    llRight.setVisibility(View.GONE);
+                }
+            }
+        });
     }
 
     //申请权限
@@ -212,15 +208,10 @@ public class MapFragment extends BaseFragment {
                 clickLocation.setLongitude(latLng.longitude);
 
                 //显示坐标
-                tvLeftClick.setVisibility(View.VISIBLE);
-                tvLeftClickLatitude.setVisibility(View.VISIBLE);
-                tvLeftClickLongitude.setVisibility(View.VISIBLE);
                 tvRightClick.setVisibility(View.VISIBLE);
                 tvRightClickLatitude.setVisibility(View.VISIBLE);
                 tvRightClickLongitude.setVisibility(View.VISIBLE);
-                tvLeftClickLatitude.setText(decimalFormat.format(clickLocation.getLatitude()));
                 tvRightClickLatitude.setText(decimalFormat.format(clickLocation.getLatitude()));
-                tvLeftClickLongitude.setText(decimalFormat.format(clickLocation.getLongitude()));
                 tvRightClickLongitude.setText(decimalFormat.format(clickLocation.getLongitude()));
 
                 //创建点击位图
@@ -292,7 +283,7 @@ public class MapFragment extends BaseFragment {
                         .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
 //                        .asCustom(new CustomDrawerPopupView(getContext()))
 //                        .hasShadowBg(false)
-                        .asCustom(pagerDrawerPopup)
+                        .asCustom(pagerDrawerPopupView)
 //                        .asCustom(new ListDrawerPopupView(getContext()))
                         .show();
                 break;
@@ -337,9 +328,7 @@ public class MapFragment extends BaseFragment {
                     .build();
             baiduMap.setMyLocationData(locationData);
 
-            tvLeftMeLatitude.setText(decimalFormat.format(myLocation.getLatitude()));
             tvRightMeLatitude.setText(decimalFormat.format(myLocation.getLatitude()));
-            tvLeftMeLongitude.setText(decimalFormat.format(myLocation.getLongitude()));
             tvRightMeLongitude.setText(decimalFormat.format(myLocation.getLongitude()));
 
             if (isLock) {
