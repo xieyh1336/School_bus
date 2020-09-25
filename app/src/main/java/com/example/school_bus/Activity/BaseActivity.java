@@ -20,6 +20,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     public void showToast(String msg){
         Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_SHORT).show();
     }
+
     /**
      *将显示Dialog的方法封装在这里面
      */

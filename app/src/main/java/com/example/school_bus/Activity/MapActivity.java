@@ -8,7 +8,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
-import com.example.school_bus.Entity.TabEntity;
+import com.example.school_bus.Entity.TabEntityData;
 import com.example.school_bus.Fragment.MapFragment;
 import com.example.school_bus.Fragment.MoreFragment;
 import com.example.school_bus.Fragment.NavigationFragment;
@@ -55,7 +55,7 @@ public class MapActivity extends BaseActivity {
 
     public void initView() {
         for (int i = 0; i < titles.length; i++) {
-            mTabEntities.add(new TabEntity(titles[i], mIconSelectIds[i], mIconUnselectIds[i]));
+            mTabEntities.add(new TabEntityData(titles[i], mIconSelectIds[i], mIconUnselectIds[i]));
         }
 
         myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
