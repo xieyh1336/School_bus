@@ -38,7 +38,7 @@ public class NewsData{
         this.result = result;
     }
 
-    public static class ResultBean {
+    public class ResultBean {
         /**
          * path : https://dy.163.com/article/FNC0M1JJ0514R9P4.html
          * image : http://cms-bucket.ws.126.net/2020/0925/4b323c83j00qh6xiq00w9c0009c0070c.jpg?imageView&thumbnail=140y88&quality=85

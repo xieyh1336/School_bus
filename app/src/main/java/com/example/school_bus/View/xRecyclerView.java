@@ -1,4 +1,4 @@
-package com.oynix.xrecyclerview;
+package com.example.school_bus.View;
 
 import android.content.Context;
 import android.graphics.Color;

@@ -40,10 +40,10 @@
                 app:canLoop="true"
                 app:indicatorAlign="center"/>
 
-            <androidx.recyclerview.widget.RecyclerView
+            <com.example.school_bus.View.xRecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"/>
+                android:layout_height="wrap_content"/>
 
         </LinearLayout>
 

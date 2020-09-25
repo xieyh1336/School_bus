@@ -1,8 +1,13 @@
 package com.example.school_bus.Presenter;
 
+import android.util.Log;
+
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.Mvp.MoreFMvp;
 import com.example.school_bus.NetWork.API_1;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -14,6 +19,9 @@ import io.reactivex.schedulers.Schedulers;
 public class MoreFPresenter implements MoreFMvp.presenter {
 
     public MoreFMvp.view view;
+    private int mCurrentPage;
+    private NewsData data = new NewsData();
+    private List<NewsData.ResultBean> list = new ArrayList<>();
 
     public MoreFPresenter(MoreFMvp.view view) {
         this.view = view;
@@ -33,7 +41,27 @@ public class MoreFPresenter implements MoreFMvp.presenter {
 
                     @Override
                     public void onNext(NewsData newsData) {
-                        view.getNewsResult(newsData);
+                        if (page == "1"){
+                            view.getNewsResult(newsData);
+                        }else {
+                            // 首次或刷新
+                            if (mCurrentPage == 1)
+                                list.clear();
+
+                            // 刷新数据
+                            list.addAll(newsData.getResult());
+                            data.setResult(list);
+                            view.getNewsResult2(data);
+
+                            Log.e("adapter", "page:" + mCurrentPage + ", size:" + list.size());
+                            // 更新视图
+                            if (mCurrentPage == 1) {
+                                view.stopRefresh();
+                            } else {
+                                view.stopLoadMore();
+                            }
+                            view.getNewsResult2(newsData);
+                        }
                     }
 
                     @Override
@@ -46,5 +74,23 @@ public class MoreFPresenter implements MoreFMvp.presenter {
                         view.onComplete(0);
                     }
                 });
+    }
+
+    @Override
+    public void onViewCreate() {
+        mCurrentPage = 1;
+        getNews(String.valueOf(mCurrentPage+1),"7");
+    }
+
+    @Override
+    public void startRefresh() {
+        mCurrentPage = 1;
+        getNews(String.valueOf(mCurrentPage+1),"7");
+    }
+
+    @Override
+    public void startLoadMore() {
+        mCurrentPage++;
+        getNews(String.valueOf(mCurrentPage+1),"7");
     }
 }

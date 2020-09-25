@@ -11,13 +11,19 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.school_bus.Activity.WebActivity;
+import com.example.school_bus.Adapter.MoreRecyclerViewAdapter;
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.Mvp.MoreFMvp;
 import com.example.school_bus.Presenter.MoreFPresenter;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.MyLog;
+import com.example.school_bus.View.xRecyclerView;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
@@ -37,7 +43,11 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     private static MoreFragment moreFragment;
     @BindView(R.id.refresh)
     SmartRefreshLayout refresh;
+    @BindView(R.id.recyclerView)
+    xRecyclerView recyclerView;
     private MoreFPresenter moreFPresenter;
+    private MoreRecyclerViewAdapter moreRecyclerViewAdapter;
+    private int firstVisibleItemPosition;
 
     public static MoreFragment getInstance() {
         if (moreFragment == null) {
@@ -53,17 +63,36 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
         ButterKnife.bind(this, view);
         moreFPresenter = new MoreFPresenter(this);
         initView(view);
+        initBanner();
         initData();
         return view;
     }
 
     public void initView(View view) {
         refresh.setOnRefreshListener(this);
+        recyclerView.setListener(new xRecyclerView.xAdapterListener() {
+            @Override
+            public void startRefresh() {
+                moreFPresenter.startRefresh();
+            }
+
+            @Override
+            public void startLoadMore() {
+                moreFPresenter.startLoadMore();
+            }
+        });
+        recyclerView.stopRefreshing();
+        moreFPresenter.onViewCreate();
+    }
+
+    public void initBanner() {
+        //获取轮播图新闻
+        moreFPresenter.getNews("1", "7");
     }
 
     public void initData() {
-        //获取轮播图新闻
-        moreFPresenter.getNews("1", "7");
+        //获取下方新闻
+        moreFPresenter.getNews(String.valueOf(firstVisibleItemPosition + 1), "7");
     }
 
     @Override
@@ -98,6 +127,17 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     }
 
     @Override
+    public void getNewsResult2(NewsData data) {
+        if (moreRecyclerViewAdapter != null) {
+            moreRecyclerViewAdapter.setNewsData(data);
+            moreRecyclerViewAdapter.notifyDataSetChanged();
+            return;
+        }
+        moreRecyclerViewAdapter = new MoreRecyclerViewAdapter(data);
+        recyclerView.setAdapter(moreRecyclerViewAdapter);
+    }
+
+    @Override
     public void onError(Throwable e, int i) {
         switch (i) {
             case 0:
@@ -114,7 +154,23 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     }
 
     @Override
+    public void onInitLoadFailed() {
+
+    }
+
+    @Override
+    public void stopRefresh() {
+        recyclerView.stopRefreshing();
+    }
+
+    @Override
+    public void stopLoadMore() {
+        recyclerView.stopLoadingMore();
+    }
+
+    @Override
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+        initBanner();
         initData();
         refreshLayout.finishRefresh();
     }

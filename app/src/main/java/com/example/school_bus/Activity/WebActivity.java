@@ -15,6 +15,9 @@ import com.example.school_bus.R;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * 用于加载网页的Activity
+ */
 public class WebActivity extends BaseActivity {
 
     @BindView(R.id.webView)
@@ -70,16 +73,17 @@ public class WebActivity extends BaseActivity {
         webView.loadUrl(Url);
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)){
-            if (webView.canGoBack()){
-                webView.goBack();
-                return true;
-            }else {
-                finish();
-            }
-        }
-        return false;
-    }
+//    @Override
+//    public boolean onKeyDown(int keyCode, KeyEvent event) {
+//        //该方法可以判断网页是否可以后退，可以后退则后退网页
+//        if ((keyCode == KeyEvent.KEYCODE_BACK)){
+//            if (webView.canGoBack()){
+//                webView.goBack();
+//                return true;
+//            }else {
+//                finish();
+//            }
+//        }
+//        return false;
+//    }
 }

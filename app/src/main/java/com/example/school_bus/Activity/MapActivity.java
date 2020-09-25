@@ -23,6 +23,9 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * 主页面
+ */
 public class MapActivity extends BaseActivity {
 
     @BindView(R.id.vp)
