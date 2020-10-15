@@ -28,7 +28,7 @@ public class MoreFPresenter implements MoreFMvp.presenter {
     }
 
     @Override
-    public void getNews(String page, String count) {
+    public void getNews(String page, String count, boolean isLoadMore) {
         Observable<NewsData> newsDataObservable = API_1.createApi().getNews(page, count);
         newsDataObservable
                 .subscribeOn(Schedulers.io())
@@ -41,26 +41,10 @@ public class MoreFPresenter implements MoreFMvp.presenter {
 
                     @Override
                     public void onNext(NewsData newsData) {
-                        if (page == "1"){
+                        if (page.equals("1")){
                             view.getNewsResult(newsData);
                         }else {
-                            // 首次或刷新
-                            if (mCurrentPage == 1)
-                                list.clear();
-
-                            // 刷新数据
-                            list.addAll(newsData.getResult());
-                            data.setResult(list);
-                            view.getNewsResult2(data);
-
-                            Log.e("adapter", "page:" + mCurrentPage + ", size:" + list.size());
-                            // 更新视图
-                            if (mCurrentPage == 1) {
-                                view.stopRefresh();
-                            } else {
-                                view.stopLoadMore();
-                            }
-                            view.getNewsResult2(newsData);
+                            view.getNewsResult2(newsData, isLoadMore);
                         }
                     }
 
@@ -74,23 +58,5 @@ public class MoreFPresenter implements MoreFMvp.presenter {
                         view.onComplete(0);
                     }
                 });
-    }
-
-    @Override
-    public void onViewCreate() {
-        mCurrentPage = 1;
-        getNews(String.valueOf(mCurrentPage+1),"7");
-    }
-
-    @Override
-    public void startRefresh() {
-        mCurrentPage = 1;
-        getNews(String.valueOf(mCurrentPage+1),"7");
-    }
-
-    @Override
-    public void startLoadMore() {
-        mCurrentPage++;
-        getNews(String.valueOf(mCurrentPage+1),"7");
     }
 }

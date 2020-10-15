@@ -83,7 +83,9 @@ dependencies {
     //okHttp
     implementation 'com.squareup.okhttp3:okhttp:3.10.0'//网络框架
     implementation "cz.msebera.android:httpclient:4.4.1.2"
-    //刷新
+    //智能刷新框架刷新
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-28'
     implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0-alpha-28'
+    //recyclerView万能适配器
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.42'
 }
