@@ -2,9 +2,8 @@ package com.example.school_bus.View;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.TextView;
 
-public class AutoTextView extends TextView {
+public class AutoTextView extends androidx.appcompat.widget.AppCompatTextView {
     public AutoTextView(Context context) {
         super(context);
     }

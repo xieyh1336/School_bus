@@ -6,9 +6,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.MyLog;
 import com.lxj.xpopup.core.DrawerPopupView;
-
-
 
 /**
  * 点击菜单出现的侧边栏
@@ -58,12 +57,12 @@ public class PagerDrawerPopupView extends DrawerPopupView {
     @Override
     protected void onShow() {
         super.onShow();
-        Log.e("tag", "PagerDrawerPopup onShow");
+        MyLog.e("tag", "PagerDrawerPopup onShow");
     }
 
     @Override
     protected void onDismiss() {
         super.onDismiss();
-        Log.e("tag", "PagerDrawerPopup onDismiss");
+        MyLog.e("tag", "PagerDrawerPopup onDismiss");
     }
 }

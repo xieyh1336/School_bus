@@ -88,4 +88,6 @@ dependencies {
     implementation 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0-alpha-28'
     //recyclerView万能适配器
     implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.42'
+    //SpinKit自定义加载动画
+    implementation 'com.github.ybq:Android-SpinKit:1.4.0'
 }

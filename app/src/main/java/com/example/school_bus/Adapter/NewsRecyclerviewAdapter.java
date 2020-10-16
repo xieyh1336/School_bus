@@ -1,22 +1,18 @@
 package com.example.school_bus.Adapter;
 
 import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.SavePictureUtil;
 
 import java.util.List;
 
@@ -40,14 +36,20 @@ public class NewsRecyclerviewAdapter extends BaseQuickAdapter<NewsData.ResultBea
         ImageView imageView = helper.getView(R.id.imageView);
         textView.setText(item.getTitle());
         Glide.with(context).load(item.getImage()).into(imageView);
-        helper.setOnClickListener(R.id.item_more_news, new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (listener != null){
-                    listener.OnItemClick(position);
-                }
+        helper.setOnClickListener(R.id.item_more_news, view -> {
+            if (listener != null){
+                listener.OnItemClick(position);
             }
         });
+
+        //测试保存图片
+        imageView.setOnLongClickListener(view -> {
+            Thread thread = new Thread(() ->
+                    SavePictureUtil.SaveBitmapFromView(SavePictureUtil.getBitmap(item.getImage(), context), context));
+            thread.start();
+            return true;
+        });
+
     }
 
     public interface OnItemClickListener{
@@ -57,5 +59,4 @@ public class NewsRecyclerviewAdapter extends BaseQuickAdapter<NewsData.ResultBea
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
-
 }

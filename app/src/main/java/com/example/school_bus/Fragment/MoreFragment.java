@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,7 +29,6 @@ import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
 import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.zhouwei.mzbanner.MZBannerView;
-import com.zhouwei.mzbanner.holder.MZHolderCreator;
 import com.zhouwei.mzbanner.holder.MZViewHolder;
 
 import butterknife.BindView;
@@ -39,7 +39,6 @@ import butterknife.OnClick;
  * 更多界面
  */
 public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefreshListener, OnLoadMoreListener {
-    private static MoreFragment moreFragment;
     @BindView(R.id.bannerView)
     MZBannerView bannerView;
     @BindView(R.id.refresh)
@@ -50,49 +49,43 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     LinearLayout loadingView;
     @BindView(R.id.error_view)
     LinearLayout errorView;
+    @BindView(R.id.ll_news)
+    LinearLayout llNews;
     private MoreFPresenter moreFPresenter;
     private NewsRecyclerviewAdapter newsRecyclerviewAdapter;
     private int page = 2;
     private boolean isLoadMore = false;
 
-    public static MoreFragment getInstance() {
-        if (moreFragment == null) {
-            moreFragment = new MoreFragment();
-        }
-        return moreFragment;
-    }
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_more, container, false);
-        ButterKnife.bind(this, view);
-        moreFPresenter = new MoreFPresenter(this);
         initView(view);
         initData();
         return view;
     }
 
     public void initView(View view) {
+        ButterKnife.bind(this, view);
+        moreFPresenter = new MoreFPresenter(this);
         refresh.setOnRefreshListener(this);
         refresh.setOnLoadMoreListener(this);
-        refresh.setVisibility(View.GONE);
+        llNews.setVisibility(View.GONE);
         loadingView.setVisibility(View.VISIBLE);
         errorView.setVisibility(View.GONE);
+        //向RecyclerView添加分割线
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        //向RecyclerView设置布局管理器，不添加这句话RecyclerView将显示空白
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
     }
 
     public void initData() {
         //获取轮播图新闻
         moreFPresenter.getNews("1", "7", false);
-        //获取下方新闻
+        //获取下方新闻，同一个接口同时请求时服务器会繁忙，第二个数据需要延迟请求
+        @SuppressWarnings("deprecation")
         Handler handler = new Handler();
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                moreFPresenter.getNews(String.valueOf(page), "7", isLoadMore);
-            }
-        };
+        Runnable runnable = () -> moreFPresenter.getNews(String.valueOf(page), "7", isLoadMore);
         handler.postDelayed(runnable, 200);
     }
 
@@ -111,23 +104,15 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     @Override
     public void getNewsResult(NewsData data) {
         //设置轮播图的点击事件
-        bannerView.setBannerPageClickListener(new MZBannerView.BannerPageClickListener() {
-            @Override
-            public void onPageClick(View view, int position) {
-                Intent intent = new Intent(getContext(), WebActivity.class);
-                intent.putExtra("Url", data.getResult().get(position).getPath());
-                startActivity(intent);
-            }
+        bannerView.setBannerPageClickListener((view, position) -> {
+            Intent intent = new Intent(getContext(), WebActivity.class);
+            intent.putExtra("Url", data.getResult().get(position).getPath());
+            startActivity(intent);
         });
         //设置轮播图指示器
         bannerView.setIndicatorAlign(MZBannerView.IndicatorAlign.RIGHT);
         //设置轮播图内容
-        bannerView.setPages(data.getResult(), new MZHolderCreator() {
-            @Override
-            public MZViewHolder createViewHolder() {
-                return new ViewPagerHolder();
-            }
-        });
+        bannerView.setPages(data.getResult(), () -> new ViewPagerHolder());
     }
 
     @Override
@@ -138,17 +123,15 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
             } else {
                 newsRecyclerviewAdapter.setNewData(data.getResult());
             }
+            newsRecyclerviewAdapter.notifyDataSetChanged();
             return;
         }
         newsRecyclerviewAdapter = new NewsRecyclerviewAdapter(R.layout.item_more_news_recycle_view, data.getResult(), getContext());
         recyclerView.setAdapter(newsRecyclerviewAdapter);
-        newsRecyclerviewAdapter.setOnItemClickListener(new NewsRecyclerviewAdapter.OnItemClickListener() {
-            @Override
-            public void OnItemClick(int position) {
-                Intent intent = new Intent(getContext(), WebActivity.class);
-                intent.putExtra("Url", data.getResult().get(position).getPath());
-                startActivity(intent);
-            }
+        newsRecyclerviewAdapter.setOnItemClickListener(position -> {
+            Intent intent = new Intent(getContext(), WebActivity.class);
+            intent.putExtra("Url", data.getResult().get(position).getPath());
+            startActivity(intent);
         });
     }
 
@@ -156,7 +139,7 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     public void onError(Throwable e, int i) {
         switch (i) {
             case 0:
-                refresh.setVisibility(View.GONE);
+                llNews.setVisibility(View.GONE);
                 loadingView.setVisibility(View.GONE);
                 errorView.setVisibility(View.VISIBLE);
                 break;
@@ -167,7 +150,7 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     public void onComplete(int i) {
         switch (i) {
             case 0:
-                refresh.setVisibility(View.VISIBLE);
+                llNews.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.GONE);
                 errorView.setVisibility(View.GONE);
                 if (isLoadMore) {
@@ -198,9 +181,10 @@ public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefre
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.error_view:
-                refresh.setVisibility(View.GONE);
+                llNews.setVisibility(View.GONE);
                 loadingView.setVisibility(View.VISIBLE);
                 errorView.setVisibility(View.GONE);
+                initData();
                 break;
         }
     }

@@ -1,13 +1,8 @@
 package com.example.school_bus.Presenter;
 
-import android.util.Log;
-
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.Mvp.MoreFMvp;
 import com.example.school_bus.NetWork.API_1;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -19,9 +14,6 @@ import io.reactivex.schedulers.Schedulers;
 public class MoreFPresenter implements MoreFMvp.presenter {
 
     public MoreFMvp.view view;
-    private int mCurrentPage;
-    private NewsData data = new NewsData();
-    private List<NewsData.ResultBean> list = new ArrayList<>();
 
     public MoreFPresenter(MoreFMvp.view view) {
         this.view = view;

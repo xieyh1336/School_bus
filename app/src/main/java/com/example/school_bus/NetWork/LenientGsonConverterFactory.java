@@ -21,9 +21,6 @@ import okio.Buffer;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
 
-/**
- * Created by Jane on 2018/8/16.
- */
 public class LenientGsonConverterFactory extends Converter.Factory {
 
     /**

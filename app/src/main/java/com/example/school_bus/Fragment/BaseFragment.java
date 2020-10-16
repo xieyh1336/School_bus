@@ -14,6 +14,8 @@ import androidx.fragment.app.Fragment;
 
 import com.example.school_bus.R;
 
+import java.util.Calendar;
+
 public class BaseFragment extends Fragment {
     protected Dialog loadingDialog;
 
@@ -56,5 +58,27 @@ public class BaseFragment extends Fragment {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 防止多次点击
+     * Created by qi on 2016/7/20.
+     */
+    public abstract class NoDoubleClickListener implements View.OnClickListener{
+
+        public static final int MIN_CLICK_DELAY_TIME = 1000;   //点击时间间隔
+        private long lastClickTime = 0;
+
+        @Override
+        public void onClick(View view) {
+            long currentTime = Calendar.getInstance().getTimeInMillis();
+            if( (currentTime-lastClickTime) > MIN_CLICK_DELAY_TIME ){
+                lastClickTime = currentTime;
+                onNoDoubleClick(view);
+            }
+        }
+
+        public abstract void onNoDoubleClick(View view);
+
     }
 }

@@ -2,7 +2,6 @@ package com.example.school_bus.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -16,7 +15,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * 用于加载网页的Activity
+ * 用于加载网页的Activity（webView）
  */
 public class WebActivity extends BaseActivity {
 

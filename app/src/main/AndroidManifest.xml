@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     package="com.example.school_bus">
 
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
@@ -23,16 +22,24 @@
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="6sugZ9bbTBvaMhGsFn7G3H2Tmur8lkdG"/>
-        <activity android:name=".Activity.MainActivity">
+        <activity android:name=".Activity.BaseActivity"/>
+        <activity android:name=".Activity.MainActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.LoginActivity"/>
-        <activity android:name=".Activity.MapActivity"/>
-        <activity android:name=".Activity.BaseActivity"/>
+        <activity android:name=".Activity.LoginActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activity.MapActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".Activity.WebActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait"/>
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
@@ -42,7 +49,7 @@
                 </action>
             </intent-filter>
         </service>
-        <activity android:name=".Activity.WebActivity"/>
+
     </application>
 
 </manifest>

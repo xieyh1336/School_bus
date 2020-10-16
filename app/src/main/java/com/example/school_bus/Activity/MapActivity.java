@@ -40,6 +40,7 @@ public class MapActivity extends BaseActivity {
             {R.mipmap.tab_map_unselect, R.mipmap.tab_navigation_unselect, R.mipmap.tab_more_unselect};
     private int[] mIconSelectIds =
             {R.mipmap.tab_map_select, R.mipmap.tab_navigation_select, R.mipmap.tab_more_select};
+    private MoreFragment moreFragment = new MoreFragment();
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -53,7 +54,7 @@ public class MapActivity extends BaseActivity {
     public void initFragment(){
         fragmentList.add(MapFragment.getInstance());
         fragmentList.add(NavigationFragment.getInstance());
-        fragmentList.add(MoreFragment.getInstance());
+        fragmentList.add(moreFragment);
     }
 
     public void initView() {

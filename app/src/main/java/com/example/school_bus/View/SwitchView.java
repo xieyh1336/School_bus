@@ -21,9 +21,6 @@ import android.view.animation.AccelerateInterpolator;
 
 import com.example.school_bus.R;
 
-/**
- * hei hei hei
- */
 public class SwitchView extends View {
 
     private static final int STATE_SWITCH_ON = 4;
@@ -195,7 +192,6 @@ public class SwitchView extends View {
                 resultWidth = Math.min(resultWidth, widthSize);
             }
         }
-
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int resultHeight;
@@ -213,13 +209,10 @@ public class SwitchView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-
         isCanVisibleDrawing = w > getPaddingLeft() + getPaddingRight() && h > getPaddingTop() + getPaddingBottom();
-
         if (isCanVisibleDrawing) {
             int actuallyDrawingAreaWidth = w - getPaddingLeft() - getPaddingRight();
             int actuallyDrawingAreaHeight = h - getPaddingTop() - getPaddingBottom();
-
             int actuallyDrawingAreaLeft;
             int actuallyDrawingAreaRight;
             int actuallyDrawingAreaTop;
@@ -237,17 +230,14 @@ public class SwitchView extends View {
                 actuallyDrawingAreaTop = getPaddingTop();
                 actuallyDrawingAreaBottom = getHeight() - getPaddingBottom();
             }
-
             shadowReservedHeight = (int) ((actuallyDrawingAreaBottom - actuallyDrawingAreaTop) * 0.07f);
             float sLeft = actuallyDrawingAreaLeft;
             float sTop = actuallyDrawingAreaTop + shadowReservedHeight;
             sRight = actuallyDrawingAreaRight;
             float sBottom = actuallyDrawingAreaBottom - shadowReservedHeight;
-
             float sHeight = sBottom - sTop;
             sCenterX = (sRight + sLeft) / 2;
             sCenterY = (sBottom + sTop) / 2;
-
             bLeft = sLeft;
             bWidth = sBottom - sTop;
             bRight = sLeft + bWidth;
@@ -260,7 +250,6 @@ public class SwitchView extends View {
             bOffLeftX = sLeft;
             bOff2LeftX = bOffLeftX + bOffset;
             sScale = 1 - bStrokeWidth / sHeight;
-
             sPath.reset();
             RectF sRectF = new RectF();
             sRectF.top = sTop;
@@ -272,14 +261,12 @@ public class SwitchView extends View {
             sRectF.right = sRight;
             sPath.arcTo(sRectF, 270, 180);
             sPath.close();
-
             bRectF.left = bLeft;
             bRectF.right = bRight;
             bRectF.top = sTop + bStrokeWidth / 2;  // bTop = sTop
             bRectF.bottom = sBottom - bStrokeWidth / 2; // bBottom = sBottom
             float bCenterX = (bRight + bLeft) / 2;
             float bCenterY = (sBottom + sTop) / 2;
-
             int red = colorShadow >> 16 & 0xFF;
             int green = colorShadow >> 8 & 0xFF;
             int blue = colorShadow & 0xFF;
@@ -396,7 +383,6 @@ public class SwitchView extends View {
         paint.setColor(isOn ? colorPrimaryDark : colorOffDark);
         canvas.drawPath(bPath, paint);
         canvas.restore();
-
         paint.reset();
         if (sAnim > 0 || bAnim > 0) invalidate();
     }
@@ -409,7 +395,6 @@ public class SwitchView extends View {
                     return true;
                 case MotionEvent.ACTION_UP:
                     lastState = state;
-
                     bAnim = 1;
                     if (state == STATE_SWITCH_OFF) {
                         refreshState(STATE_SWITCH_OFF2);
@@ -418,7 +403,6 @@ public class SwitchView extends View {
                         refreshState(STATE_SWITCH_ON2);
                         listener.toggleToOff(this);
                     }
-
                     if (mOnClickListener != null) {
                         mOnClickListener.onClick(this);
                     }
@@ -436,7 +420,6 @@ public class SwitchView extends View {
 
     public interface OnStateChangedListener {
         void toggleToOn(SwitchView view);
-
         void toggleToOff(SwitchView view);
     }
 
