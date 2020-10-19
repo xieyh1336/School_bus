@@ -12,7 +12,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.R;
-import com.example.school_bus.Utils.SavePictureUtil;
+import com.example.school_bus.Utils.ResourcesUtil;
 
 import java.util.List;
 
@@ -45,7 +45,7 @@ public class NewsRecyclerviewAdapter extends BaseQuickAdapter<NewsData.ResultBea
         //测试保存图片
         imageView.setOnLongClickListener(view -> {
             Thread thread = new Thread(() ->
-                    SavePictureUtil.SaveBitmapFromView(SavePictureUtil.getBitmap(item.getImage(), context), context));
+                    ResourcesUtil.SaveBitmapFromView(ResourcesUtil.getBitmap(item.getImage(), context), context));
             thread.start();
             return true;
         });

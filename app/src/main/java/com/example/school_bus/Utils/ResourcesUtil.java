@@ -8,19 +8,21 @@ import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * 保存图片工具类
+ * 资源工具类
  */
-public class SavePictureUtil {
+public class ResourcesUtil {
 
     //将Url图片转为Bitmap的方法，该方法不能在主线程中执行，需创建子线程执行！
     public static Bitmap getBitmap(String imgUrl, Context context) {
@@ -71,6 +73,7 @@ public class SavePictureUtil {
         }
         return null;
     }
+
     //保存图片的方法
     public static void SaveBitmapFromView(Bitmap bitmap, Context context){
         if (bitmap == null){
@@ -104,5 +107,21 @@ public class SavePictureUtil {
             MyLog.e("SavePicture", e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    //从assets中获取资源文件
+    public static String getFromAssets(String fileName, Context context){
+        try {
+            InputStreamReader inputReader = new InputStreamReader(context.getResources().getAssets().open(fileName));
+            BufferedReader bufReader = new BufferedReader(inputReader);
+            String line="";
+            String Result="";
+            while((line = bufReader.readLine()) != null)
+                Result += line;
+            return Result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

@@ -18,9 +18,12 @@ public class API_1 {
     private static Retrofit retrofit;
 
     public interface Api {
-        //获取新闻
+        //获取网易新闻
         @GET("getWangYiNews")
         Observable<NewsData> getNews(@Query("page") String page, @Query("count") String count);
+
+        //获取美图推荐
+
     }
 
     public static Api createApi() {

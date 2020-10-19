@@ -158,14 +158,11 @@ public class MapFragment extends BaseFragment {
 
     public void initData(){
         //接口回调
-        pagerDrawerPopupView.setDataResult(new PagerDrawerPopupView.DataResult() {
-            @Override
-            public void isShowLocation(boolean show) {
-                if (show){
-                    llRight.setVisibility(View.VISIBLE);
-                }else {
-                    llRight.setVisibility(View.GONE);
-                }
+        pagerDrawerPopupView.setDataResult(show -> {
+            if (show){
+                llRight.setVisibility(View.VISIBLE);
+            }else {
+                llRight.setVisibility(View.GONE);
             }
         });
     }
@@ -261,7 +258,7 @@ public class MapFragment extends BaseFragment {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_lock:
-                if (isLock == false) {
+                if (!isLock) {
                     //锁定状态
                     ivLock.setImageResource(R.mipmap.positioning_select);
                     //锁定状态不允许平移
@@ -281,10 +278,8 @@ public class MapFragment extends BaseFragment {
             case R.id.iv_memu:
                 new XPopup.Builder(getContext())
                         .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-//                        .asCustom(new CustomDrawerPopupView(getContext()))
 //                        .hasShadowBg(false)
                         .asCustom(pagerDrawerPopupView)
-//                        .asCustom(new ListDrawerPopupView(getContext()))
                         .show();
                 break;
         }

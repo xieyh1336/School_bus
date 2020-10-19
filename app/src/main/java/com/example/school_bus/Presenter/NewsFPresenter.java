@@ -1,7 +1,7 @@
 package com.example.school_bus.Presenter;
 
 import com.example.school_bus.Entity.NewsData;
-import com.example.school_bus.Mvp.MoreFMvp;
+import com.example.school_bus.Mvp.NewsFMvp;
 import com.example.school_bus.NetWork.API_1;
 
 import io.reactivex.Observable;
@@ -11,11 +11,11 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class MoreFPresenter implements MoreFMvp.presenter {
+public class NewsFPresenter implements NewsFMvp.presenter {
 
-    public MoreFMvp.view view;
+    public NewsFMvp.view view;
 
-    public MoreFPresenter(MoreFMvp.view view) {
+    public NewsFPresenter(NewsFMvp.view view) {
         this.view = view;
     }
 
@@ -42,12 +42,12 @@ public class MoreFPresenter implements MoreFMvp.presenter {
 
                     @Override
                     public void onError(Throwable e) {
-                        view.onError(e,0);
+                        view.onError(e,"0");
                     }
 
                     @Override
                     public void onComplete() {
-                        view.onComplete(0);
+                        view.onComplete("0");
                     }
                 });
     }

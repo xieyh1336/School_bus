@@ -1,211 +1,123 @@
 package com.example.school_bus.Fragment;
 
-import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 
-import com.bumptech.glide.Glide;
-import com.example.school_bus.Activity.WebActivity;
-import com.example.school_bus.Adapter.NewsRecyclerviewAdapter;
-import com.example.school_bus.Entity.NewsData;
-import com.example.school_bus.Mvp.MoreFMvp;
-import com.example.school_bus.Presenter.MoreFPresenter;
 import com.example.school_bus.R;
-import com.scwang.smartrefresh.layout.SmartRefreshLayout;
-import com.scwang.smartrefresh.layout.api.RefreshLayout;
-import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
-import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
-import com.zhouwei.mzbanner.MZBannerView;
-import com.zhouwei.mzbanner.holder.MZViewHolder;
+import com.example.school_bus.View.MyViewPager;
+import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
+import com.nightonke.boommenu.BoomButtons.TextInsideCircleButton;
+import com.nightonke.boommenu.BoomMenuButton;
+
+import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 
-/**
- * 更多界面
- */
-public class MoreFragment extends BaseFragment implements MoreFMvp.view, OnRefreshListener, OnLoadMoreListener {
-    @BindView(R.id.bannerView)
-    MZBannerView bannerView;
-    @BindView(R.id.refresh)
-    SmartRefreshLayout refresh;
-    @BindView(R.id.recyclerView)
-    RecyclerView recyclerView;
-    @BindView(R.id.loading_view)
-    LinearLayout loadingView;
-    @BindView(R.id.error_view)
-    LinearLayout errorView;
-    @BindView(R.id.ll_news)
-    LinearLayout llNews;
-    private MoreFPresenter moreFPresenter;
-    private NewsRecyclerviewAdapter newsRecyclerviewAdapter;
-    private int page = 2;
-    private boolean isLoadMore = false;
+public class MoreFragment extends BaseFragment {
+
+    private static MoreFragment moreFragment;
+    //boomMenu
+    private static int imageResourceIndex = 0;
+
+    @BindView(R.id.vp)
+    MyViewPager vp;
+    @BindView(R.id.bmb)
+    BoomMenuButton bmb;
+    @BindView(R.id.tv_title)
+    TextView tvTitle;
+    private MyPagerAdapter myPagerAdapter;
+    private ArrayList<Fragment> fragmentList = new ArrayList<>();
+    private String[] titles = {"新闻", "美图"};
+    private NewsFragment newsFragment = new NewsFragment();
+    private PictureFragment pictureFragment = new PictureFragment();
+
+    public static MoreFragment getInstance() {
+        if (moreFragment == null) {
+            moreFragment = new MoreFragment();
+        }
+        return moreFragment;
+    }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_more, container, false);
+        initFragment();
         initView(view);
-        initData();
         return view;
+    }
+
+    public void initFragment() {
+        fragmentList.add(newsFragment);
+        fragmentList.add(pictureFragment);
     }
 
     public void initView(View view) {
         ButterKnife.bind(this, view);
-        moreFPresenter = new MoreFPresenter(this);
-        refresh.setOnRefreshListener(this);
-        refresh.setOnLoadMoreListener(this);
-        llNews.setVisibility(View.GONE);
-        loadingView.setVisibility(View.VISIBLE);
-        errorView.setVisibility(View.GONE);
-        //向RecyclerView添加分割线
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        //向RecyclerView设置布局管理器，不添加这句话RecyclerView将显示空白
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
-    }
-
-    public void initData() {
-        //获取轮播图新闻
-        moreFPresenter.getNews("1", "7", false);
-        //获取下方新闻，同一个接口同时请求时服务器会繁忙，第二个数据需要延迟请求
-        @SuppressWarnings("deprecation")
-        Handler handler = new Handler();
-        Runnable runnable = () -> moreFPresenter.getNews(String.valueOf(page), "7", isLoadMore);
-        handler.postDelayed(runnable, 200);
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        bannerView.pause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        bannerView.start();
-    }
-
-    @Override
-    public void getNewsResult(NewsData data) {
-        //设置轮播图的点击事件
-        bannerView.setBannerPageClickListener((view, position) -> {
-            Intent intent = new Intent(getContext(), WebActivity.class);
-            intent.putExtra("Url", data.getResult().get(position).getPath());
-            startActivity(intent);
-        });
-        //设置轮播图指示器
-        bannerView.setIndicatorAlign(MZBannerView.IndicatorAlign.RIGHT);
-        //设置轮播图内容
-        bannerView.setPages(data.getResult(), () -> new ViewPagerHolder());
-    }
-
-    @Override
-    public void getNewsResult2(NewsData data, boolean isLoadMore) {
-        if (newsRecyclerviewAdapter != null) {
-            if (isLoadMore) {
-                newsRecyclerviewAdapter.addData(data.getResult());
-            } else {
-                newsRecyclerviewAdapter.setNewData(data.getResult());
-            }
-            newsRecyclerviewAdapter.notifyDataSetChanged();
-            return;
+        //构建BoomMenu
+        for (int i = 0; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
+            TextInsideCircleButton.Builder builder = new TextInsideCircleButton.Builder()
+                    .normalImageRes(getImageResource())
+                    .normalText(titles[i])
+                    .listener(new OnBMClickListener() {
+                        @Override
+                        public void onBoomButtonClick(int index) {
+                            //第二个参数是禁止滑动动画
+                            vp.setCurrentItem(index, false);
+                            tvTitle.setText(titles[index]);
+                        }
+                    });
+            bmb.addBuilder(builder);
         }
-        newsRecyclerviewAdapter = new NewsRecyclerviewAdapter(R.layout.item_more_news_recycle_view, data.getResult(), getContext());
-        recyclerView.setAdapter(newsRecyclerviewAdapter);
-        newsRecyclerviewAdapter.setOnItemClickListener(position -> {
-            Intent intent = new Intent(getContext(), WebActivity.class);
-            intent.putExtra("Url", data.getResult().get(position).getPath());
-            startActivity(intent);
-        });
+        //viewPager
+        myPagerAdapter = new MyPagerAdapter(getChildFragmentManager());
+        vp.setAdapter(myPagerAdapter);
+        vp.setOffscreenPageLimit(3);
+        //进入默认显示第0个fragment
+        vp.setCurrentItem(0);
+        tvTitle.setText(titles[0]);
+
     }
 
-    @Override
-    public void onError(Throwable e, int i) {
-        switch (i) {
-            case 0:
-                llNews.setVisibility(View.GONE);
-                loadingView.setVisibility(View.GONE);
-                errorView.setVisibility(View.VISIBLE);
-                break;
-        }
+    static int getImageResource() {
+        if (imageResourceIndex >= imageResources.length) imageResourceIndex = 0;
+        return imageResources[imageResourceIndex++];
     }
 
-    @Override
-    public void onComplete(int i) {
-        switch (i) {
-            case 0:
-                llNews.setVisibility(View.VISIBLE);
-                loadingView.setVisibility(View.GONE);
-                errorView.setVisibility(View.GONE);
-                if (isLoadMore) {
-                    refresh.finishLoadMore();
-                } else {
-                    refresh.finishRefresh();
-                }
-                break;
-        }
-    }
+    private static int[] imageResources = new int[]{
+            R.drawable.bat,
+            R.drawable.bear,
+    };
 
-    @Override
-    public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-        page = 2;
-        isLoadMore = false;
-        initData();
-    }
-
-    @Override
-    public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
-        page += 1;
-        //获取下方新闻
-        isLoadMore = true;
-        moreFPresenter.getNews(String.valueOf(page), "7", isLoadMore);
-    }
-
-    @OnClick({R.id.error_view})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.error_view:
-                llNews.setVisibility(View.GONE);
-                loadingView.setVisibility(View.VISIBLE);
-                errorView.setVisibility(View.GONE);
-                initData();
-                break;
-        }
-    }
-
-    public static final class ViewPagerHolder implements MZViewHolder<NewsData.ResultBean> {
-        private ImageView imageView;
-        private TextView textView;
-
-        @Override
-        public View createView(Context context) {
-            View view = LayoutInflater.from(context).inflate(R.layout.normal_banner_item, null);
-            imageView = view.findViewById(R.id.normal_banner_image);
-            textView = view.findViewById(R.id.textView);
-            return view;
+    private class MyPagerAdapter extends FragmentPagerAdapter {
+        public MyPagerAdapter(FragmentManager fm) {
+            //noinspection deprecation
+            super(fm);
         }
 
         @Override
-        public void onBind(Context context, int position, NewsData.ResultBean data) {
-            Glide.with(context).load(data.getImage()).into(imageView);
-            textView.setText(data.getTitle());
-            textView.getPaint().setFakeBoldText(true);
+        public int getCount() {
+            return fragmentList.size();
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            return titles[position];
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            return fragmentList.get(position);
         }
     }
 }

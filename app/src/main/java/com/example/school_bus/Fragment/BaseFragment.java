@@ -62,7 +62,6 @@ public class BaseFragment extends Fragment {
 
     /**
      * 防止多次点击
-     * Created by qi on 2016/7/20.
      */
     public abstract class NoDoubleClickListener implements View.OnClickListener{
 
@@ -77,8 +76,6 @@ public class BaseFragment extends Fragment {
                 onNoDoubleClick(view);
             }
         }
-
         public abstract void onNoDoubleClick(View view);
-
     }
 }
