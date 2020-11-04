@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        android:id="@+id/refresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="2"
+            android:overScrollMode="never"
+            tools:listitem="@layout/item_more_pictures_recyclerview"/>
+
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+    <indi.liyi.viewer.ImageViewer
+        android:id="@+id/iv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+    <include
+        android:id="@+id/loading_view"
+        layout="@layout/loading_view"
+        android:visibility="gone"/>
+
+    <include
+        android:id="@+id/error_view"
+        layout="@layout/error_view"
+        android:visibility="gone"/>
+
+</FrameLayout>

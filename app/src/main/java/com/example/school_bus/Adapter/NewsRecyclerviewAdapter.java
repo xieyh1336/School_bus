@@ -41,15 +41,6 @@ public class NewsRecyclerviewAdapter extends BaseQuickAdapter<NewsData.ResultBea
                 listener.OnItemClick(position);
             }
         });
-
-        //测试保存图片
-        imageView.setOnLongClickListener(view -> {
-            Thread thread = new Thread(() ->
-                    ResourcesUtil.SaveBitmapFromView(ResourcesUtil.getBitmap(item.getImage(), context), context));
-            thread.start();
-            return true;
-        });
-
     }
 
     public interface OnItemClickListener{

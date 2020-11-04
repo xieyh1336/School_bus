@@ -36,9 +36,9 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
- * 更多界面
+ * 新闻界面
  */
-public class NewsFragment extends BaseFragmentLazyLoad implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
+public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
     @BindView(R.id.bannerView)
     MZBannerView bannerView;
     @BindView(R.id.refresh)
@@ -61,12 +61,12 @@ public class NewsFragment extends BaseFragmentLazyLoad implements NewsFMvp.view,
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_news, container, false);
-        initView(view);
+        initView();
         initData();
         return view;
     }
 
-    public void initView(View view) {
+    public void initView() {
         ButterKnife.bind(this, view);
         newsFPresenter = new NewsFPresenter(this);
         refresh.setOnRefreshListener(this);
@@ -103,18 +103,6 @@ public class NewsFragment extends BaseFragmentLazyLoad implements NewsFMvp.view,
     }
 
     @Override
-    protected void onFragmentVisibleChange(boolean isVisible) {
-
-    }
-
-    @Override
-    protected void onFragmentFirstVisible() {
-        super.onFragmentFirstVisible();
-        initView(view);
-        initData();
-    }
-
-    @Override
     public void getNewsResult(NewsData data) {
         //设置轮播图的点击事件
         bannerView.setBannerPageClickListener((view, position) -> {
@@ -139,7 +127,7 @@ public class NewsFragment extends BaseFragmentLazyLoad implements NewsFMvp.view,
             newsRecyclerviewAdapter.notifyDataSetChanged();
             return;
         }
-        newsRecyclerviewAdapter = new NewsRecyclerviewAdapter(R.layout.item_more_news_recycle_view, data.getResult(), getContext());
+        newsRecyclerviewAdapter = new NewsRecyclerviewAdapter(R.layout.item_more_news_recyclerview, data.getResult(), getContext());
         recyclerView.setAdapter(newsRecyclerviewAdapter);
         newsRecyclerviewAdapter.setOnItemClickListener(position -> {
             Intent intent = new Intent(getContext(), WebActivity.class);

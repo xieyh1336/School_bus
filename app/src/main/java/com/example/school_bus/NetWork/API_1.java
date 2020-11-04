@@ -1,6 +1,7 @@
 package com.example.school_bus.NetWork;
 
 import com.example.school_bus.Entity.NewsData;
+import com.example.school_bus.Entity.PicturesData;
 import com.example.school_bus.Utils.HttpLoggerUtils;
 import com.google.gson.Gson;
 
@@ -23,7 +24,8 @@ public class API_1 {
         Observable<NewsData> getNews(@Query("page") String page, @Query("count") String count);
 
         //获取美图推荐
-
+        @GET("getImages")
+        Observable<PicturesData> getPictures(@Query("page") String page, @Query("count") String count);
     }
 
     public static Api createApi() {

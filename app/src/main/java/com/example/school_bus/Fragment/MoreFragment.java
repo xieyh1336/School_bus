@@ -1,6 +1,7 @@
 package com.example.school_bus.Fragment;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,9 +24,8 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class MoreFragment extends BaseFragment {
+public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
 
-    private static MoreFragment moreFragment;
     //boomMenu
     private static int imageResourceIndex = 0;
 
@@ -39,14 +39,7 @@ public class MoreFragment extends BaseFragment {
     private ArrayList<Fragment> fragmentList = new ArrayList<>();
     private String[] titles = {"新闻", "美图"};
     private NewsFragment newsFragment = new NewsFragment();
-    private PictureFragment pictureFragment = new PictureFragment();
-
-    public static MoreFragment getInstance() {
-        if (moreFragment == null) {
-            moreFragment = new MoreFragment();
-        }
-        return moreFragment;
-    }
+    private PicturesFragment picturesFragment = new PicturesFragment();
 
     @Nullable
     @Override
@@ -59,7 +52,7 @@ public class MoreFragment extends BaseFragment {
 
     public void initFragment() {
         fragmentList.add(newsFragment);
-        fragmentList.add(pictureFragment);
+        fragmentList.add(picturesFragment);
     }
 
     public void initView(View view) {
@@ -98,6 +91,19 @@ public class MoreFragment extends BaseFragment {
             R.drawable.bat,
             R.drawable.bear,
     };
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //监听PicturesFragment的返回键
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            if (picturesFragment != null
+                    && picturesFragment instanceof FragmentOnKeyListener
+                    && ((FragmentOnKeyListener) picturesFragment).onKeyDown(keyCode, event)){
+                return true;
+            }
+        }
+        return false;
+    }
 
     private class MyPagerAdapter extends FragmentPagerAdapter {
         public MyPagerAdapter(FragmentManager fm) {

@@ -1,6 +1,7 @@
 package com.example.school_bus.Activity;
 
 import android.os.Bundle;
+import android.view.KeyEvent;
 
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -9,6 +10,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.school_bus.Entity.TabEntityData;
+import com.example.school_bus.Fragment.FragmentOnKeyListener;
 import com.example.school_bus.Fragment.MapFragment;
 import com.example.school_bus.Fragment.MoreFragment;
 import com.example.school_bus.Fragment.NewsFragment;
@@ -37,6 +39,7 @@ public class MapActivity extends BaseActivity {
     private String[] titles = {"地图", "导航", "更多"};
     private MyPagerAdapter myPagerAdapter;
     private ArrayList<CustomTabEntity> mTabEntities = new ArrayList<>();
+    private MoreFragment moreFragment = new MoreFragment();
     private int[] mIconUnselectIds =
             {R.mipmap.tab_map_unselect, R.mipmap.tab_navigation_unselect, R.mipmap.tab_more_unselect};
     private int[] mIconSelectIds =
@@ -54,7 +57,7 @@ public class MapActivity extends BaseActivity {
     public void initFragment(){
         fragmentList.add(MapFragment.getInstance());
         fragmentList.add(NavigationFragment.getInstance());
-        fragmentList.add(MoreFragment.getInstance());
+        fragmentList.add(moreFragment);
     }
 
     public void initView() {
@@ -95,6 +98,19 @@ public class MapActivity extends BaseActivity {
 
             }
         });
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        //监听MoreFragment的返回键
+        if (keyCode == KeyEvent.KEYCODE_BACK){
+            if (moreFragment != null
+                    && moreFragment instanceof FragmentOnKeyListener
+                    && ((FragmentOnKeyListener) moreFragment).onKeyDown(keyCode, event)){
+                return true;
+            }
+        }
+        return super.onKeyDown(keyCode, event);
     }
 
     private class MyPagerAdapter extends FragmentPagerAdapter {

@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.PixelFormat;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.widget.Toast;
@@ -99,7 +102,6 @@ public class ResourcesUtil {
             Uri uri = Uri.fromFile(file);
             //noinspection deprecation
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
-            Toast.makeText(context, "已保存图片至“School_bus”中",Toast.LENGTH_SHORT);
         } catch (FileNotFoundException e) {
             MyLog.e("SavePicture", e.getMessage());
             e.printStackTrace();
@@ -123,5 +125,21 @@ public class ResourcesUtil {
             e.printStackTrace();
         }
         return null;
+    }
+
+    //将drawable转换为bitmap
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        int w = drawable.getIntrinsicWidth();
+        int h = drawable.getIntrinsicHeight();
+        Bitmap.Config config =
+                drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
+                        : Bitmap.Config.RGB_565;
+        Bitmap bitmap = Bitmap.createBitmap(w, h, config);
+        //注意，下面三行代码要用到，否则在View或者SurfaceView里的canvas.drawBitmap会看不到图
+        Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, w, h);
+        drawable.draw(canvas);
+
+        return bitmap;
     }
 }
