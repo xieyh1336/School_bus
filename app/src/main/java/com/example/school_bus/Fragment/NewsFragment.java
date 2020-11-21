@@ -36,7 +36,10 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
- * 新闻界面
+ * @作者 yonghe Xie
+ * @创建/修改日期 2020-11-19 17:32
+ * @类名 NewsFragment
+ * @所在包 com\example\school_bus\Fragment\NewsFragment.java
  */
 public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
     @BindView(R.id.bannerView)

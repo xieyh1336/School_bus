@@ -41,5 +41,10 @@
       <option name="name" value="maven4" />
       <option name="url" value="https://dl.bintray.com/albertlii/android-maven/" />
     </remote-repository>
+    <remote-repository>
+      <option name="id" value="MobSDK" />
+      <option name="name" value="MobSDK" />
+      <option name="url" value="http://mvn.mob.com/android" />
+    </remote-repository>
   </component>
 </project>

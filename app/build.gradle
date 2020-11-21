@@ -1,8 +1,11 @@
 apply plugin: 'com.android.application'
 
+//秒验
+apply plugin: 'com.mob.sdk'
+
 android {
     compileSdkVersion 30
-    buildToolsVersion "30.0.1"
+    buildToolsVersion "30.0.2"
 
     defaultConfig {
         applicationId "com.example.school_bus"
@@ -34,25 +37,25 @@ android {
     }
 
     //虚拟机安装错误  解决
-    splits {
-        abi {
-            enable true
-            reset()
-            include 'x86', 'armeabi-v7a', 'x86_64'
-            universalApk true
-        }
-    }
+//    splits {
+//        abi {
+//            enable true
+//            reset()
+//            include 'x86', 'armeabi-v7a', 'x86_64'
+//            universalApk true
+//        }
+//    }
 }
 
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation 'androidx.appcompat:appcompat:1.2.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.0.1'
-    implementation files('libs\\BaiduLBS_Android.jar')
-    implementation files('libs\\component_common_sdk_1.2.0.jar')
-    implementation files('libs\\IndoorscapeAlbumPlugin.jar')
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    implementation files('libs/BaiduLBS_Android.jar')
+    implementation files('libs/component_common_sdk_1.2.0.jar')
+    implementation files('libs/IndoorscapeAlbumPlugin.jar')
     testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
     implementation files("libs/BaiduLBS_Android.jar")
@@ -95,4 +98,11 @@ dependencies {
     implementation 'com.nightonke:boommenu:2.0.4'
     //ImageVIew
     implementation 'indi.liyi.view:image-viewer:3.0.1'
+}
+
+MobSDK {
+    appKey "317de5a3445c6"
+    appSecret "99e21d685c7eb9e62f069a16378c08da"
+    fp true//需要终端用户接受隐私条款后才能发起网络访问
+    SecVerify {}//秒验
 }
