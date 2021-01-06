@@ -4,6 +4,7 @@
     // 登录相关
     <string name="account">用户名</string>
     <string name="password">密码</string>
+    <string name="phone">手机号</string>
 
     <string name="simple_circle_button_example">Simple Circle Button Example</string>
     <string name="button_place_alignment_example">Button Place Alignment Example</string>

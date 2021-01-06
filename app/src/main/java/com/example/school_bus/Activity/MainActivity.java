@@ -60,27 +60,22 @@ public class MainActivity extends BaseActivity implements MainMvp.view {
             editor.putString("phone", userData.getData().getPhone());
             editor.putString("token", userData.getData().getToken());
             editor.apply();
-            Intent intent = new Intent(MainActivity.this, MapActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(MainActivity.this, MapActivity.class));
         } else {
             //跳转登陆页面
             MyLog.e(TAG, "token已过期，跳转登陆页面");
-            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(MainActivity.this, LoginActivity.class));
         }
         finish();
     }
 
     @Override
     public void onError(Throwable e, String type) {
-        switch (type) {
-            case "tokenLogin":
-                //跳转登陆页面
-                MyLog.e(TAG, "token自动登录访问出错，跳转登陆页面");
-                Intent intent = new Intent(MainActivity.this, LoginActivity.class);
-                startActivity(intent);
-                finish();
-                break;
+        if ("tokenLogin".equals(type)) {//跳转登陆页面
+            MyLog.e(TAG, "token自动登录访问出错，跳转登陆页面");
+            Intent intent = new Intent(MainActivity.this, LoginActivity.class);
+            startActivity(intent);
+            finish();
         }
     }
 }
