@@ -76,25 +76,6 @@ public abstract class BaseFragmentLazyLoad extends Fragment {
         }
     }
 
-    /**
-     * 防止多次点击
-     */
-    public abstract class NoDoubleClickListener implements View.OnClickListener{
-
-        public static final int MIN_CLICK_DELAY_TIME = 1000;   //点击时间间隔
-        private long lastClickTime = 0;
-
-        @Override
-        public void onClick(View view) {
-            long currentTime = Calendar.getInstance().getTimeInMillis();
-            if( (currentTime-lastClickTime) > MIN_CLICK_DELAY_TIME ){
-                lastClickTime = currentTime;
-                onNoDoubleClick(view);
-            }
-        }
-        public abstract void onNoDoubleClick(View view);
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

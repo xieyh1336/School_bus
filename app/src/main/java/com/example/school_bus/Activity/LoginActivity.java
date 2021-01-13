@@ -91,9 +91,8 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
                                     editor.putString("phone", userData.getData().getPhone());
                                     editor.putString("token", userData.getData().getToken());
                                     editor.apply();
-                                    Intent intent = new Intent(LoginActivity.this, MapActivity.class);
                                     showToast("登录成功");
-                                    startActivity(intent);
+                                    startActivity(new Intent(LoginActivity.this, MapActivity.class));
                                     finish();
                                 }else {
                                     showToast(userData.getMessage());

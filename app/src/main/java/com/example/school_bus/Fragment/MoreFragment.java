@@ -33,8 +33,6 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
     MyViewPager vp;
     @BindView(R.id.bmb)
     BoomMenuButton bmb;
-    @BindView(R.id.tv_title)
-    TextView tvTitle;
     private MyPagerAdapter myPagerAdapter;
     private ArrayList<Fragment> fragmentList = new ArrayList<>();
     private String[] titles = {"新闻", "美图"};
@@ -67,7 +65,6 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
                         public void onBoomButtonClick(int index) {
                             //第二个参数是禁止滑动动画
                             vp.setCurrentItem(index, false);
-                            tvTitle.setText(titles[index]);
                         }
                     });
             bmb.addBuilder(builder);
@@ -76,9 +73,9 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
         myPagerAdapter = new MyPagerAdapter(getChildFragmentManager());
         vp.setAdapter(myPagerAdapter);
         vp.setOffscreenPageLimit(3);
+        vp.setStopForViewPager(true);
         //进入默认显示第0个fragment
         vp.setCurrentItem(0);
-        tvTitle.setText(titles[0]);
 
     }
 

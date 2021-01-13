@@ -1,6 +1,7 @@
 package com.example.school_bus.Activity;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,7 +18,15 @@ public abstract class BaseActivity extends AppCompatActivity {
     protected Dialog loadingDialog;
 
     public void showToast(String msg){
-        Toast.makeText(getApplicationContext(),msg,Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    public void startLogin(){
+        startActivity(new Intent(this, LoginActivity.class));
+    }
+
+    public void loginOut(){
+
     }
 
     /**
@@ -26,8 +35,8 @@ public abstract class BaseActivity extends AppCompatActivity {
     public Dialog showLoading(String msg) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View v = inflater.inflate(R.layout.dialog_loading, null); // 得到加载view
-        LinearLayout layout = (LinearLayout) v.findViewById(R.id.dialog_loading_view); // 加载布局
-        TextView tipTextView = (TextView) v.findViewById(R.id.tipTextView); // 提示文字
+        LinearLayout layout = v.findViewById(R.id.dialog_loading_view); // 加载布局
+        TextView tipTextView = v.findViewById(R.id.tipTextView); // 提示文字
         tipTextView.setText(msg); // 设置加载信息
         loadingDialog = new Dialog(this, R.style.MyDialogStyle); // 创建自定义样式dialog
         loadingDialog.setCancelable(true); // 是否可以按“返回键”消失
@@ -55,25 +64,5 @@ public abstract class BaseActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-    }
-
-    /**
-     * 防止多次点击
-     * Created by qi on 2016/7/20.
-     */
-    public abstract class NoDoubleClickListener implements View.OnClickListener{
-
-        public static final int MIN_CLICK_DELAY_TIME = 1000;   //点击时间间隔
-        private long lastClickTime = 0;
-
-        @Override
-        public void onClick(View view) {
-            long currentTime = Calendar.getInstance().getTimeInMillis();
-            if( (currentTime-lastClickTime) > MIN_CLICK_DELAY_TIME ){
-                lastClickTime = currentTime;
-                onNoDoubleClick(view);
-            }
-        }
-        public abstract void onNoDoubleClick(View view);
     }
 }

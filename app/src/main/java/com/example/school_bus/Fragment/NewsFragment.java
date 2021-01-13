@@ -77,17 +77,18 @@ public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefre
         llNews.setVisibility(View.GONE);
         loadingView.setVisibility(View.VISIBLE);
         errorView.setVisibility(View.GONE);
-        //向RecyclerView添加分割线
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        //向RecyclerView设置布局管理器，不添加这句话RecyclerView将显示空白
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
+        if (getContext() != null){
+            //向RecyclerView添加分割线
+            recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+            //向RecyclerView设置布局管理器，不添加这句话RecyclerView将显示空白
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
+        }
     }
 
     public void initData() {
         //获取轮播图新闻
         newsFPresenter.getNews("1", "7", false);
         //获取下方新闻，同一个接口同时请求时服务器会繁忙，第二个数据需要延迟请求
-        @SuppressWarnings("deprecation")
         Handler handler = new Handler();
         Runnable runnable = () -> newsFPresenter.getNews(String.valueOf(page), "7", isLoadMore);
         handler.postDelayed(runnable, 200);
@@ -157,11 +158,8 @@ public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefre
                 llNews.setVisibility(View.VISIBLE);
                 loadingView.setVisibility(View.GONE);
                 errorView.setVisibility(View.GONE);
-                if (isLoadMore) {
-                    refresh.finishLoadMore();
-                } else {
-                    refresh.finishRefresh();
-                }
+                refresh.finishLoadMore();
+                refresh.finishRefresh();
                 break;
         }
     }

@@ -14,7 +14,6 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,6 +22,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
+ * @作者 yonghe Xie
+ * @创建/修改日期 2021-01-06 16:37
+ * @类名 ResourcesUtil
+ * @所在包 com\example\school_bus\Utils\ResourcesUtil.java
  * 资源工具类
  */
 public class ResourcesUtil {
@@ -84,7 +87,6 @@ public class ResourcesUtil {
             return;
         }
         //文件夹
-        @SuppressWarnings("deprecation")
         File appDir = new File(Environment.getExternalStorageDirectory(), "School_bus");
         //如果没有文件夹，则创建文件夹
         if (!appDir.exists()){
@@ -100,11 +102,7 @@ public class ResourcesUtil {
             fos.close();
             //保存图片后发送广播通知更新数据库
             Uri uri = Uri.fromFile(file);
-            //noinspection deprecation
             context.sendBroadcast(new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE, uri));
-        } catch (FileNotFoundException e) {
-            MyLog.e("SavePicture", e.getMessage());
-            e.printStackTrace();
         } catch (IOException e) {
             MyLog.e("SavePicture", e.getMessage());
             e.printStackTrace();

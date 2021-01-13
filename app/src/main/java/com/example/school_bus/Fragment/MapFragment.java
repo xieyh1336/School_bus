@@ -1,6 +1,10 @@
 package com.example.school_bus.Fragment;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -34,12 +38,11 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 import com.example.school_bus.R;
-import com.example.school_bus.View.PagerDrawerPopupView;
-import com.lxj.xpopup.XPopup;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -82,7 +85,7 @@ public class MapFragment extends BaseFragment {
     private BitmapDescriptor bitmapDescriptor;//地图点击出现的图标
     private MarkerOptions markerOptions = new MarkerOptions();//用于在地图上添加Market
     private DecimalFormat decimalFormat = new DecimalFormat("#.00");//保留小数点后两位
-    private PagerDrawerPopupView pagerDrawerPopupView;//侧边弹窗
+    private MapBroadcast mapBroadcast;
 
     public static MapFragment getInstance() {
         if (mapFragment == null) {
@@ -106,6 +109,10 @@ public class MapFragment extends BaseFragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_map, container, false);
         ButterKnife.bind(this, view);
+        //注册广播
+        mapBroadcast = new MapBroadcast();
+        Objects.requireNonNull(getActivity()).registerReceiver(mapBroadcast, new IntentFilter("Map"));
+
         requestPermissions();
         initView();
         initMap(view);
@@ -115,7 +122,6 @@ public class MapFragment extends BaseFragment {
     }
 
     public void initView() {
-        pagerDrawerPopupView = new PagerDrawerPopupView(getContext());
 
         llRight.setVisibility(View.GONE);
 
@@ -157,14 +163,7 @@ public class MapFragment extends BaseFragment {
     }
 
     public void initData(){
-        //接口回调
-        pagerDrawerPopupView.setDataResult(show -> {
-            if (show){
-                llRight.setVisibility(View.VISIBLE);
-            }else {
-                llRight.setVisibility(View.GONE);
-            }
-        });
+
     }
 
     //申请权限
@@ -275,13 +274,6 @@ public class MapFragment extends BaseFragment {
                     isLock = false;
                 }
                 break;
-            case R.id.iv_memu:
-                new XPopup.Builder(getContext())
-                        .isDestroyOnDismiss(true) //对于只使用一次的弹窗，推荐设置这个
-//                        .hasShadowBg(false)
-                        .asCustom(pagerDrawerPopupView)
-                        .show();
-                break;
         }
     }
 
@@ -300,6 +292,11 @@ public class MapFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        //注销广播
+        if (mapBroadcast != null && getActivity() != null){
+            getActivity().unregisterReceiver(mapBroadcast);
+        }
+
         locationClient.stop();
         mapView.onDestroy();
         baiduMap.setMyLocationEnabled(false);
@@ -331,6 +328,27 @@ public class MapFragment extends BaseFragment {
                 LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
                 mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
                 baiduMap.animateMapStatus(mapStatusUpdate);
+            }
+        }
+    }
+
+    /**
+     * 广播接受处
+     */
+    class MapBroadcast extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            boolean isOpen = intent.getBooleanExtra("state", false);
+            switch (intent.getIntExtra("type", -1)){
+                case 0:
+                    //是否打开右上角的坐标显示
+                    if (isOpen){
+                        llRight.setVisibility(View.VISIBLE);
+                    }else {
+                        llRight.setVisibility(View.GONE);
+                    }
+                    break;
             }
         }
     }
