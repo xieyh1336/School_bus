@@ -12,7 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.school_bus.R;
-import java.util.Calendar;
+
+import java.util.Objects;
 
 public abstract class BaseActivity extends AppCompatActivity {
     protected Dialog loadingDialog;
@@ -28,7 +29,7 @@ public abstract class BaseActivity extends AppCompatActivity {
     /**
      *将显示Dialog的方法封装在这里面
      */
-    public Dialog showLoading(String msg) {
+    public void showLoading(String msg) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View v = inflater.inflate(R.layout.dialog_loading, null); // 得到加载view
         LinearLayout layout = v.findViewById(R.id.dialog_loading_view); // 加载布局
@@ -39,14 +40,13 @@ public abstract class BaseActivity extends AppCompatActivity {
         loadingDialog.setCanceledOnTouchOutside(false); // 点击加载框以外的区域
         loadingDialog.setContentView(layout, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)); // 设置布局
         Window window = loadingDialog.getWindow();
-        WindowManager.LayoutParams lp = window.getAttributes();
+        WindowManager.LayoutParams lp = Objects.requireNonNull(window).getAttributes();
         lp.width = WindowManager.LayoutParams.MATCH_PARENT;
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
         window.setGravity(Gravity.CENTER);
         window.setAttributes(lp);
         window.setWindowAnimations(R.style.PopWindowAnimStyle);
         loadingDialog.show();
-        return loadingDialog;
     }
 
     /**

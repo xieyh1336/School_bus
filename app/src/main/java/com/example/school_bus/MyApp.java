@@ -60,6 +60,16 @@ public class MyApp extends Application {
         editor.apply();
     }
 
+    public static String getHead(){
+        return preferences.getString("head", "");
+    }
+
+    public static void clearHead(){
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.remove("head");
+        editor.apply();
+    }
+
     static {
         //智能刷新框架
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);//启用矢量图兼容

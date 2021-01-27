@@ -32,4 +32,8 @@ public class BaseData {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    public boolean isSuccess(){
+        return code == 20000;
+    }
 }

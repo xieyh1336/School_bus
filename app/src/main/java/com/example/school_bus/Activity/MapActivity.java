@@ -17,13 +17,19 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.viewpager.widget.ViewPager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.school_bus.Entity.TabEntityData;
 import com.example.school_bus.Fragment.FragmentOnKeyListener;
 import com.example.school_bus.Fragment.MapFragment;
 import com.example.school_bus.Fragment.MapSideFragment;
 import com.example.school_bus.Fragment.MoreFragment;
 import com.example.school_bus.Fragment.NavigationFragment;
+import com.example.school_bus.MyApp;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.ImageUtil;
+import com.example.school_bus.Utils.MyLog;
 import com.example.school_bus.View.MyViewPager;
 import com.flyco.tablayout.CommonTabLayout;
 import com.flyco.tablayout.listener.CustomTabEntity;
@@ -49,6 +55,7 @@ import butterknife.OnClick;
  */
 public class MapActivity extends BaseActivity {
 
+    private static String TAG = "MapActivity";
     @BindView(R.id.vp)
     MyViewPager vp;
     @BindView(R.id.tl)
@@ -80,6 +87,12 @@ public class MapActivity extends BaseActivity {
     }
 
     public void init() {
+        Glide.with(this)
+                .load(ImageUtil.getHeadUrl(MyApp.getHead()))
+                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                .error(R.drawable.ic_header)
+                .into(ivHeader);
+
         fragmentList.add(MapFragment.getInstance());
         fragmentList.add(NavigationFragment.getInstance());
         fragmentList.add(moreFragment);
@@ -102,7 +115,6 @@ public class MapActivity extends BaseActivity {
     }
 
     public void setListener() {
-
         //相互绑定
         tl.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
@@ -131,6 +143,39 @@ public class MapActivity extends BaseActivity {
 
             }
         });
+        //侧滑菜单监听
+        dlMap.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(@NonNull View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(@NonNull View drawerView) {
+                //打开了侧滑菜单
+                MyLog.e(TAG, "打开了侧滑菜单");
+            }
+
+            @Override
+            public void onDrawerClosed(@NonNull View drawerView) {
+                //关闭了侧滑菜单
+                MyLog.e(TAG, "关闭了侧滑菜单");
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+    }
+
+    public void updateHead(){
+        MyLog.e(TAG, "MapActivity加载头像");
+        Glide.with(this)
+                .load(ImageUtil.getHeadUrl(MyApp.getHead()))
+                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                .error(R.drawable.ic_header)
+                .into(ivHeader);
     }
 
     @Override

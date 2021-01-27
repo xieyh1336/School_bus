@@ -3,7 +3,6 @@ package com.example.school_bus.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,27 +13,20 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.LoginAMvp;
-import com.example.school_bus.MyApp;
-import com.example.school_bus.NetWork.API_login;
 import com.example.school_bus.Presenter.LoginPresenter;
 import com.example.school_bus.R;
-import com.example.school_bus.Utils.MyLog;
-import com.mob.tools.utils.SharePrefrenceHelper;
+import com.example.school_bus.Utils.HttpUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**
  * @作者 yonghe Xie
  * @创建/修改日期 2020-11-21 11:09
  * @类名 LoginActivity
  * @所在包 com\example\school_bus\Activity\LoginActivity.java
+ * 登录页面
  */
 public class LoginActivity extends BaseActivity implements LoginAMvp.view {
 
@@ -50,8 +42,7 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
     @BindView(R.id.btn_register)
     Button btnRegister;
     private long secondBackTime;
-    private LoginPresenter loginPresenter;
-    private SharePrefrenceHelper sharePrefrenceHelper;
+    private LoginPresenter loginPresenter = new LoginPresenter(this);
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -87,49 +78,7 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
             case R.id.btn_login:
                 //账号密码登录
                 showLoading("正在登录");
-                Observable<UserData> newsDataObservable = API_login.createApi().login(etLoginAccount.getText().toString(), etLoginPassword.getText().toString(), null, 0);
-                newsDataObservable
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Observer<UserData>() {
-                            @Override
-                            public void onSubscribe(Disposable d) {
-
-                            }
-
-                            @Override
-                            public void onNext(UserData userData) {
-                                if (userData.getCode() == 20000){
-                                    //存储输入的账号密码
-                                    SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
-                                    editor.putString("username", userData.getData().getUsername());
-                                    editor.putString("password", userData.getData().getPassword());
-                                    editor.putString("phone", userData.getData().getPhone());
-                                    editor.putString("token", userData.getData().getToken());
-                                    editor.apply();
-
-                                    Handler handler = new Handler();
-                                    handler.postDelayed(() -> {
-                                        hideLoading();
-                                        showToast("登录成功");
-                                        startActivity(new Intent(LoginActivity.this, MapActivity.class));
-                                        finish();
-                                    }, 2000);
-                                }else {
-                                    showToast(userData.getMessage());
-                                }
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-
-                            }
-
-                            @Override
-                            public void onComplete() {
-
-                            }
-                        });
+                loginPresenter.login(etLoginAccount.getText().toString(), etLoginPassword.getText().toString(), null, 0);
                 break;
             case R.id.btn_register:
                 //注册
@@ -139,13 +88,28 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
     }
 
     @Override
-    public void onComplete(String type) {
-
+    public void loginResult(UserData userData) {
+        if (userData.isSuccess()){
+            //存储输入的账号密码
+            SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
+            editor.putString("username", userData.getData().getUsername());
+            editor.putString("password", userData.getData().getPassword());
+            editor.putString("phone", userData.getData().getPhone());
+            editor.putString("token", userData.getData().getToken());
+            editor.putString("head", userData.getData().getToken());
+            editor.apply();
+            hideLoading();
+            showToast("登录成功");
+            startActivity(new Intent(LoginActivity.this, MapActivity.class));
+            finish();
+        }else {
+            showToast(userData.getMessage());
+        }
     }
 
     @Override
-    public void onError(Throwable e, String type) {
-
+    public void onError(Throwable e) {
+        HttpUtil.onError(this, e);
     }
 
     @Override

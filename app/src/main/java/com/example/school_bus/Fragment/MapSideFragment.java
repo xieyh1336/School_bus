@@ -3,6 +3,7 @@ package com.example.school_bus.Fragment;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -26,11 +27,13 @@ import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.school_bus.Activity.MapActivity;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.NetWork.API_login;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.FileUtil;
+import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
 import com.example.school_bus.View.MyPopupWindow;
@@ -54,6 +57,8 @@ import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+
+import static android.content.Context.MODE_PRIVATE;
 
 /**
  * @作者 yonghe Xie
@@ -98,6 +103,11 @@ public class MapSideFragment extends BaseFragment {
     }
 
     private void init() {
+        Glide.with(getContext())
+                .load(ImageUtil.getHeadUrl(MyApp.getHead()))
+                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                .error(R.drawable.ic_header)
+                .into(ivHeader);
         switch1.toggleSwitch(false);
         switch1.setColor(Color.parseColor("#FF1878"), Color.parseColor("#FFFFFF"));
         switch1.setOnStateChangedListener(new SwitchView.OnStateChangedListener() {
@@ -293,23 +303,32 @@ public class MapSideFragment extends BaseFragment {
 
                         @Override
                         public void onNext(UserData userData) {
-                            if (userData.getCode() == 20000){
+                            if (userData.isSuccess()){
                                 MyLog.e(TAG, "上传成功，图片地址：" + userData.getData().getHead());
+                                showToast("上传成功");
+                                if (getActivity() != null){
+                                    MyLog.e(TAG, "真实地址：" + ImageUtil.getHeadUrl(userData.getData().getHead()));
+                                    if (getContext() != null){
+                                        SharedPreferences.Editor editor = getContext().getSharedPreferences("user", MODE_PRIVATE).edit();
+                                        editor.putString("head", userData.getData().getHead());
+                                        editor.apply();
+                                        Glide.with(getContext())
+                                                .load(ImageUtil.getHeadUrl(userData.getData().getHead()))
+                                                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                                                .error(R.drawable.ic_header)
+                                                .into(ivHeader);
+                                        ((MapActivity) getActivity()).updateHead();//更新主页面的头像
+                                    }
+                                }
                             }else {
                                 MyLog.e(TAG, "上传失败，原因：" + userData.getMessage());
-                            }
-                            if (getContext() != null){
-                                MyLog.e(TAG, "真实地址：" + ImageUtil.getHeadUrl(userData.getData().getHead()));
-                                Glide.with(getContext())
-                                        .load(ImageUtil.getHeadUrl(userData.getData().getHead()))
-                                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                                        .into(ivHeader);
+                                showToast(userData.getMessage());
                             }
                         }
 
                         @Override
                         public void onError(Throwable e) {
-
+                            HttpUtil.onError(getContext(), e);
                         }
 
                         @Override
@@ -416,13 +435,15 @@ public class MapSideFragment extends BaseFragment {
                     File file = new File(Environment.getExternalStorageDirectory(), IMAGE_FILE_NAME);
                     openTailor(Uri.fromFile(file));//对照片进行裁剪
                 }else {
-                    showToast("未找到存储卡，无法");
+                    showToast("未找到存储卡");
                 }
                 break;
             case ALBUM_REQUEST_CODE:
                 //相册回调
                 MyLog.e(TAG, "相册回调");
-                upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
+                if (data != null && data.getData() != null){
+                    upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
+                }
                 break;
             case TAILOR_REQUEST_CODE:
                 //图片剪裁回调

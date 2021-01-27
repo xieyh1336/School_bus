@@ -1,7 +1,7 @@
 package com.example.school_bus.Presenter;
 
 import com.example.school_bus.Entity.UserData;
-import com.example.school_bus.Mvp.LoginAMvp;
+import com.example.school_bus.Mvp.RegisterMvp;
 import com.example.school_bus.NetWork.API_login;
 
 import io.reactivex.Observable;
@@ -10,17 +10,17 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class LoginPresenter implements LoginAMvp.presenter{
+public class RegisterPresenter implements RegisterMvp.presenter {
 
-    private LoginAMvp.view view;
+    private RegisterMvp.view view;
 
-    public LoginPresenter(LoginAMvp.view view) {
+    public RegisterPresenter(RegisterMvp.view view) {
         this.view = view;
     }
 
     @Override
-    public void login(String username, String password, String phone, int type) {
-        Observable<UserData> newsDataObservable = API_login.createApi().login(username, password, phone, type);
+    public void register(String username, String password, String phone) {
+        Observable<UserData> newsDataObservable = API_login.createApi().register(username, password, phone);
         newsDataObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -32,7 +32,7 @@ public class LoginPresenter implements LoginAMvp.presenter{
 
                     @Override
                     public void onNext(UserData userData) {
-                        view.loginResult(userData);
+                        view.registerResult(userData);
                     }
 
                     @Override
