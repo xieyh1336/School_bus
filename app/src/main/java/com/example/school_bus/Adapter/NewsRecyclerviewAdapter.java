@@ -12,7 +12,6 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.R;
-import com.example.school_bus.Utils.ResourcesUtil;
 
 import java.util.List;
 

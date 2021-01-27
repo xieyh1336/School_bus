@@ -1,15 +1,22 @@
 package com.example.school_bus.Utils;
 
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.widget.Toast;
+
+import com.google.gson.internal.$Gson$Types;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -20,15 +27,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.temporal.TemporalAccessor;
 
 /**
  * @作者 yonghe Xie
  * @创建/修改日期 2021-01-06 16:37
- * @类名 ResourcesUtil
- * @所在包 com\example\school_bus\Utils\ResourcesUtil.java
+ * @类名 FileUtil
+ * @所在包 com\example\school_bus\Utils\FileUtil.java
  * 资源工具类
  */
-public class ResourcesUtil {
+public class FileUtil {
+
+    private static String TAG = "FileUtil";
 
     //将Url图片转为Bitmap的方法，该方法不能在主线程中执行，需创建子线程执行！
     public static Bitmap getBitmap(String imgUrl, Context context) {
@@ -139,5 +149,109 @@ public class ResourcesUtil {
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    //将Uri转化为path
+    public static String getFilePathByUri(Context context, Uri uri){
+        if ("content".equalsIgnoreCase(uri.getScheme())){
+            int sdkVersion = Build.VERSION.SDK_INT;
+            if (sdkVersion >= 19){
+                return getRealPathFromUriAboveApi19(context, uri);
+            } else {
+                return getRealPathFromUriBelowApi19(context, uri);
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())){
+            return uri.getPath();
+        }
+        return null;
+    }
+
+    /**
+     * 适配api19及以上，根据Uri获取图片的绝对路径
+     */
+    private static String getRealPathFromUriAboveApi19(Context context, Uri uri){
+        String filePath = null;
+        if (DocumentsContract.isDocumentUri(context, uri)){
+            //如果是Document类型的uri，则通过Document，id来进行处理
+            String documentId = DocumentsContract.getDocumentId(uri);
+            if (isMediaDocument(uri)){
+                //使用':'分割
+                String type = documentId.split(":")[0];
+                String id = documentId.split(":")[1];
+
+                String selection = MediaStore.Images.Media._ID + "=?";
+                String[] selectionArgs = {id};
+
+                Uri contentUri = null;
+                if ("image".equals(type)){
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                }else if ("video".equals(type)){
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                }else if ("audio".equals(type)){
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
+                filePath = getDataColumn(context, contentUri, selection, selectionArgs);
+            } else if (isDownloadsDocument(uri)){
+                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.parseLong(documentId));
+                filePath = getDataColumn(context, contentUri, null, null);
+            } else if (isExternalStorageDocument(uri)){
+                final String docId = DocumentsContract.getDocumentId(uri);
+                final String[] split = docId.split(":");
+                final String type = split[0];
+                if ("primary".equalsIgnoreCase(type)){
+                    filePath = Environment.getExternalStorageDirectory() + "/" + split[1];
+                }
+            } else {
+                MyLog.e(TAG, "路径错误");
+            }
+        } else if ("content".equalsIgnoreCase(uri.getScheme())){
+            //如果是content类型的Uri
+            filePath = getDataColumn(context, uri, null, null);
+        } else if ("file".equals(uri.getScheme())){
+            //如果是file类型的Uri，直接获取图片对应的路径
+            filePath = uri.getPath();
+        }
+        return filePath;
+    }
+
+    /**
+     * 适配api19以下（不包括19），根据uri获取图片的绝对路径
+     */
+    private static String getRealPathFromUriBelowApi19(Context context, Uri uri){
+        return getDataColumn(context, uri, null, null);
+    }
+
+    /**
+     * 获取数据库表中的_data列，即返回Uri对应的文件路径
+     */
+    private static String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs){
+        String path = null;
+        String[] projection = new String[]{MediaStore.Images.Media.DATA};
+        Cursor cursor = null;
+        try {
+            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
+            if (cursor != null && cursor.moveToFirst()){
+                int columnIndex = cursor.getColumnIndexOrThrow(projection[0]);
+                path = cursor.getString(columnIndex);
+            }
+        } catch (Exception e){
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+        return path;
+    }
+
+
+    private static boolean isMediaDocument(Uri uri){
+        return "com.android.providers.media.documents".equals(uri.getAuthority());
+    }
+
+    private static boolean isExternalStorageDocument(Uri uri){
+        return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    }
+
+    private static boolean isDownloadsDocument(Uri uri){
+        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 }

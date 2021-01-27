@@ -13,7 +13,7 @@ import androidx.annotation.Nullable;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.example.school_bus.R;
-import com.example.school_bus.Utils.ResourcesUtil;
+import com.example.school_bus.Utils.FileUtil;
 import com.github.ybq.android.spinkit.SpinKitView;
 import com.github.ybq.android.spinkit.SpriteFactory;
 import com.github.ybq.android.spinkit.Style;
@@ -43,7 +43,7 @@ public class PicturesRecyclerviewAdapter extends BaseQuickAdapter<Drawable, Base
         Sprite drawable = SpriteFactory.create(style);
         spinKitView.setIndeterminateDrawable(drawable);
 
-        Bitmap bitmap = ResourcesUtil.drawableToBitmap(item);
+        Bitmap bitmap = FileUtil.drawableToBitmap(item);
         imageView.setImageBitmap(bitmap);
 //        imageView.setImageDrawable(item);
         spinKitView.setVisibility(View.GONE);
@@ -68,11 +68,11 @@ public class PicturesRecyclerviewAdapter extends BaseQuickAdapter<Drawable, Base
         //测试保存图片
         imageView.setOnLongClickListener(view -> {
             Thread thread = new Thread(() -> {
-                ResourcesUtil.SaveBitmapFromView(bitmap, context);
+                FileUtil.SaveBitmapFromView(bitmap, context);
                 Looper.prepare();
                 Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
                 Looper.loop();
-//                    ResourcesUtil.SaveBitmapFromView(ResourcesUtil.getBitmap(item.getImg(), context), context);
+//                    FileUtil.SaveBitmapFromView(FileUtil.getBitmap(item.getImg(), context), context);
             });
             thread.start();
             return true;

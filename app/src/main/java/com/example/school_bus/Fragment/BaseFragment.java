@@ -1,6 +1,7 @@
 package com.example.school_bus.Fragment;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
+import com.example.school_bus.Activity.LoginActivity;
 import com.example.school_bus.R;
 
 import java.util.Calendar;
@@ -21,6 +23,10 @@ public class BaseFragment extends Fragment {
 
     public void showToast(String msg){
         Toast.makeText(getContext(), msg, Toast.LENGTH_SHORT).show();
+    }
+
+    public void startLogin(){
+        startActivity(new Intent(getContext(), LoginActivity.class));
     }
 
     /**

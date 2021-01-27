@@ -21,6 +21,13 @@ import android.view.animation.AccelerateInterpolator;
 
 import com.example.school_bus.R;
 
+/**
+ * @作者 yonghe Xie
+ * @创建/修改日期 2021-01-23 11:52
+ * @类名 SwitchView
+ * @所在包 com\example\school_bus\View\SwitchView.java
+ * 自定义选择器
+ */
 public class SwitchView extends View {
 
     private static final int STATE_SWITCH_ON = 4;

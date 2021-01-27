@@ -1,32 +1,8 @@
 package com.example.school_bus.Entity;
 
-public class UserData {
+public class UserData extends BaseData {
 
-    /**
-     * code : 20000
-     * message : 登陆成功
-     * data : {"username":"test2","password":"e10adc3949ba59abbe56e057f20f883e","phone":"1","time_out":"2020-11-20 11:56:09","token":"dc17f670dc76edad9bd3513e772374962ed4af3a"}
-     */
-
-    private int code;
-    private String message;
     private DataBean data;
-
-    public int getCode() {
-        return code;
-    }
-
-    public void setCode(int code) {
-        this.code = code;
-    }
-
-    public String getMessage() {
-        return message;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
-    }
 
     public DataBean getData() {
         return data;
@@ -50,6 +26,7 @@ public class UserData {
         private String phone;
         private String time_out;
         private String token;
+        private String head;
 
         public String getUsername() {
             return username;
@@ -89,6 +66,14 @@ public class UserData {
 
         public void setToken(String token) {
             this.token = token;
+        }
+
+        public String getHead() {
+            return head;
+        }
+
+        public void setHead(String head) {
+            this.head = head;
         }
     }
 }

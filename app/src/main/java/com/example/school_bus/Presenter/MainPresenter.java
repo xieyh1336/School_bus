@@ -19,8 +19,8 @@ public class MainPresenter implements MainMvp.presenter {
     }
 
     @Override
-    public void tokenLogin(String token) {
-        Observable<UserData> newsDataObservable = API_login.createApi().tokenLogin(token);
+    public void tokenLogin() {
+        Observable<UserData> newsDataObservable = API_login.createApi().tokenLogin();
         newsDataObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

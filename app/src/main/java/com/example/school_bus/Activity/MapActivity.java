@@ -1,5 +1,6 @@
 package com.example.school_bus.Activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -40,6 +41,11 @@ import butterknife.OnClick;
  * @类名 MapActivity
  * @所在包 com\example\school_bus\Activity\MapActivity.java
  * 主页面
+ * fragment：
+ * {@link MapFragment}第一页，地图
+ * {@link NavigationFragment}第二页，导航
+ * {@link MoreFragment}第三页，更多
+ * 侧边栏：{@link MapSideFragment}
  */
 public class MapActivity extends BaseActivity {
 
@@ -55,9 +61,10 @@ public class MapActivity extends BaseActivity {
     FrameLayout flSide;
     private ArrayList<Fragment> fragmentList = new ArrayList<>();
     private String[] titles = {"地图", "导航", "更多"};
-    private MyPagerAdapter myPagerAdapter;
     private ArrayList<CustomTabEntity> mTabEntities = new ArrayList<>();
-    private MoreFragment moreFragment = new MoreFragment();
+    private MoreFragment moreFragment = MoreFragment.getInstance();
+    private long firstBackTime;
+    private long secondBackTime;
     private int[] mIconUnselectIds =
             {R.mipmap.tab_map_unselect, R.mipmap.tab_navigation_unselect, R.mipmap.tab_more_unselect};
     private int[] mIconSelectIds =
@@ -81,7 +88,7 @@ public class MapActivity extends BaseActivity {
             mTabEntities.add(new TabEntityData(titles[i], mIconSelectIds[i], mIconUnselectIds[i]));
         }
 
-        myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
+        MyPagerAdapter myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
         vp.setAdapter(myPagerAdapter);
         vp.setOffscreenPageLimit(3);
         vp.setStopForViewPager(true);
@@ -135,6 +142,20 @@ public class MapActivity extends BaseActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    @Override
+    public void onBackPressed() {
+        firstBackTime = System.currentTimeMillis();
+        if (firstBackTime - secondBackTime > 2000){
+            showToast("再按一次返回桌面");
+            secondBackTime = firstBackTime;
+        }else {
+            //返回桌面
+            Intent home = new Intent(Intent.ACTION_MAIN);
+            home.addCategory(Intent.CATEGORY_HOME);
+            startActivity(home);
+        }
     }
 
     @OnClick({R.id.iv_header})

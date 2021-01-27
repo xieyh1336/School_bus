@@ -49,10 +49,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 /**
- * 地图界面
+ * @作者 yonghe Xie
+ * @创建/修改日期 2021-01-27 14:07
+ * @类名 MapFragment
+ * @所在包 com\example\school_bus\Fragment\MapFragment.java
+ * 地图页面主页
  */
 public class MapFragment extends BaseFragment {
-    private static MapFragment mapFragment;
     @BindView(R.id.mapView)
     MapView mapView;
     @BindView(R.id.iv_lock)
@@ -88,17 +91,14 @@ public class MapFragment extends BaseFragment {
     private MapBroadcast mapBroadcast;
 
     public static MapFragment getInstance() {
-        if (mapFragment == null) {
-            mapFragment = new MapFragment();
-        }
-        return mapFragment;
+        return new MapFragment();
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //在使用SDK各组件之前初始化context信息，传入ApplicationContext
-        SDKInitializer.initialize(getActivity().getApplicationContext());
+        SDKInitializer.initialize(Objects.requireNonNull(getActivity()).getApplicationContext());
         //自4.3.0起，百度地图SDK所有接口均支持百度坐标和国测局坐标，用此方法设置使用的坐标类型.
         //包括BD09LL和GCJ02两种坐标，默认是BD09LL坐标。
         SDKInitializer.setCoordType(CoordType.BD09LL);

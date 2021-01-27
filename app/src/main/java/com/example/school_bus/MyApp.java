@@ -3,6 +3,8 @@ package com.example.school_bus;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.StrictMode;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
@@ -23,7 +25,7 @@ public class MyApp extends Application {
 
     private static String TAG = "MyApp";
     private static SharedPreferences preferences;//存储用户基本信息
-    private Context context;
+    private static Context context;
 
     @Override
     public void onCreate() {
@@ -36,6 +38,16 @@ public class MyApp extends Application {
 
         context = getApplicationContext();
         preferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+
+        //兼容Android7.0拍照闪退
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
+    }
+
+    public static Context getContext(){
+        return context;
     }
 
     public static String getToken(){

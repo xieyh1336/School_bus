@@ -24,6 +24,13 @@ import java.util.ArrayList;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+/**
+ * @作者 yonghe Xie
+ * @创建/修改日期 2021-01-27 14:07
+ * @类名 MoreFragment
+ * @所在包 com\example\school_bus\Fragment\MoreFragment.java
+ * 更多页面主页
+ */
 public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
 
     //boomMenu
@@ -36,8 +43,12 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
     private MyPagerAdapter myPagerAdapter;
     private ArrayList<Fragment> fragmentList = new ArrayList<>();
     private String[] titles = {"新闻", "美图"};
-    private NewsFragment newsFragment = new NewsFragment();
-    private PicturesFragment picturesFragment = new PicturesFragment();
+    private NewsFragment newsFragment = NewsFragment.getInstance();
+    private PicturesFragment picturesFragment = PicturesFragment.getInstance();
+
+    public static MoreFragment getInstance(){
+        return new MoreFragment();
+    }
 
     @Nullable
     @Override
@@ -93,11 +104,7 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //监听PicturesFragment的返回键
         if (keyCode == KeyEvent.KEYCODE_BACK){
-            if (picturesFragment != null
-                    && picturesFragment instanceof FragmentOnKeyListener
-                    && ((FragmentOnKeyListener) picturesFragment).onKeyDown(keyCode, event)){
-                return true;
-            }
+            return picturesFragment != null && ((FragmentOnKeyListener) picturesFragment).onKeyDown(keyCode, event);
         }
         return false;
     }

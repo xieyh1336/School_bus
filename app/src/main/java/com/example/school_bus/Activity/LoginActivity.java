@@ -3,6 +3,7 @@ package com.example.school_bus.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,9 +14,11 @@ import androidx.annotation.Nullable;
 import com.bumptech.glide.Glide;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.LoginAMvp;
+import com.example.school_bus.MyApp;
 import com.example.school_bus.NetWork.API_login;
 import com.example.school_bus.Presenter.LoginPresenter;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.MyLog;
 import com.mob.tools.utils.SharePrefrenceHelper;
 
 import butterknife.BindView;
@@ -46,6 +49,7 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
     Button btnLogin;
     @BindView(R.id.btn_register)
     Button btnRegister;
+    private long secondBackTime;
     private LoginPresenter loginPresenter;
     private SharePrefrenceHelper sharePrefrenceHelper;
 
@@ -66,11 +70,23 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
         etLoginPassword.setText(sharedPreferences.getString("password", ""));
     }
 
+    @Override
+    public void onBackPressed() {
+        if (System.currentTimeMillis() - secondBackTime > 2000){
+            showToast("再按一次退出");
+            secondBackTime = System.currentTimeMillis();
+        }else {
+            //退出
+            finish();
+        }
+    }
+
     @OnClick({R.id.btn_login, R.id.btn_register})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_login:
                 //账号密码登录
+                showLoading("正在登录");
                 Observable<UserData> newsDataObservable = API_login.createApi().login(etLoginAccount.getText().toString(), etLoginPassword.getText().toString(), null, 0);
                 newsDataObservable
                         .subscribeOn(Schedulers.io())
@@ -91,9 +107,14 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
                                     editor.putString("phone", userData.getData().getPhone());
                                     editor.putString("token", userData.getData().getToken());
                                     editor.apply();
-                                    showToast("登录成功");
-                                    startActivity(new Intent(LoginActivity.this, MapActivity.class));
-                                    finish();
+
+                                    Handler handler = new Handler();
+                                    handler.postDelayed(() -> {
+                                        hideLoading();
+                                        showToast("登录成功");
+                                        startActivity(new Intent(LoginActivity.this, MapActivity.class));
+                                        finish();
+                                    }, 2000);
                                 }else {
                                     showToast(userData.getMessage());
                                 }

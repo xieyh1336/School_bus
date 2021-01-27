@@ -10,6 +10,6 @@ public interface MainMvp {
     }
 
     interface presenter{
-        void tokenLogin(String token);
+        void tokenLogin();
     }
 }

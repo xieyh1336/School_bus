@@ -25,10 +25,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         startActivity(new Intent(this, LoginActivity.class));
     }
 
-    public void loginOut(){
-
-    }
-
     /**
      *将显示Dialog的方法封装在这里面
      */

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">我的地图</string>
+    <string name="app_name">蓝梦地图</string>
 
     // 登录相关
     <string name="account">用户名</string>

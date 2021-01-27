@@ -6,6 +6,10 @@
 
     <color name="item_split_color">#cccccc</color>
 
-    <!-- 聊天发送/光标色值 -->
-    <color name="green">#70C160</color>
+    <color name="green">#70C160</color><!-- 聊天发送/光标色值 -->
+    <color name="black">#000000</color><!--黑色-->
+    <color name="white">#FFFFFF</color><!--白色-->
+    <color name="red">#FF0000</color>
+    <color name="background">#F2F2F2</color>
+    <color name="gray">#44AAAAAA</color>
 </resources>

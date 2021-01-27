@@ -25,4 +25,10 @@
         <item name="android:backgroundDimEnabled">true</item>
     </style>
 
+    <!--popup下方进出的动画-->
+    <style name="popup_window_bottom_style">
+        <item name="android:windowEnterAnimation">@anim/popup_window_in</item>
+        <item name="android:windowExitAnimation">@anim/popup_window_out</item>
+    </style>
+
 </resources>

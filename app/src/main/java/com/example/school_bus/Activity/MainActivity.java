@@ -42,11 +42,16 @@ public class MainActivity extends BaseActivity implements MainMvp.view {
     private void login() {
         //查找token是否存在
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
-        String token = sharedPreferences.getString("token", "");
+        String token = sharedPreferences.getString("token", null);
         MyLog.e(TAG, "准备自动登录，查询是否存储有token...");
         MyLog.e(TAG, "存储的token:" + token);
         //尝试使用token自动登录
-        mainPresenter.tokenLogin(token);
+        if (token == null){
+            startLogin();
+            finish();
+        }else {
+            mainPresenter.tokenLogin();
+        }
     }
 
     @Override
@@ -73,7 +78,7 @@ public class MainActivity extends BaseActivity implements MainMvp.view {
     public void onError(Throwable e, String type) {
         if ("tokenLogin".equals(type)) {//跳转登陆页面
             MyLog.e(TAG, "token自动登录访问出错，跳转登陆页面");
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            startLogin();
             finish();
         }
     }

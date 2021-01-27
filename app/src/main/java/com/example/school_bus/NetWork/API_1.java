@@ -23,7 +23,7 @@ public class API_1 {
         @GET("getWangYiNews")
         Observable<NewsData> getNews(@Query("page") String page, @Query("count") String count);
 
-        //获取美图推荐
+        //获取美图推荐，该接口返回的图片有问题，暂时不使用
         @GET("getImages")
         Observable<PicturesData> getPictures(@Query("page") String page, @Query("count") String count);
     }

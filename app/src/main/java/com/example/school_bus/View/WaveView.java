@@ -11,7 +11,11 @@ import android.widget.RelativeLayout;
 import com.example.school_bus.R;
 
 /**
- *点击菜单栏弹出的侧边栏的波浪背景
+ * @作者 yonghe Xie
+ * @创建/修改日期 2021-01-23 11:52
+ * @类名 WaveView
+ * @所在包 com\example\school_bus\View\WaveView.java
+ * 点击菜单栏弹出的侧边栏的波浪背景
  * 类似支付宝的蓝色背景波纹
  */
 public class WaveView extends RelativeLayout {

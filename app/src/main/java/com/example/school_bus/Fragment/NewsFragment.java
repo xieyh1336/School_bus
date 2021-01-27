@@ -40,6 +40,7 @@ import butterknife.OnClick;
  * @创建/修改日期 2020-11-19 17:32
  * @类名 NewsFragment
  * @所在包 com\example\school_bus\Fragment\NewsFragment.java
+ * 更多页面，新闻分页
  */
 public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
     @BindView(R.id.bannerView)
@@ -60,6 +61,9 @@ public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefre
     private boolean isLoadMore = false;
     private View view;
 
+    public static NewsFragment getInstance(){
+        return new NewsFragment();
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {

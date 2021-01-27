@@ -30,6 +30,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import indi.liyi.viewer.ImageViewer;
 
+/**
+ * @作者 yonghe Xie
+ * @创建/修改日期 2021-01-27 14:07
+ * @类名 PicturesFragment
+ * @所在包 com\example\school_bus\Fragment\PicturesFragment.java
+ * 更多页面，图片分页
+ */
 public class PicturesFragment extends BaseFragment implements PicturesFMvp.view, OnRefreshListener, OnLoadMoreListener, FragmentOnKeyListener {
 
     @BindView(R.id.rv)
@@ -50,6 +57,9 @@ public class PicturesFragment extends BaseFragment implements PicturesFMvp.view,
     private boolean loading = false;//用于判断是否在网络访问加载
     private PhotoLoader loader = new PhotoLoader();
 
+    public static PicturesFragment getInstance(){
+        return new PicturesFragment();
+    }
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
