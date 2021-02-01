@@ -2,6 +2,7 @@ package com.example.school_bus.Activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -67,6 +68,7 @@ public class MainActivity extends BaseActivity {
     DrawerLayout dlMap;
     @BindView(R.id.fl_side)
     FrameLayout flSide;
+    private boolean isFirst = true;
     private ArrayList<Fragment> fragmentList = new ArrayList<>();
     private String[] titles = {"地图", "预约", "更多"};
     private ArrayList<CustomTabEntity> mTabEntities = new ArrayList<>();
@@ -84,7 +86,6 @@ public class MainActivity extends BaseActivity {
         ButterKnife.bind(this);
         init();
         setListener();
-        showToast("欢迎您 " + MyApp.getUserName());
     }
 
     public void init() {
@@ -175,6 +176,18 @@ public class MainActivity extends BaseActivity {
                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                 .error(R.drawable.ic_header)
                 .into(ivHeader);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        new Handler().postDelayed(() -> {
+            if (isFirst){
+                showToast("欢迎您 " + MyApp.getUserName());
+                isFirst = false;
+            }
+        }, 2000);
+
     }
 
     @Override

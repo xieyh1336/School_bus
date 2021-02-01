@@ -118,7 +118,6 @@ public class MapSideFragment extends BaseFragment {
                     .error(R.drawable.ic_header)
                     .into(ivHeader);
         }
-        tvName.setText("欢迎您 " + MyApp.getUserName());
 
         switch1.toggleSwitch(false);
         switch1.setColor(Color.parseColor("#FF1878"), Color.parseColor("#FFFFFF"));

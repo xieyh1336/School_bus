@@ -6,8 +6,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -33,6 +35,7 @@ import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
@@ -191,6 +194,21 @@ public class MapFragment extends BaseFragment {
      * 地图监听
      */
     public void mapListener() {
+        //地图加载完成
+        baiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                MyLog.e(TAG, "地图加载完成");
+            }
+        });
+        //地图渲染完成回调
+        baiduMap.setOnMapRenderCallbadk(new BaiduMap.OnMapRenderCallback() {
+            @Override
+            public void onMapRenderFinished() {
+                //每次对地图进行操作的时候都会渲染
+                MyLog.e(TAG, "地图渲染完成");
+            }
+        });
         //地图单击事件
         baiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
             /**
@@ -260,6 +278,9 @@ public class MapFragment extends BaseFragment {
                     case REASON_GESTURE:
                         //用户手势触发导致地图状态改变
                         MyLog.e(TAG, "用户手势触发地图状态改变，mapStatus：" + mapStatus);
+                        //地图状态改变，图标解锁
+                        isLock = false;
+                        ivMyLocation.setImageResource(R.mipmap.positioning_unselect);
                         break;
                     case REASON_API_ANIMATION:
                         //SDK导致地图状态改变
@@ -290,6 +311,47 @@ public class MapFragment extends BaseFragment {
                 MyLog.e(TAG, "地图状态改变结束，mapStatus：" + mapStatus);
             }
         });
+        //地图双击事件
+        baiduMap.setOnMapDoubleClickListener(new BaiduMap.OnMapDoubleClickListener() {
+            @Override
+            public void onMapDoubleClick(LatLng latLng) {
+                MyLog.e(TAG, "双击了地图");
+            }
+        });
+        //地图长按事件
+        baiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
+            @Override
+            public void onMapLongClick(LatLng latLng) {
+                MyLog.e(TAG, "长按了地图");
+            }
+        });
+        //地图Marker覆盖物点击事件
+        baiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                MyLog.e(TAG, "点击了Marker覆盖物");
+                return false;//是否捕获点击事件，不捕捉则OnMapClickListener捕捉
+            }
+        });
+        //地图触摸事件
+        baiduMap.setOnMapTouchListener(new BaiduMap.OnMapTouchListener() {
+            @Override
+            public void onTouch(MotionEvent motionEvent) {
+                MyLog.e(TAG, "触摸了地图");
+            }
+        });
+        //地图截屏事件
+        baiduMap.snapshot(new BaiduMap.SnapshotReadyCallback() {
+            /**
+             * 地图截屏回调接口
+             * @param bitmap 截屏返回的 bitmap 数据
+             */
+            @Override
+            public void onSnapshotReady(Bitmap bitmap) {
+                MyLog.e(TAG, "地图截屏事件");
+            }
+        });
+
     }
 
     /**
@@ -316,8 +378,10 @@ public class MapFragment extends BaseFragment {
         tvRightMeLongitude.setText(decimalFormat.format(myLocation.getLongitude()));
 
         if (isLock || isFirst) {
-            //移动到我的位置
             isFirst = false;
+            //直接缩放至缩放级别16
+            baiduMap.setMapStatus(MapStatusUpdateFactory.zoomTo(16));
+            //移动到我的位置
             LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
             baiduMap.animateMapStatus(mapStatusUpdate);
@@ -349,13 +413,18 @@ public class MapFragment extends BaseFragment {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_my_location:
-                //锁定状态
-                ivMyLocation.setImageResource(R.mipmap.positioning_select);
                 //移动到我的位置
                 LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
                 mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
                 baiduMap.animateMapStatus(mapStatusUpdate);
-                isLock = true;
+                if (!isLock){
+                    //锁定状态
+                    ivMyLocation.setImageResource(R.mipmap.positioning_select);
+                    isLock = true;
+                } else {
+                    ivMyLocation.setImageResource(R.mipmap.positioning_unselect);
+                    isLock = false;
+                }
                 break;
         }
     }
