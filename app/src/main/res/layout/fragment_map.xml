@@ -15,7 +15,7 @@
             android:layout_height="match_parent"/>
 
         <ImageView
-            android:id="@+id/iv_lock"
+            android:id="@+id/iv_my_location"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@mipmap/positioning_unselect"

@@ -64,10 +64,8 @@ public class MyApp extends Application {
         return preferences.getString("head", "");
     }
 
-    public static void clearHead(){
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.remove("head");
-        editor.apply();
+    public static String getUserName(){
+        return preferences.getString("username", "");
     }
 
     static {

@@ -33,7 +33,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait"/>
         <activity
-            android:name=".Activity.MapActivity"
+            android:name=".Activity.MainActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
@@ -41,7 +41,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.MainActivity"
+            android:name=".Activity.GuideActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -51,6 +51,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".Activity.BaseActivity" />
+        <!--百度地图-->
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="6sugZ9bbTBvaMhGsFn7G3H2Tmur8lkdG" />
@@ -64,13 +65,13 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
-
+        <!--百度地图服务-->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
             android:process=":remote">
             <intent-filter>
-                <action android:name="com.baidu.location.service_v2.2"></action>
+                <action android:name="com.baidu.location.service_v2.2" />
             </intent-filter>
         </service>
     </application>

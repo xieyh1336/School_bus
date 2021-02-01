@@ -1,6 +1,7 @@
 package com.example.school_bus.Fragment;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -18,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,9 +27,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.school_bus.Activity.MapActivity;
+import com.example.school_bus.Activity.MainActivity;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.NetWork.API_login;
@@ -88,6 +91,8 @@ public class MapSideFragment extends BaseFragment {
     @BindView(R.id.iv_header)
     ImageView ivHeader;
     MyPopupWindow myPopupWindow;//自定义弹窗
+    @BindView(R.id.tv_name)
+    TextView tvName;
 
     public static MapSideFragment getInstance() {
         return new MapSideFragment();
@@ -102,12 +107,19 @@ public class MapSideFragment extends BaseFragment {
         return view;
     }
 
+    @SuppressLint("SetTextI18n")
     private void init() {
-        Glide.with(getContext())
-                .load(ImageUtil.getHeadUrl(MyApp.getHead()))
-                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                .error(R.drawable.ic_header)
-                .into(ivHeader);
+        if (getContext() != null){
+            Glide.with(getContext())
+                    .load(ImageUtil.getHeadUrl(MyApp.getHead()))
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .error(R.drawable.ic_header)
+                    .into(ivHeader);
+        }
+        tvName.setText("欢迎您 " + MyApp.getUserName());
+
         switch1.toggleSwitch(false);
         switch1.setColor(Color.parseColor("#FF1878"), Color.parseColor("#FFFFFF"));
         switch1.setOnStateChangedListener(new SwitchView.OnStateChangedListener() {
@@ -135,14 +147,14 @@ public class MapSideFragment extends BaseFragment {
      * 显示选择弹窗
      * 如果申请权限则跳转到权限回调{@link MapSideFragment#onRequestPermissionsResult(int, String[], int[])}
      */
-    private void showPhotoPopupWindow(){
-        if (myPopupWindow == null){
+    private void showPhotoPopupWindow() {
+        if (myPopupWindow == null) {
             myPopupWindow = new MyPopupWindow(getContext());
         }
         myPopupWindow.showPhoto();//显示照片弹窗
         myPopupWindow.setOnClickListener(type -> {
-            if (getContext() != null){
-                switch (type){
+            if (getContext() != null) {
+                switch (type) {
                     case MyPopupWindow.TAKE_PHOTO:
                         //拍照
                         MyLog.e(TAG, "点击拍照");
@@ -151,11 +163,11 @@ public class MapSideFragment extends BaseFragment {
                                 && (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                 == PackageManager.PERMISSION_GRANTED)
                                 && (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-                                == PackageManager.PERMISSION_GRANTED)){
+                                == PackageManager.PERMISSION_GRANTED)) {
                             //权限都齐的情况下，跳转相机
                             openCamera();
-                        }else {
-                            if (getActivity() != null){
+                        } else {
+                            if (getActivity() != null) {
                                 //请求权限
                                 ActivityCompat.requestPermissions(getActivity(), new String[]{
                                         Manifest.permission.CAMERA,
@@ -171,11 +183,11 @@ public class MapSideFragment extends BaseFragment {
                         if ((ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)
                                 == PackageManager.PERMISSION_GRANTED)
                                 && (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
-                                == PackageManager.PERMISSION_GRANTED)){
+                                == PackageManager.PERMISSION_GRANTED)) {
                             //权限都齐的情况下，跳转相册
                             openAlbum();
-                        }else {
-                            if (getActivity() != null){
+                        } else {
+                            if (getActivity() != null) {
                                 //请求权限
                                 ActivityCompat.requestPermissions(getActivity(), new String[]{
                                         Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -193,10 +205,10 @@ public class MapSideFragment extends BaseFragment {
      * 打开相机
      * 操作完成后回调{@link MapSideFragment#onActivityResult(int, int, Intent)}
      */
-    private void openCamera(){
+    private void openCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         //判断存储卡是否可用，可用则存储
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             Uri uri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), IMAGE_FILE_NAME));
             //指定照片保存路径（SD卡），headImage.png为一个临时文件，每次拍照后这个图片都被替换
             intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
@@ -209,7 +221,7 @@ public class MapSideFragment extends BaseFragment {
      * 打开相册
      * 操作完成后回调{@link MapSideFragment#onActivityResult(int, int, Intent)}
      */
-    private void openAlbum(){
+    private void openAlbum() {
         Intent intent = new Intent(Intent.ACTION_PICK, null);
         intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
         startActivityForResult(intent, ALBUM_REQUEST_CODE);
@@ -261,7 +273,7 @@ public class MapSideFragment extends BaseFragment {
      */
     private String saveMyBitmap(Bitmap bitmap) {
         File dir = new File(Environment.getExternalStorageDirectory() + "/head/");
-        if (!dir.exists()){
+        if (!dir.exists()) {
             dir.mkdir();
         }
         File f = new File(dir.getPath() + SAVE_AVATAR_NAME);
@@ -283,9 +295,9 @@ public class MapSideFragment extends BaseFragment {
     /**
      * 更换头像
      */
-    private void upHead(String path){
+    private void upHead(String path) {
         File file = new File(path);
-        if (file.exists()){
+        if (file.exists()) {
             MyLog.e(TAG, "更换头像，图片文件存在，图片名：" + file.getName());
             //以下将图片转化上传
             RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
@@ -303,24 +315,26 @@ public class MapSideFragment extends BaseFragment {
 
                         @Override
                         public void onNext(UserData userData) {
-                            if (userData.isSuccess()){
+                            if (userData.isSuccess()) {
                                 MyLog.e(TAG, "上传成功，图片地址：" + userData.getData().getHead());
                                 showToast("上传成功");
-                                if (getActivity() != null){
+                                if (getActivity() != null) {
                                     MyLog.e(TAG, "真实地址：" + ImageUtil.getHeadUrl(userData.getData().getHead()));
-                                    if (getContext() != null){
+                                    if (getContext() != null) {
                                         SharedPreferences.Editor editor = getContext().getSharedPreferences("user", MODE_PRIVATE).edit();
                                         editor.putString("head", userData.getData().getHead());
                                         editor.apply();
                                         Glide.with(getContext())
                                                 .load(ImageUtil.getHeadUrl(userData.getData().getHead()))
                                                 .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                                                .skipMemoryCache(true)
+                                                .diskCacheStrategy(DiskCacheStrategy.NONE)
                                                 .error(R.drawable.ic_header)
                                                 .into(ivHeader);
-                                        ((MapActivity) getActivity()).updateHead();//更新主页面的头像
+                                        ((MainActivity) getActivity()).updateHead();//更新主页面的头像
                                     }
                                 }
-                            }else {
+                            } else {
                                 MyLog.e(TAG, "上传失败，原因：" + userData.getMessage());
                                 showToast(userData.getMessage());
                             }
@@ -342,7 +356,7 @@ public class MapSideFragment extends BaseFragment {
     /**
      * 权限缺失提醒
      */
-    private void showMissingPermissionDialog(String s){
+    private void showMissingPermissionDialog(String s) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
         builder.setMessage("当前应用缺少\"" + s + "\"权限。\n\n请点击 \"设置 \"- \"权限 \"打开所需权限。");
         builder.setNegativeButton("取消", null);
@@ -353,8 +367,8 @@ public class MapSideFragment extends BaseFragment {
     /**
      * 打开设置
      */
-    private void openAppSetting(){
-        if (getContext() != null){
+    private void openAppSetting() {
+        if (getContext() != null) {
             Intent intent = new Intent();
             intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
             Uri uri = Uri.fromParts("package", getContext().getPackageName(), null);
@@ -390,17 +404,17 @@ public class MapSideFragment extends BaseFragment {
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
+        switch (requestCode) {
             case PHOTO_REQUEST_CAMERA:
                 //相机权限请求回调
                 MyLog.e(TAG, "相机权限请求回调");
-                if (grantResults.length > 0){
+                if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED
                             && grantResults[1] == PackageManager.PERMISSION_GRANTED
-                            && grantResults[2] == PackageManager.PERMISSION_GRANTED){
+                            && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
                         //跳转相机
                         openCamera();
-                    }else {
+                    } else {
                         //无权限提示
                         showMissingPermissionDialog("相机\"或\"存储");
                     }
@@ -408,12 +422,12 @@ public class MapSideFragment extends BaseFragment {
                 break;
             case PHOTO_REQUEST_ALBUM:
                 MyLog.e(TAG, "相册权限请求回调");
-                if (grantResults.length > 0){
+                if (grantResults.length > 0) {
                     if (grantResults[0] == PackageManager.PERMISSION_GRANTED
-                            && grantResults[1] == PackageManager.PERMISSION_GRANTED){
+                            && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
                         //跳转相册
                         openAlbum();
-                    }else {
+                    } else {
                         //无权限提示
                         showMissingPermissionDialog("存储");
                     }
@@ -427,28 +441,28 @@ public class MapSideFragment extends BaseFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode){
+        switch (requestCode) {
             case CAMERA_REQUEST_CODE:
                 //相机回调
                 MyLog.e(TAG, "相机回调");
-                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
                     File file = new File(Environment.getExternalStorageDirectory(), IMAGE_FILE_NAME);
                     openTailor(Uri.fromFile(file));//对照片进行裁剪
-                }else {
+                } else {
                     showToast("未找到存储卡");
                 }
                 break;
             case ALBUM_REQUEST_CODE:
                 //相册回调
                 MyLog.e(TAG, "相册回调");
-                if (data != null && data.getData() != null){
+                if (data != null && data.getData() != null) {
                     upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
                 }
                 break;
             case TAILOR_REQUEST_CODE:
                 //图片剪裁回调
                 MyLog.e(TAG, "图片剪裁回调");
-                if (data != null){
+                if (data != null) {
                     setImageToView(data);
                 }
         }

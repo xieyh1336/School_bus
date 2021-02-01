@@ -18,7 +18,7 @@ import com.example.school_bus.R;
 
 import java.util.Calendar;
 
-public class BaseFragment extends Fragment {
+public abstract class BaseFragment extends Fragment {
     protected Dialog loadingDialog;
 
     public void showToast(String msg){

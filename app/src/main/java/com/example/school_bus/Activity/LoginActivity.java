@@ -77,7 +77,7 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
         switch (view.getId()) {
             case R.id.btn_login:
                 //账号密码登录
-                showLoading("正在登录");
+                showLoading("正在登录...");
                 loginPresenter.login(etLoginAccount.getText().toString(), etLoginPassword.getText().toString(), null, 0);
                 break;
             case R.id.btn_register:
@@ -96,11 +96,10 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
             editor.putString("password", userData.getData().getPassword());
             editor.putString("phone", userData.getData().getPhone());
             editor.putString("token", userData.getData().getToken());
-            editor.putString("head", userData.getData().getToken());
+            editor.putString("head", userData.getData().getHead());
             editor.apply();
             hideLoading();
-            showToast("登录成功");
-            startActivity(new Intent(LoginActivity.this, MapActivity.class));
+            startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }else {
             showToast(userData.getMessage());

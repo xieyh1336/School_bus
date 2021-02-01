@@ -29,6 +29,7 @@ import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
@@ -38,10 +39,9 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.MyLog;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -56,10 +56,12 @@ import butterknife.OnClick;
  * 地图页面主页
  */
 public class MapFragment extends BaseFragment {
+    private static String TAG = "MapFragment";
+    private final static int MAP_PERMISSION = 100;//地图权限申请码
     @BindView(R.id.mapView)
     MapView mapView;
-    @BindView(R.id.iv_lock)
-    ImageView ivLock;
+    @BindView(R.id.iv_my_location)
+    ImageView ivMyLocation;
     @BindView(R.id.ll_right)
     LinearLayout llRight;
     @BindView(R.id.tv_right_click_latitude)
@@ -76,19 +78,17 @@ public class MapFragment extends BaseFragment {
     TextView tvRightClick;
     @BindView(R.id.tv_right_me)
     TextView tvRightMe;
-    private LocationClient locationClient;
-    private BDLocation myLocation = new BDLocation();//我的位置
+    private LocationClient locationClient;//用于发起定位
+    private BDLocation myLocation = new BDLocation();//监听，我的位置
     private BDLocation clickLocation = new BDLocation();//点击位置
     private boolean isLock = false;//是否锁定我的位置
     private BaiduMap baiduMap;//定位图层
     private MapStatusUpdate mapStatusUpdate;
-    private MyLocationListener myLocationListener;
-    private MyLocationData locationData;
-    private UiSettings uiSettings;
-    private BitmapDescriptor bitmapDescriptor;//地图点击出现的图标
+    private UiSettings uiSettings;//UI设置
     private MarkerOptions markerOptions = new MarkerOptions();//用于在地图上添加Market
     private DecimalFormat decimalFormat = new DecimalFormat("#.00");//保留小数点后两位
-    private MapBroadcast mapBroadcast;
+    private MapBroadcast mapBroadcast;//我的广播
+    private boolean isFirst = true;//是否第一次进入app
 
     public static MapFragment getInstance() {
         return new MapFragment();
@@ -113,35 +113,55 @@ public class MapFragment extends BaseFragment {
         mapBroadcast = new MapBroadcast();
         Objects.requireNonNull(getActivity()).registerReceiver(mapBroadcast, new IntentFilter("Map"));
 
-        requestPermissions();
-        initView();
-        initMap(view);
-        interactive();
-        initData();
+        requestPermissions();//申请权限
         return view;
     }
 
-    public void initView() {
+    /**
+     *  申请权限
+     */
+    public void requestPermissions() {
+        if (getContext() != null){
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                //申请权限
+                if (getActivity() != null){
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.READ_PHONE_STATE,
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE
+                    }, MAP_PERMISSION);
+                }
+            } else {
+                init();
+            }
+        }
+    }
 
+    public void init() {
         llRight.setVisibility(View.GONE);
-
         tvRightClick.setVisibility(View.GONE);
         tvRightClickLatitude.setVisibility(View.GONE);
         tvRightClickLongitude.setVisibility(View.GONE);
         tvRightClickLatitude.setText("0");
         tvRightClickLongitude.setText("0");
+
+        //地图有关的初始化
+        initMap();
+        mapListener();
     }
 
-    public void initMap(View view) {
+    public void initMap() {
         //定位初始化
         locationClient = new LocationClient(getContext());
-
+        //地图的定位图层
         baiduMap = mapView.getMap();
         //开启地图的定位图层
         baiduMap.setMyLocationEnabled(true);
-
+        //UI设置
         uiSettings = baiduMap.getUiSettings();
-
+        //服务基本设置
         LocationClientOption option = new LocationClientOption();
         option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy);//可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
         option.setCoorType("bd09ll");//可选，默认gcj02，设置返回的定位结果坐标系
@@ -155,48 +175,34 @@ public class MapFragment extends BaseFragment {
         option.setIgnoreKillProcess(false);//可选，默认true，定位SDK内部是一个SERVICE，并放到了独立进程，设置是否在stop的时候杀死这个进程，默认不杀死
         option.SetIgnoreCacheException(false);//可选，默认false，设置是否收集CRASH信息，默认收集
         option.setEnableSimulateGps(false);//可选，默认false，设置是否需要过滤gps仿真结果，默认需要
+        option.setOpenAutoNotifyMode(3000, 1, LocationClientOption.LOC_SENSITIVITY_HIGHT);//只要定位发生变化就主动回调，用于连续定位
         locationClient.setLocOption(option);
-
-        myLocationListener = new MyLocationListener();
+        //注册监听
+        MyLocationListener myLocationListener = new MyLocationListener();
         locationClient.registerLocationListener(myLocationListener);
         locationClient.start();
+
+        //创建点击位图
+        BitmapDescriptor bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.mipmap.ic_map_click2);//地图点击出现的图标
+        markerOptions.icon(bitmapDescriptor);
     }
 
-    public void initData(){
-
-    }
-
-    //申请权限
-    public void requestPermissions() {
-        List<String> permissionList = new ArrayList<>();
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.
-                permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.
-                permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
-            permissionList.add(Manifest.permission.READ_PHONE_STATE);
-        }
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.
-                permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-            permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if (!permissionList.isEmpty()) {
-            String[] permissions = permissionList.toArray(new String[permissionList.size()]);
-            ActivityCompat.requestPermissions(getActivity(), permissions, 1);
-        }
-    }
-
-    //交互事件
-    public void interactive() {
+    /**
+     * 地图监听
+     */
+    public void mapListener() {
         //地图单击事件
-        BaiduMap.OnMapClickListener onMapClickListener = new BaiduMap.OnMapClickListener() {
+        baiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
             /**
              * 地图单击事件回调函数
              * @param latLng 点击的地理坐标
              */
             @Override
             public void onMapClick(LatLng latLng) {
+                MyLog.e(TAG, "-------------------------");
+                MyLog.e(TAG, "点击了地图：");
+                MyLog.e(TAG, "经度：" + latLng.latitude);
+                MyLog.e(TAG, "纬度：" + latLng.longitude);
                 //添加之前把上一次点击的图标清空
                 baiduMap.clear();
                 //记录点击位置的经纬度
@@ -210,11 +216,8 @@ public class MapFragment extends BaseFragment {
                 tvRightClickLatitude.setText(decimalFormat.format(clickLocation.getLatitude()));
                 tvRightClickLongitude.setText(decimalFormat.format(clickLocation.getLongitude()));
 
-                //创建点击位图
-                bitmapDescriptor = BitmapDescriptorFactory.fromResource(R.mipmap.ic_map_click2);
                 //构建MarkerOption，用于在地图上添加Market
                 markerOptions.position(latLng);
-                markerOptions.icon(bitmapDescriptor);
                 OverlayOptions options = markerOptions;
                 //在地图上添加Marker，并显示
                 baiduMap.addOverlay(options);
@@ -228,51 +231,131 @@ public class MapFragment extends BaseFragment {
             public void onMapPoiClick(MapPoi mapPoi) {
 
             }
-        };
-        baiduMap.setOnMapClickListener(onMapClickListener);
+        });
+        //地图状态监听
+        baiduMap.setOnMapStatusChangeListener(new BaiduMap.OnMapStatusChangeListener() {
+            /**
+             * 手势操作地图，设置地图状态等操作导致地图状态开始改变。
+             * @param mapStatus 地图状态改变开始时的地图状态
+             */
+            @Override
+            public void onMapStatusChangeStart(MapStatus mapStatus) {
+
+            }
+
+            /**
+             * 手势操作地图，设置地图状态等操作导致地图状态开始改变。
+             * @param mapStatus 地图状态改变开始时的地图状态
+             * @param reason 地图状态改变的原因
+             *               用户手势触发导致的地图状态改变,比如双击、拖拽、滑动底图
+             *               int REASON_GESTURE = 1;
+             *               SDK导致的地图状态改变, 比如点击缩放控件、指南针图标
+             *               int REASON_API_ANIMATION = 2;
+             *               开发者调用,导致的地图状态改变
+             *               int REASON_DEVELOPER_ANIMATION = 3;
+             */
+            @Override
+            public void onMapStatusChangeStart(MapStatus mapStatus, int reason) {
+                switch (reason){
+                    case REASON_GESTURE:
+                        //用户手势触发导致地图状态改变
+                        MyLog.e(TAG, "用户手势触发地图状态改变，mapStatus：" + mapStatus);
+                        break;
+                    case REASON_API_ANIMATION:
+                        //SDK导致地图状态改变
+                        MyLog.e(TAG, "SDK导致地图状态改变，mapStatus：" + mapStatus);
+                        break;
+                    case REASON_DEVELOPER_ANIMATION:
+                        //开发者调用，导致地图状态改变
+                        MyLog.e(TAG, "开发者调用导致地图状态改变，mapStatus：" + mapStatus);
+                        break;
+                }
+            }
+
+            /**
+             * 地图状态变化中
+             * @param mapStatus 当前地图状态
+             */
+            @Override
+            public void onMapStatusChange(MapStatus mapStatus) {
+
+            }
+
+            /**
+             * 地图状态改变结束
+             * @param mapStatus 地图状态改变结束后的地图状态
+             */
+            @Override
+            public void onMapStatusChangeFinish(MapStatus mapStatus) {
+                MyLog.e(TAG, "地图状态改变结束，mapStatus：" + mapStatus);
+            }
+        });
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case 1:
-                if (grantResults.length > 0) {
-                    for (int result : grantResults) {
-                        if (result != PackageManager.PERMISSION_GRANTED) {
-                            showToast("必须同意所有权限才能使用本程序!");
-                            return;
-                        }
-                    }
-                    locationClient.start();
-                } else {
-                    showToast("发生未知错误");
-                }
-                break;
-            default:
+    /**
+     * 刷新数据
+     */
+    private void notifyLocation(){
+        MyLog.e(TAG, "当前地址：" + myLocation.getAddrStr());
+        MyLog.e(TAG, "当前国家：" + myLocation.getCountry());
+        MyLog.e(TAG, "当前省份：" + myLocation.getProvince());
+        MyLog.e(TAG, "当前城市：" + myLocation.getCity());
+        MyLog.e(TAG, "当前区县：" + myLocation.getDistrict());
+        MyLog.e(TAG, "当前街道信息：" + myLocation.getStreet());
+        MyLog.e(TAG, "adcode：" + myLocation.getAdCode());
+        MyLog.e(TAG, "当前乡镇信息：" + myLocation.getTown());
+
+        MyLocationData locationData = new MyLocationData.Builder()
+                .accuracy(myLocation.getRadius())
+                .direction(myLocation.getDirection())
+                .latitude(myLocation.getLatitude())
+                .longitude(myLocation.getLongitude())
+                .build();
+        baiduMap.setMyLocationData(locationData);
+        tvRightMeLatitude.setText(decimalFormat.format(myLocation.getLatitude()));
+        tvRightMeLongitude.setText(decimalFormat.format(myLocation.getLongitude()));
+
+        if (isLock || isFirst) {
+            //移动到我的位置
+            isFirst = false;
+            LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+            mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
+            baiduMap.animateMapStatus(mapStatusUpdate);
         }
     }
 
-    @OnClick({R.id.iv_lock,R.id.iv_memu})
+    /**
+     * 权限申请回调
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MAP_PERMISSION) {
+            if (grantResults.length > 0) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[2] == PackageManager.PERMISSION_GRANTED){
+                    init();
+                } else {
+                    showToast("必须同意所有权限才能使用本程序!");
+                }
+            } else {
+                showToast("发生未知错误");
+            }
+        }
+    }
+
+    @OnClick({R.id.iv_my_location,R.id.iv_memu})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.iv_lock:
-                if (!isLock) {
-                    //锁定状态
-                    ivLock.setImageResource(R.mipmap.positioning_select);
-                    //锁定状态不允许平移
-                    uiSettings.setScrollGesturesEnabled(false);
-                    //移动到我的位置
-                    LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-                    mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
-                    baiduMap.animateMapStatus(mapStatusUpdate);
-                    isLock = true;
-                } else {
-                    ivLock.setImageResource(R.mipmap.positioning_unselect);
-                    //解锁后允许平移
-                    uiSettings.setScrollGesturesEnabled(true);
-                    isLock = false;
-                }
+            case R.id.iv_my_location:
+                //锁定状态
+                ivMyLocation.setImageResource(R.mipmap.positioning_select);
+                //移动到我的位置
+                LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+                mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
+                baiduMap.animateMapStatus(mapStatusUpdate);
+                isLock = true;
                 break;
         }
     }
@@ -311,24 +394,10 @@ public class MapFragment extends BaseFragment {
             if (bdLocation == null || mapView == null) {
                 return;
             }
+            MyLog.e(TAG, "Listener纬度：" + bdLocation.getLatitude());
+            MyLog.e(TAG, "Listener经度：" + bdLocation.getLongitude());
             myLocation = bdLocation;
-            locationData = new MyLocationData.Builder()
-                    .accuracy(bdLocation.getRadius())
-                    .direction(bdLocation.getDirection())
-                    .latitude(bdLocation.getLatitude())
-                    .longitude(bdLocation.getLongitude())
-                    .build();
-            baiduMap.setMyLocationData(locationData);
-
-            tvRightMeLatitude.setText(decimalFormat.format(myLocation.getLatitude()));
-            tvRightMeLongitude.setText(decimalFormat.format(myLocation.getLongitude()));
-
-            if (isLock) {
-                //移动到我的位置
-                LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-                mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
-                baiduMap.animateMapStatus(mapStatusUpdate);
-            }
+            notifyLocation();//刷新数据
         }
     }
 
