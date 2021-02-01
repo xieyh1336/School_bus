@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -36,6 +37,7 @@ import com.example.school_bus.MyApp;
 import com.example.school_bus.NetWork.API_login;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.FileUtil;
+import com.example.school_bus.Utils.GlideUtils;
 import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
@@ -113,8 +115,6 @@ public class MapSideFragment extends BaseFragment {
             Glide.with(getContext())
                     .load(ImageUtil.getHeadUrl(MyApp.getHead()))
                     .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .skipMemoryCache(true)
-                    .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .error(R.drawable.ic_header)
                     .into(ivHeader);
         }
@@ -323,6 +323,10 @@ public class MapSideFragment extends BaseFragment {
                                         SharedPreferences.Editor editor = getContext().getSharedPreferences("user", MODE_PRIVATE).edit();
                                         editor.putString("head", userData.getData().getHead());
                                         editor.apply();
+                                        //清除缓存和磁盘
+                                        MyLog.e(TAG, "Glide当前的缓存：" +  GlideUtils.getInstance().getCacheSize(getContext()));
+                                        GlideUtils.getInstance().clearImageAllCache(getContext());
+
                                         Glide.with(getContext())
                                                 .load(ImageUtil.getHeadUrl(userData.getData().getHead()))
                                                 .apply(RequestOptions.bitmapTransform(new CircleCrop()))
@@ -330,7 +334,7 @@ public class MapSideFragment extends BaseFragment {
                                                 .diskCacheStrategy(DiskCacheStrategy.NONE)
                                                 .error(R.drawable.ic_header)
                                                 .into(ivHeader);
-                                        ((MainActivity) getActivity()).updateHead();//更新主页面的头像
+                                        ((MainActivity) getActivity()).updateHead(true);//更新主页面的头像
                                     }
                                 }
                             } else {

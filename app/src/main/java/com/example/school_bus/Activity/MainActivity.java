@@ -89,8 +89,7 @@ public class MainActivity extends BaseActivity {
     }
 
     public void init() {
-        updateHead();
-
+        updateHead(false);
         fragmentList.add(MapFragment.getInstance());
         fragmentList.add(OrderFragment.getInstance());
         fragmentList.add(moreFragment);
@@ -167,15 +166,24 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    public void updateHead(){
+    public void updateHead(boolean isUp){
         MyLog.e(TAG, "MapActivity加载头像");
-        Glide.with(this)
-                .load(ImageUtil.getHeadUrl(MyApp.getHead()))
-                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                .skipMemoryCache(true)
-                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                .error(R.drawable.ic_header)
-                .into(ivHeader);
+        if (isUp){
+            Glide.with(this)
+                    .load(ImageUtil.getHeadUrl(MyApp.getHead()))
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .error(R.drawable.ic_header)
+                    .into(ivHeader);
+        } else {
+            Glide.with(this)
+                    .load(ImageUtil.getHeadUrl(MyApp.getHead()))
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .error(R.drawable.ic_header)
+                    .into(ivHeader);
+        }
+
     }
 
     @Override
