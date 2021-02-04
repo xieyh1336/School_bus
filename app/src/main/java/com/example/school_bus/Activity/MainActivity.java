@@ -13,10 +13,11 @@ import androidx.annotation.Nullable;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.viewpager.widget.ViewPager;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -32,12 +33,12 @@ import com.example.school_bus.MyApp;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
-import com.example.school_bus.View.MyViewPager;
 import com.flyco.tablayout.CommonTabLayout;
 import com.flyco.tablayout.listener.CustomTabEntity;
 import com.flyco.tablayout.listener.OnTabSelectListener;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -59,7 +60,7 @@ public class MainActivity extends BaseActivity {
 
     private static String TAG = "MainActivity";
     @BindView(R.id.vp)
-    MyViewPager vp;
+    ViewPager2 vp;
     @BindView(R.id.tl)
     CommonTabLayout tl;
     @BindView(R.id.iv_header)
@@ -69,15 +70,20 @@ public class MainActivity extends BaseActivity {
     @BindView(R.id.fl_side)
     FrameLayout flSide;
     private boolean isFirst = true;
-    private ArrayList<Fragment> fragmentList = new ArrayList<>();
-    private String[] titles = {"地图", "预约", "更多"};
+    //标题栏
+    private List<String> titles = new ArrayList<>();
     private ArrayList<CustomTabEntity> mTabEntities = new ArrayList<>();
-    private MoreFragment moreFragment = MoreFragment.getInstance();
+    private List<Integer> mIconSelectIds = new ArrayList<>();
+    private List<Integer> mIconUnSelectIds = new ArrayList<>();
+
+    //viewPager
+    private ArrayList<Fragment> fragmentList = new ArrayList<>();
+    private MapFragment mapFragment = MapFragment.newInstance();
+    private OrderFragment orderFragment = OrderFragment.newInstance();
+    private MoreFragment moreFragment = MoreFragment.newInstance();
+
     private long secondBackTime;
-    private int[] mIconUnSelectIds =
-            {R.mipmap.tab_map_unselect, R.mipmap.tab_navigation_unselect, R.mipmap.tab_more_unselect};
-    private int[] mIconSelectIds =
-            {R.mipmap.tab_map_select, R.mipmap.tab_navigation_select, R.mipmap.tab_more_select};
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -90,29 +96,43 @@ public class MainActivity extends BaseActivity {
 
     public void init() {
         updateHead(false);
-        fragmentList.add(MapFragment.getInstance());
-        fragmentList.add(OrderFragment.getInstance());
+
+        fragmentList.add(mapFragment);
+        fragmentList.add(orderFragment);
         fragmentList.add(moreFragment);
 
-        for (int i = 0; i < titles.length; i++) {
-            mTabEntities.add(new TabEntityData(titles[i], mIconSelectIds[i], mIconUnSelectIds[i]));
+        titles.add("地图");
+        titles.add("预约");
+        titles.add("更多");
+
+        mIconSelectIds.add(R.mipmap.tab_map_select);
+        mIconSelectIds.add(R.mipmap.tab_navigation_select);
+        mIconSelectIds.add(R.mipmap.tab_more_select);
+
+        mIconUnSelectIds.add(R.mipmap.tab_map_unselect);
+        mIconUnSelectIds.add(R.mipmap.tab_navigation_unselect);
+        mIconUnSelectIds.add(R.mipmap.tab_more_unselect);
+
+        for (int i = 0; i < titles.size(); i++) {
+            mTabEntities.add(new TabEntityData(titles.get(i), mIconSelectIds.get(i), mIconUnSelectIds.get(i)));
         }
 
-        MyPagerAdapter myPagerAdapter = new MyPagerAdapter(getSupportFragmentManager());
+        //第二个参数懒加载
+        MyPagerAdapter myPagerAdapter = new MyPagerAdapter(this);
         vp.setAdapter(myPagerAdapter);
         vp.setOffscreenPageLimit(3);
-        vp.setStopForViewPager(true);
+        vp.setUserInputEnabled(false);//禁止滑动
         tl.setTabData(mTabEntities);
 
         //添加侧边栏
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(flSide.getId(), MapSideFragment.getInstance());
+        fragmentTransaction.replace(flSide.getId(), MapSideFragment.newInstance());
         fragmentTransaction.commit();
     }
 
     public void setListener() {
-        //相互绑定
+        //tabLayout监听
         tl.setOnTabSelectListener(new OnTabSelectListener() {
             @Override
             public void onTabSelect(int position) {
@@ -124,22 +144,7 @@ public class MainActivity extends BaseActivity {
 
             }
         });
-        vp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
 
-            }
-
-            @Override
-            public void onPageSelected(int position) {
-                tl.setCurrentTab(position);
-            }
-
-            @Override
-            public void onPageScrollStateChanged(int state) {
-
-            }
-        });
         //侧滑菜单监听
         dlMap.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -232,25 +237,21 @@ public class MainActivity extends BaseActivity {
         }
     }
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
-        public MyPagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
+    private class MyPagerAdapter extends FragmentStateAdapter {
 
-        @Override
-        public int getCount() {
-            return fragmentList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return titles[position];
+        public MyPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
+            super(fragmentActivity);
         }
 
         @NonNull
         @Override
-        public Fragment getItem(int position) {
+        public Fragment createFragment(int position) {
             return fragmentList.get(position);
+        }
+
+        @Override
+        public int getItemCount() {
+            return fragmentList.size();
         }
     }
 }

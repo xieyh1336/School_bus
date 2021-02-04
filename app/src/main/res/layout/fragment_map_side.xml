@@ -84,14 +84,12 @@
                 android:text="是否显示坐标"
                 android:layout_centerVertical="true"/>
 
-            <com.example.school_bus.View.SwitchView
+            <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/switch1"
-                android:layout_width="35dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
-                android:layout_marginBottom="10dip"
-                android:layout_centerVertical="true"
-                app:isOpened="true" />
+                android:layout_centerVertical="true"/>
 
         </RelativeLayout>
 

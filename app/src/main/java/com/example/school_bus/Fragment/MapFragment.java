@@ -41,6 +41,7 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
+import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.MyLog;
 
@@ -58,7 +59,7 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Fragment\MapFragment.java
  * 地图页面主页
  */
-public class MapFragment extends BaseFragment {
+public class MapFragment extends ViewPager2LazyLoadFragment {
     private static String TAG = "MapFragment";
     private final static int MAP_PERMISSION = 100;//地图权限申请码
     @BindView(R.id.mapView)
@@ -93,7 +94,7 @@ public class MapFragment extends BaseFragment {
     private MapBroadcast mapBroadcast;//我的广播
     private boolean isFirst = true;//是否第一次进入app
 
-    public static MapFragment getInstance() {
+    public static MapFragment newInstance() {
         return new MapFragment();
     }
 
@@ -115,9 +116,13 @@ public class MapFragment extends BaseFragment {
         //注册广播
         mapBroadcast = new MapBroadcast();
         Objects.requireNonNull(getActivity()).registerReceiver(mapBroadcast, new IntentFilter("Map"));
-
-        requestPermissions();//申请权限
         return view;
+    }
+
+    @Override
+    public void lazyLoad() {
+        MyLog.e(TAG, "MapFragment懒加载");
+        requestPermissions();//申请权限
     }
 
     /**
@@ -195,19 +200,14 @@ public class MapFragment extends BaseFragment {
      */
     public void mapListener() {
         //地图加载完成
-        baiduMap.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
-            @Override
-            public void onMapLoaded() {
-                MyLog.e(TAG, "地图加载完成");
-            }
+        baiduMap.setOnMapLoadedCallback(() -> {
+            //地图加载完成
+            MyLog.e(TAG, "地图加载完成");
         });
         //地图渲染完成回调
-        baiduMap.setOnMapRenderCallbadk(new BaiduMap.OnMapRenderCallback() {
-            @Override
-            public void onMapRenderFinished() {
-                //每次对地图进行操作的时候都会渲染
-                MyLog.e(TAG, "地图渲染完成");
-            }
+        baiduMap.setOnMapRenderCallbadk(() -> {
+            //每次对地图进行操作的时候都会渲染
+            MyLog.e(TAG, "地图渲染完成");
         });
         //地图单击事件
         baiduMap.setOnMapClickListener(new BaiduMap.OnMapClickListener() {
@@ -312,44 +312,30 @@ public class MapFragment extends BaseFragment {
             }
         });
         //地图双击事件
-        baiduMap.setOnMapDoubleClickListener(new BaiduMap.OnMapDoubleClickListener() {
-            @Override
-            public void onMapDoubleClick(LatLng latLng) {
-                MyLog.e(TAG, "双击了地图");
-            }
+        baiduMap.setOnMapDoubleClickListener(latLng -> {
+            //双击了地图
+            MyLog.e(TAG, "双击了地图");
         });
         //地图长按事件
-        baiduMap.setOnMapLongClickListener(new BaiduMap.OnMapLongClickListener() {
-            @Override
-            public void onMapLongClick(LatLng latLng) {
-                MyLog.e(TAG, "长按了地图");
-            }
+        baiduMap.setOnMapLongClickListener(latLng -> {
+            //长按了地图
+            MyLog.e(TAG, "长按了地图");
         });
         //地图Marker覆盖物点击事件
-        baiduMap.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                MyLog.e(TAG, "点击了Marker覆盖物");
-                return false;//是否捕获点击事件，不捕捉则OnMapClickListener捕捉
-            }
+        baiduMap.setOnMarkerClickListener(marker -> {
+            //点击了Marker覆盖物
+            MyLog.e(TAG, "点击了Marker覆盖物");
+            return false;//是否捕获点击事件，不捕捉则OnMapClickListener捕捉
         });
         //地图触摸事件
-        baiduMap.setOnMapTouchListener(new BaiduMap.OnMapTouchListener() {
-            @Override
-            public void onTouch(MotionEvent motionEvent) {
-                MyLog.e(TAG, "触摸了地图");
-            }
+        baiduMap.setOnMapTouchListener(motionEvent -> {
+            //触摸了地图
+            MyLog.e(TAG, "触摸了地图");
         });
         //地图截屏事件
-        baiduMap.snapshot(new BaiduMap.SnapshotReadyCallback() {
-            /**
-             * 地图截屏回调接口
-             * @param bitmap 截屏返回的 bitmap 数据
-             */
-            @Override
-            public void onSnapshotReady(Bitmap bitmap) {
-                MyLog.e(TAG, "地图截屏事件");
-            }
+        baiduMap.snapshot(bitmap -> {
+            //地图截屏事件
+            MyLog.e(TAG, "地图截屏事件");
         });
 
     }
@@ -473,7 +459,7 @@ public class MapFragment extends BaseFragment {
     /**
      * 广播接受处
      */
-    class MapBroadcast extends BroadcastReceiver{
+    private class MapBroadcast extends BroadcastReceiver{
 
         @Override
         public void onReceive(Context context, Intent intent) {

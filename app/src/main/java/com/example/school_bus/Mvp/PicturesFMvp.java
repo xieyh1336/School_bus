@@ -9,14 +9,10 @@ import java.util.List;
 
 public interface PicturesFMvp {
     interface view{
-//        void getPicturesResult(PicturesData data, boolean isLoadMore);
-        void getPicturesResult2(List<Drawable> list, boolean isLoadMore);
-        void onError(Throwable e, String type);
-        void onComplete(String type);
+        void getPicturesResult2(List<Drawable> list);
     }
 
     interface presenter{
-//        void getPictures(String page, String count, boolean isLoadMore);
-        void getPictures2(int count, boolean isLoadMore, Context context);
+        void getPictures2(int count, Context context);
     }
 }

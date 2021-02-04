@@ -6,25 +6,10 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/tv_take_photo"
+        android:id="@+id/tv_save"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:paddingVertical="15dp"
-        android:text="打开相机拍照"
-        android:textColor="@color/black"
-        android:textSize="16sp" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@color/gray"/>
-
-    <TextView
-        android:id="@+id/tv_select_photo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="从相册中选择"
+        android:text="保存图片"
         android:textSize="16sp"
         android:textColor="@color/black"
         android:gravity="center"

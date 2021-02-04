@@ -5,16 +5,18 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
+import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
+import com.example.school_bus.Fragment.More.NewsFragment;
+import com.example.school_bus.Fragment.More.PicturesFragment;
 import com.example.school_bus.R;
-import com.example.school_bus.View.MyViewPager;
+import com.example.school_bus.Utils.MyLog;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
 import com.nightonke.boommenu.BoomButtons.TextInsideCircleButton;
 import com.nightonke.boommenu.BoomMenuButton;
@@ -31,22 +33,22 @@ import butterknife.ButterKnife;
  * @所在包 com\example\school_bus\Fragment\MoreFragment.java
  * 更多页面主页
  */
-public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
+public class MoreFragment extends ViewPager2LazyLoadFragment implements FragmentOnKeyListener {
 
-    //boomMenu
-    private static int imageResourceIndex = 0;
-
+    private static String TAG = "MoreFragment";
     @BindView(R.id.vp)
-    MyViewPager vp;
+    ViewPager2 vp;
     @BindView(R.id.bmb)
     BoomMenuButton bmb;
-    private MyPagerAdapter myPagerAdapter;
-    private ArrayList<Fragment> fragmentList = new ArrayList<>();
+    //boomMenu
     private String[] titles = {"新闻", "美图"};
+    private ArrayList<Fragment> fragmentList = new ArrayList<>();
+    private int irIndex = 0;
+    private int[] imageResources = new int[]{R.drawable.bat, R.drawable.bear};
     private NewsFragment newsFragment = NewsFragment.getInstance();
     private PicturesFragment picturesFragment = PicturesFragment.getInstance();
 
-    public static MoreFragment getInstance(){
+    public static MoreFragment newInstance() {
         return new MoreFragment();
     }
 
@@ -54,9 +56,15 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_more, container, false);
+        ButterKnife.bind(this, view);
         initFragment();
-        initView(view);
+        initView();
         return view;
+    }
+
+    @Override
+    public void lazyLoad() {
+        MyLog.e(TAG, "MoreFragment懒加载");
     }
 
     public void initFragment() {
@@ -64,8 +72,7 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
         fragmentList.add(picturesFragment);
     }
 
-    public void initView(View view) {
-        ButterKnife.bind(this, view);
+    public void initView() {
         //构建BoomMenu
         for (int i = 0; i < bmb.getPiecePlaceEnum().pieceNumber(); i++) {
             TextInsideCircleButton.Builder builder = new TextInsideCircleButton.Builder()
@@ -81,53 +88,43 @@ public class MoreFragment extends BaseFragment implements FragmentOnKeyListener{
             bmb.addBuilder(builder);
         }
         //viewPager
-        myPagerAdapter = new MyPagerAdapter(getChildFragmentManager());
+        MyPagerAdapter myPagerAdapter = new MyPagerAdapter(this);
         vp.setAdapter(myPagerAdapter);
         vp.setOffscreenPageLimit(3);
-        vp.setStopForViewPager(true);
+        vp.setUserInputEnabled(false);//禁止滑动
         //进入默认显示第0个fragment
         vp.setCurrentItem(0);
-
     }
 
-    static int getImageResource() {
-        if (imageResourceIndex >= imageResources.length) imageResourceIndex = 0;
-        return imageResources[imageResourceIndex++];
+    private int getImageResource() {
+        if (irIndex >= imageResources.length) irIndex = 0;
+        return imageResources[irIndex++];
     }
-
-    private static int[] imageResources = new int[]{
-            R.drawable.bat,
-            R.drawable.bear,
-    };
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //监听PicturesFragment的返回键
-        if (keyCode == KeyEvent.KEYCODE_BACK){
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             return picturesFragment != null && ((FragmentOnKeyListener) picturesFragment).onKeyDown(keyCode, event);
         }
         return false;
     }
 
-    private class MyPagerAdapter extends FragmentPagerAdapter {
-        public MyPagerAdapter(FragmentManager fm) {
-            //noinspection deprecation
-            super(fm);
+    private class MyPagerAdapter extends FragmentStateAdapter {
+
+        public MyPagerAdapter(@NonNull Fragment fragment) {
+            super(fragment);
         }
 
+        @NonNull
         @Override
-        public int getCount() {
-            return fragmentList.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return titles[position];
-        }
-
-        @Override
-        public Fragment getItem(int position) {
+        public Fragment createFragment(int position) {
             return fragmentList.get(position);
+        }
+
+        @Override
+        public int getItemCount() {
+            return fragmentList.size();
         }
     }
 }

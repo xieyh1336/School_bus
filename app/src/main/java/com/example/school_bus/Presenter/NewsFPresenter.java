@@ -42,12 +42,12 @@ public class NewsFPresenter implements NewsFMvp.presenter {
 
                     @Override
                     public void onError(Throwable e) {
-                        view.onError(e,"0");
+                        view.onError(e,"getNews");
                     }
 
                     @Override
                     public void onComplete() {
-                        view.onComplete("0");
+                        view.onComplete("getNews");
                     }
                 });
     }

@@ -1,89 +1,98 @@
 package com.example.school_bus.Adapter;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
-import com.chad.library.adapter.base.BaseViewHolder;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.FileUtil;
-import com.github.ybq.android.spinkit.SpinKitView;
-import com.github.ybq.android.spinkit.SpriteFactory;
-import com.github.ybq.android.spinkit.Style;
-import com.github.ybq.android.spinkit.sprite.Sprite;
+import com.example.school_bus.Utils.MyLog;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class PicturesRecyclerviewAdapter extends BaseQuickAdapter<Drawable, BaseViewHolder> {
+/**
+ * @作者 yonghe Xie
+ * @创建/修改日期 2021-02-03 14:17
+ * @类名 PicturesRecyclerviewAdapter
+ * @所在包 com\example\school_bus\Adapter\PicturesRecyclerviewAdapter.java
+ * 更多，美图适配器
+ */
+public class PicturesRecyclerviewAdapter extends RecyclerView.Adapter<PicturesRecyclerviewAdapter.ViewHolder> {
 
     private Context context;
-    private OnItemClickListener listener;
+    private List<Drawable> list = new ArrayList<>();
+    private OnClickListener onClickListener;
 
-    public PicturesRecyclerviewAdapter(int layoutResId, @Nullable List<Drawable> data, Context context) {
-        super(layoutResId, data);
+    public PicturesRecyclerviewAdapter(Context context) {
         this.context = context;
     }
 
+    public void setData(List<Drawable> list) {
+        this.list.clear();
+        this.list.addAll(list);
+        notifyDataSetChanged();
+    }
+
+    public void addData(List<Drawable> list){
+        this.list.addAll(list);
+        notifyDataSetChanged();
+    }
+
+    public List<Drawable> getData() {
+        return list;
+    }
+
+    public void setOnClickListener(OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
+    }
+
+    public interface OnClickListener{
+        void OnClick(int position);
+    }
+
+    @NonNull
     @Override
-    protected void convert(BaseViewHolder helper, Drawable item) {
-        //获取当前item的类型
-        helper.getItemViewType();
-        final int position = helper.getLayoutPosition();
-        ImageView imageView = helper.getView(R.id.imageView);
-        SpinKitView spinKitView = helper.getView(R.id.skv);
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_more_pictures_recyclerview, parent, false);
+        return new ViewHolder(view);
+    }
 
-        Style style = Style.values()[position % 15];
-        Sprite drawable = SpriteFactory.create(style);
-        spinKitView.setIndeterminateDrawable(drawable);
-
-        Bitmap bitmap = FileUtil.drawableToBitmap(item);
-        imageView.setImageBitmap(bitmap);
-//        imageView.setImageDrawable(item);
-        spinKitView.setVisibility(View.GONE);
-//        Glide
-//                .with(context)
-//                .load("https://api.ixiaowai.cn/api/api.php")
-//                .diskCacheStrategy(DiskCacheStrategy.NONE)//关闭磁盘缓存
-//                .skipMemoryCache(true)//跳过内存缓存
-//                .into(new SimpleTarget<GlideDrawable>() {
-//            @Override
-//            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-//                //加载完成后的处理
-//                imageView.setImageDrawable(resource);
-//                spinKitView.setVisibility(View.GONE);
-//            }
-//        });
-        imageView.setOnClickListener(view -> {
-            if (listener != null){
-                listener.OnItemClick(position);
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        Bitmap bitmap = FileUtil.drawableToBitmap(list.get(position));
+        holder.image.setImageBitmap(bitmap);//drawable会造成卡顿，改用bitmap
+        holder.image.setOnClickListener(view -> {
+            if (onClickListener != null){
+                onClickListener.OnClick(position);
             }
         });
-        //测试保存图片
-        imageView.setOnLongClickListener(view -> {
-            Thread thread = new Thread(() -> {
-                FileUtil.SaveBitmapFromView(bitmap, context);
-                Looper.prepare();
-                Toast.makeText(context, "保存成功", Toast.LENGTH_SHORT).show();
-                Looper.loop();
-//                    FileUtil.SaveBitmapFromView(FileUtil.getBitmap(item.getImg(), context), context);
-            });
-            thread.start();
-            return true;
-        });
     }
 
-    public interface OnItemClickListener{
-        void OnItemClick(int position);
+    @Override
+    public int getItemCount() {
+        if (list != null){
+            return list.size();
+        } else {
+            return 0;
+        }
     }
 
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView image;
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            image = itemView.findViewById(R.id.image);
+        }
     }
 }

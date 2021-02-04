@@ -1,4 +1,4 @@
-package com.example.school_bus.Fragment;
+package com.example.school_bus.Fragment.More;
 
 import android.content.Context;
 import android.content.Intent;
@@ -14,16 +14,17 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.school_bus.Activity.WebActivity;
 import com.example.school_bus.Adapter.NewsRecyclerviewAdapter;
 import com.example.school_bus.Entity.NewsData;
+import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
 import com.example.school_bus.Mvp.NewsFMvp;
 import com.example.school_bus.Presenter.NewsFPresenter;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.MyLog;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.api.RefreshLayout;
 import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
@@ -42,7 +43,9 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Fragment\NewsFragment.java
  * 更多页面，新闻分页
  */
-public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
+public class NewsFragment extends ViewPager2LazyLoadFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
+
+    private static String TAG = "NewsFragment";
     @BindView(R.id.bannerView)
     MZBannerView bannerView;
     @BindView(R.id.refresh)
@@ -55,41 +58,67 @@ public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefre
     LinearLayout errorView;
     @BindView(R.id.ll_news)
     LinearLayout llNews;
-    private NewsFPresenter newsFPresenter;
+    private NewsFPresenter newsFPresenter = new NewsFPresenter(this);;
     private NewsRecyclerviewAdapter newsRecyclerviewAdapter;
+    private NewsData bannerData;//轮播图数据
     private int page = 2;
     private boolean isLoadMore = false;
-    private View view;
 
     public static NewsFragment getInstance(){
         return new NewsFragment();
     }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_news, container, false);
-        initView();
-        initData();
+        MyLog.e(TAG, "NewsFragment：onCreateView");
+        View view = inflater.inflate(R.layout.fragment_news, container, false);
+        ButterKnife.bind(this, view);
         return view;
     }
 
-    public void initView() {
-        ButterKnife.bind(this, view);
-        newsFPresenter = new NewsFPresenter(this);
+    @Override
+    public void lazyLoad() {
+        MyLog.e(TAG, "NewsFragment懒加载");
+        init();
+        getData();
+    }
+
+    public void init() {
         refresh.setOnRefreshListener(this);
         refresh.setOnLoadMoreListener(this);
         llNews.setVisibility(View.GONE);
         loadingView.setVisibility(View.VISIBLE);
         errorView.setVisibility(View.GONE);
+
+        newsRecyclerviewAdapter = new NewsRecyclerviewAdapter(getContext());
+        recyclerView.setAdapter(newsRecyclerviewAdapter);
+        newsRecyclerviewAdapter.setOnClickListener(position -> {
+            if (newsRecyclerviewAdapter.getData() != null){
+                Intent intent = new Intent(getContext(), WebActivity.class);
+                intent.putExtra("Url", newsRecyclerviewAdapter.getData().get(position).getPath());
+                startActivity(intent);
+            }
+        });
+
+        //设置轮播图的点击事件
+        bannerView.setBannerPageClickListener((view, position) -> {
+            if (bannerData != null){
+                Intent intent = new Intent(getContext(), WebActivity.class);
+                intent.putExtra("Url", bannerData.getResult().get(position).getPath());
+                startActivity(intent);
+            }
+        });
+        //设置轮播图指示器
+        bannerView.setIndicatorAlign(MZBannerView.IndicatorAlign.RIGHT);
+
         if (getContext() != null){
             //向RecyclerView添加分割线
             recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-            //向RecyclerView设置布局管理器，不添加这句话RecyclerView将显示空白
-            recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
         }
     }
 
-    public void initData() {
+    public void getData() {
         //获取轮播图新闻
         newsFPresenter.getNews("1", "7", false);
         //获取下方新闻，同一个接口同时请求时服务器会繁忙，第二个数据需要延迟请求
@@ -112,59 +141,39 @@ public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefre
 
     @Override
     public void getNewsResult(NewsData data) {
-        //设置轮播图的点击事件
-        bannerView.setBannerPageClickListener((view, position) -> {
-            Intent intent = new Intent(getContext(), WebActivity.class);
-            intent.putExtra("Url", data.getResult().get(position).getPath());
-            startActivity(intent);
-        });
-        //设置轮播图指示器
-        bannerView.setIndicatorAlign(MZBannerView.IndicatorAlign.RIGHT);
         //设置轮播图内容
+        bannerData = data;
         bannerView.setPages(data.getResult(), () -> new ViewPagerHolder());
     }
 
     @Override
     public void getNewsResult2(NewsData data, boolean isLoadMore) {
-        if (newsRecyclerviewAdapter != null) {
-            if (isLoadMore) {
-                newsRecyclerviewAdapter.addData(data.getResult());
-            } else {
-                newsRecyclerviewAdapter.setNewData(data.getResult());
-            }
-            newsRecyclerviewAdapter.notifyDataSetChanged();
-            return;
+        if (isLoadMore) {
+            newsRecyclerviewAdapter.addData(data.getResult());
+        } else {
+            newsRecyclerviewAdapter.setData(data.getResult());
         }
-        newsRecyclerviewAdapter = new NewsRecyclerviewAdapter(R.layout.item_more_news_recyclerview, data.getResult(), getContext());
-        recyclerView.setAdapter(newsRecyclerviewAdapter);
-        newsRecyclerviewAdapter.setOnItemClickListener(position -> {
-            Intent intent = new Intent(getContext(), WebActivity.class);
-            intent.putExtra("Url", data.getResult().get(position).getPath());
-            startActivity(intent);
-        });
     }
 
     @Override
     public void onError(Throwable e, String type) {
-        switch (type) {
-            case "0":
-                llNews.setVisibility(View.GONE);
-                loadingView.setVisibility(View.GONE);
-                errorView.setVisibility(View.VISIBLE);
-                break;
+        if ("getNews".equals(type)) {
+            llNews.setVisibility(View.GONE);
+            loadingView.setVisibility(View.GONE);
+            errorView.setVisibility(View.VISIBLE);
+            refresh.finishLoadMore();
+            refresh.finishRefresh();
         }
     }
 
     @Override
     public void onComplete(String type) {
-        switch (type) {
-            case "0":
-                llNews.setVisibility(View.VISIBLE);
-                loadingView.setVisibility(View.GONE);
-                errorView.setVisibility(View.GONE);
-                refresh.finishLoadMore();
-                refresh.finishRefresh();
-                break;
+        if ("getNews".equals(type)) {
+            llNews.setVisibility(View.VISIBLE);
+            loadingView.setVisibility(View.GONE);
+            errorView.setVisibility(View.GONE);
+            refresh.finishLoadMore();
+            refresh.finishRefresh();
         }
     }
 
@@ -172,7 +181,7 @@ public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefre
     public void onRefresh(@NonNull RefreshLayout refreshLayout) {
         page = 2;
         isLoadMore = false;
-        initData();
+        getData();
     }
 
     @Override
@@ -190,7 +199,7 @@ public class NewsFragment extends BaseFragment implements NewsFMvp.view, OnRefre
                 llNews.setVisibility(View.GONE);
                 loadingView.setVisibility(View.VISIBLE);
                 errorView.setVisibility(View.GONE);
-                initData();
+                getData();
                 break;
         }
     }

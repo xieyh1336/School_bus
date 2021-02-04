@@ -8,11 +8,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -24,6 +22,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -42,7 +41,6 @@ import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
 import com.example.school_bus.View.MyPopupWindow;
-import com.example.school_bus.View.SwitchView;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -83,7 +81,7 @@ public class MapSideFragment extends BaseFragment {
     private final static String IMAGE_FILE_NAME = "headImage.png";
     private final static String SAVE_AVATAR_NAME = "image.png";
     @BindView(R.id.switch1)
-    SwitchView switch1;
+    SwitchCompat switch1;
     @BindView(R.id.ll_login_setting)
     LinearLayout llLoginSetting;
     @BindView(R.id.ll_login_out)
@@ -96,7 +94,7 @@ public class MapSideFragment extends BaseFragment {
     @BindView(R.id.tv_name)
     TextView tvName;
 
-    public static MapSideFragment getInstance() {
+    public static MapSideFragment newInstance() {
         return new MapSideFragment();
     }
 
@@ -119,21 +117,15 @@ public class MapSideFragment extends BaseFragment {
                     .into(ivHeader);
         }
 
-        switch1.toggleSwitch(false);
-        switch1.setColor(Color.parseColor("#FF1878"), Color.parseColor("#FFFFFF"));
-        switch1.setOnStateChangedListener(new SwitchView.OnStateChangedListener() {
-            @Override
-            public void toggleToOn(SwitchView view) {
-                view.toggleSwitch(true);
+        switch1.setChecked(false);
+
+        switch1.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (isChecked){
                 Intent intent = new Intent("Map");
                 intent.putExtra("type", 0);
                 intent.putExtra("state", true);
                 Objects.requireNonNull(getActivity()).sendBroadcast(intent);
-            }
-
-            @Override
-            public void toggleToOff(SwitchView view) {
-                view.toggleSwitch(false);
+            } else {
                 Intent intent = new Intent("Map");
                 intent.putExtra("type", 0);
                 intent.putExtra("state", false);
@@ -378,6 +370,11 @@ public class MapSideFragment extends BaseFragment {
             intent.setData(uri);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
     @OnClick({R.id.ll_login_setting, R.id.ll_login_out, R.id.ll_close, R.id.iv_header})
