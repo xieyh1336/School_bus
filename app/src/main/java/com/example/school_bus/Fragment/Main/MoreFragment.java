@@ -1,4 +1,4 @@
-package com.example.school_bus.Fragment;
+package com.example.school_bus.Fragment.Main;
 
 import android.os.Bundle;
 import android.view.KeyEvent;
@@ -12,9 +12,10 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
-import com.example.school_bus.Fragment.More.NewsFragment;
-import com.example.school_bus.Fragment.More.PicturesFragment;
+import com.example.school_bus.Fragment.FragmentOnKeyListener;
+import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
+import com.example.school_bus.Fragment.Main.More.NewsFragment;
+import com.example.school_bus.Fragment.Main.More.PicturesFragment;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.MyLog;
 import com.nightonke.boommenu.BoomButtons.OnBMClickListener;
@@ -33,7 +34,7 @@ import butterknife.ButterKnife;
  * @所在包 com\example\school_bus\Fragment\MoreFragment.java
  * 更多页面主页
  */
-public class MoreFragment extends ViewPager2LazyLoadFragment implements FragmentOnKeyListener {
+public class MoreFragment extends BaseVp2LazyLoadFragment implements FragmentOnKeyListener {
 
     private static String TAG = "MoreFragment";
     @BindView(R.id.vp)

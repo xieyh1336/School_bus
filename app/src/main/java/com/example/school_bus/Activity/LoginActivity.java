@@ -53,9 +53,8 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
     }
 
     public void init() {
-        loginPresenter = new LoginPresenter(this);
-        //查找是否有存储的账号密码
         Glide.with(this).load(R.drawable.lightning_five_whip).into(ivBackground);
+        //查找是否有存储的账号密码
         SharedPreferences sharedPreferences = getSharedPreferences("user", MODE_PRIVATE);
         etLoginAccount.setText(sharedPreferences.getString("username", ""));
         etLoginPassword.setText(sharedPreferences.getString("password", ""));

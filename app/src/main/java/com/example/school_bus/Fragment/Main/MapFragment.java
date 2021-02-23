@@ -1,4 +1,4 @@
-package com.example.school_bus.Fragment;
+package com.example.school_bus.Fragment.Main;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -6,10 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -35,13 +33,13 @@ import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
-import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
-import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
+import com.example.school_bus.Entity.MapData;
+import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.MyLog;
 
@@ -59,9 +57,9 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Fragment\MapFragment.java
  * 地图页面主页
  */
-public class MapFragment extends ViewPager2LazyLoadFragment {
+public class MapFragment extends BaseVp2LazyLoadFragment {
     private static String TAG = "MapFragment";
-    private final static int MAP_PERMISSION = 100;//地图权限申请码
+    public final static int MAP_PERMISSION = 100;//地图权限申请码
     @BindView(R.id.mapView)
     MapView mapView;
     @BindView(R.id.iv_my_location)
@@ -76,7 +74,7 @@ public class MapFragment extends ViewPager2LazyLoadFragment {
     TextView tvRightMeLatitude;
     @BindView(R.id.tv_right_me_longitude)
     TextView tvRightMeLongitude;
-    @BindView(R.id.iv_memu)
+    @BindView(R.id.ic_menu)
     ImageView ivMemu;
     @BindView(R.id.tv_right_click)
     TextView tvRightClick;
@@ -93,6 +91,7 @@ public class MapFragment extends ViewPager2LazyLoadFragment {
     private DecimalFormat decimalFormat = new DecimalFormat("#.00");//保留小数点后两位
     private MapBroadcast mapBroadcast;//我的广播
     private boolean isFirst = true;//是否第一次进入app
+    private boolean isLoading = true;//地图是否正在加载
 
     public static MapFragment newInstance() {
         return new MapFragment();
@@ -122,6 +121,15 @@ public class MapFragment extends ViewPager2LazyLoadFragment {
     @Override
     public void lazyLoad() {
         MyLog.e(TAG, "MapFragment懒加载");
+        isLoading = true;
+
+        llRight.setVisibility(View.GONE);
+        tvRightClick.setVisibility(View.GONE);
+        tvRightClickLatitude.setVisibility(View.GONE);
+        tvRightClickLongitude.setVisibility(View.GONE);
+        tvRightClickLatitude.setText("0");
+        tvRightClickLongitude.setText("0");
+
         requestPermissions();//申请权限
     }
 
@@ -148,16 +156,10 @@ public class MapFragment extends ViewPager2LazyLoadFragment {
     }
 
     public void init() {
-        llRight.setVisibility(View.GONE);
-        tvRightClick.setVisibility(View.GONE);
-        tvRightClickLatitude.setVisibility(View.GONE);
-        tvRightClickLongitude.setVisibility(View.GONE);
-        tvRightClickLatitude.setText("0");
-        tvRightClickLongitude.setText("0");
-
         //地图有关的初始化
         initMap();
         mapListener();
+        isLoading = false;
     }
 
     public void initMap() {
@@ -352,6 +354,14 @@ public class MapFragment extends ViewPager2LazyLoadFragment {
         MyLog.e(TAG, "当前街道信息：" + myLocation.getStreet());
         MyLog.e(TAG, "adcode：" + myLocation.getAdCode());
         MyLog.e(TAG, "当前乡镇信息：" + myLocation.getTown());
+        MapData.AddrStr = myLocation.getAddrStr();
+        MapData.Country = myLocation.getCountry();
+        MapData.Province = myLocation.getProvince();
+        MapData.City = myLocation.getCity();
+        MapData.District = myLocation.getDistrict();
+        MapData.Street = myLocation.getStreet();
+        MapData.AdCode = myLocation.getAdCode();
+        MapData.Town = myLocation.getTown();
 
         MyLocationData locationData = new MyLocationData.Builder()
                 .accuracy(myLocation.getRadius())
@@ -374,42 +384,25 @@ public class MapFragment extends ViewPager2LazyLoadFragment {
         }
     }
 
-    /**
-     * 权限申请回调
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == MAP_PERMISSION) {
-            if (grantResults.length > 0) {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
-                        && grantResults[2] == PackageManager.PERMISSION_GRANTED){
-                    init();
-                } else {
-                    showToast("必须同意所有权限才能使用本程序!");
-                }
-            } else {
-                showToast("发生未知错误");
-            }
-        }
-    }
-
-    @OnClick({R.id.iv_my_location,R.id.iv_memu})
+    @OnClick({R.id.iv_my_location,R.id.ic_menu})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_my_location:
-                //移动到我的位置
-                LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
-                mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
-                baiduMap.animateMapStatus(mapStatusUpdate);
-                if (!isLock){
-                    //锁定状态
-                    ivMyLocation.setImageResource(R.mipmap.positioning_select);
-                    isLock = true;
+                if (!isLoading){
+                    //移动到我的位置
+                    LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
+                    mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
+                    baiduMap.animateMapStatus(mapStatusUpdate);
+                    if (!isLock){
+                        //锁定状态
+                        ivMyLocation.setImageResource(R.mipmap.positioning_select);
+                        isLock = true;
+                    } else {
+                        ivMyLocation.setImageResource(R.mipmap.positioning_unselect);
+                        isLock = false;
+                    }
                 } else {
-                    ivMyLocation.setImageResource(R.mipmap.positioning_unselect);
-                    isLock = false;
+                    showToast("地图正在加载");
                 }
                 break;
         }
@@ -434,8 +427,9 @@ public class MapFragment extends ViewPager2LazyLoadFragment {
         if (mapBroadcast != null && getActivity() != null){
             getActivity().unregisterReceiver(mapBroadcast);
         }
-
-        locationClient.stop();
+        if (locationClient != null){
+            locationClient.stop();
+        }
         mapView.onDestroy();
         baiduMap.setMyLocationEnabled(false);
     }

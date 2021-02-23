@@ -1,4 +1,4 @@
-package com.example.school_bus.Fragment;
+package com.example.school_bus.Fragment.Main;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -8,13 +8,13 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
+import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Utils.MyLog;
 
 /**
  * 预约界面
  */
-public class OrderFragment extends ViewPager2LazyLoadFragment {
+public class OrderFragment extends BaseVp2LazyLoadFragment {
 
     private static String TAG = "OrderFragment";
 

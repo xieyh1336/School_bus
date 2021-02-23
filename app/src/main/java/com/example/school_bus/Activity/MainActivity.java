@@ -1,12 +1,15 @@
 package com.example.school_bus.Activity;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,22 +26,17 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.school_bus.Entity.TabEntityData;
 import com.example.school_bus.Fragment.FragmentOnKeyListener;
-import com.example.school_bus.Fragment.MapFragment;
-import com.example.school_bus.Fragment.MapSideFragment;
-import com.example.school_bus.Fragment.MoreFragment;
-import com.example.school_bus.Fragment.OrderFragment;
+import com.example.school_bus.Fragment.Main.MapFragment;
+import com.example.school_bus.Fragment.Main.MapSideFragment;
+import com.example.school_bus.Fragment.MainFragment;
+import com.example.school_bus.Fragment.OfflineMapFragment;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
-import com.flyco.tablayout.CommonTabLayout;
-import com.flyco.tablayout.listener.CustomTabEntity;
-import com.flyco.tablayout.listener.OnTabSelectListener;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -51,9 +49,6 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Activity\MainActivity.java
  * 主页面
  * fragment：
- * {@link MapFragment}第一页，地图
- * {@link OrderFragment}第二页，导航
- * {@link MoreFragment}第三页，更多
  * 侧边栏：{@link MapSideFragment}
  */
 public class MainActivity extends BaseActivity {
@@ -61,29 +56,28 @@ public class MainActivity extends BaseActivity {
     private static String TAG = "MainActivity";
     @BindView(R.id.vp)
     ViewPager2 vp;
-    @BindView(R.id.tl)
-    CommonTabLayout tl;
     @BindView(R.id.iv_header)
     ImageView ivHeader;
     @BindView(R.id.dl_map)
     DrawerLayout dlMap;
     @BindView(R.id.fl_side)
     FrameLayout flSide;
+    @BindView(R.id.ll_top)
+    LinearLayout llTop;
+    @BindView(R.id.iv_header2)
+    ImageView ivHeader2;
+    @BindView(R.id.tv_header)
+    TextView tvHeader;
     private boolean isFirst = true;
-    //标题栏
-    private List<String> titles = new ArrayList<>();
-    private ArrayList<CustomTabEntity> mTabEntities = new ArrayList<>();
-    private List<Integer> mIconSelectIds = new ArrayList<>();
-    private List<Integer> mIconUnSelectIds = new ArrayList<>();
 
     //viewPager
-    private ArrayList<Fragment> fragmentList = new ArrayList<>();
-    private MapFragment mapFragment = MapFragment.newInstance();
-    private OrderFragment orderFragment = OrderFragment.newInstance();
-    private MoreFragment moreFragment = MoreFragment.newInstance();
+    public ArrayList<Fragment> fragmentList = new ArrayList<>();
+    public MapSideFragment mapSideFragment = MapSideFragment.newInstance();//侧边栏
+
+    public MainFragment mainFragment = MainFragment.newInstance();//首页fragment
+    public OfflineMapFragment offlineMapFragment = OfflineMapFragment.newInstance();//离线地图
 
     private long secondBackTime;
-
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -97,54 +91,27 @@ public class MainActivity extends BaseActivity {
     public void init() {
         updateHead(false);
 
-        fragmentList.add(mapFragment);
-        fragmentList.add(orderFragment);
-        fragmentList.add(moreFragment);
+        fragmentList.add(mainFragment);
+        fragmentList.add(offlineMapFragment);
 
-        titles.add("地图");
-        titles.add("预约");
-        titles.add("更多");
-
-        mIconSelectIds.add(R.mipmap.tab_map_select);
-        mIconSelectIds.add(R.mipmap.tab_navigation_select);
-        mIconSelectIds.add(R.mipmap.tab_more_select);
-
-        mIconUnSelectIds.add(R.mipmap.tab_map_unselect);
-        mIconUnSelectIds.add(R.mipmap.tab_navigation_unselect);
-        mIconUnSelectIds.add(R.mipmap.tab_more_unselect);
-
-        for (int i = 0; i < titles.size(); i++) {
-            mTabEntities.add(new TabEntityData(titles.get(i), mIconSelectIds.get(i), mIconUnSelectIds.get(i)));
-        }
+        ivHeader.setVisibility(View.VISIBLE);
+        ivHeader2.setVisibility(View.GONE);
+        tvHeader.setVisibility(View.GONE);
 
         //第二个参数懒加载
         MyPagerAdapter myPagerAdapter = new MyPagerAdapter(this);
         vp.setAdapter(myPagerAdapter);
-        vp.setOffscreenPageLimit(3);
+        vp.setOffscreenPageLimit(fragmentList.size());
         vp.setUserInputEnabled(false);//禁止滑动
-        tl.setTabData(mTabEntities);
 
         //添加侧边栏
         FragmentManager fragmentManager = getSupportFragmentManager();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(flSide.getId(), MapSideFragment.newInstance());
+        fragmentTransaction.replace(flSide.getId(), mapSideFragment);
         fragmentTransaction.commit();
     }
 
     public void setListener() {
-        //tabLayout监听
-        tl.setOnTabSelectListener(new OnTabSelectListener() {
-            @Override
-            public void onTabSelect(int position) {
-                vp.setCurrentItem(position);
-            }
-
-            @Override
-            public void onTabReselect(int position) {
-
-            }
-        });
-
         //侧滑菜单监听
         dlMap.addDrawerListener(new DrawerLayout.DrawerListener() {
             @Override
@@ -171,9 +138,49 @@ public class MainActivity extends BaseActivity {
         });
     }
 
-    public void updateHead(boolean isUp){
+    /**
+     * 选择页面
+     *
+     * @param i 页码
+     */
+    public void selectPager(int i) {
+        vp.setCurrentItem(i, false);
+        if (i == 0){
+            ivHeader.setVisibility(View.VISIBLE);
+            ivHeader2.setVisibility(View.GONE);
+            tvHeader.setVisibility(View.GONE);
+        } else if (i == 1){
+            ivHeader.setVisibility(View.GONE);
+            ivHeader2.setVisibility(View.VISIBLE);
+            tvHeader.setVisibility(View.VISIBLE);
+            tvHeader.setText("离线地图");
+        }
+    }
+
+    /**
+     * 获取当前页面
+     *
+     * @return 页码
+     */
+    public int getCurrentPager() {
+        return vp.getCurrentItem();
+    }
+
+    /**
+     * 关闭侧滑菜单
+     */
+    public void closeSideView() {
+        dlMap.closeDrawer(GravityCompat.START);
+    }
+
+    /**
+     * 加载头像
+     *
+     * @param isUp 是否更新了头像
+     */
+    public void updateHead(boolean isUp) {
         MyLog.e(TAG, "MapActivity加载头像");
-        if (isUp){
+        if (isUp) {
             Glide.with(this)
                     .load(ImageUtil.getHeadUrl(MyApp.getHead()))
                     .apply(RequestOptions.bitmapTransform(new CircleCrop()))
@@ -181,6 +188,7 @@ public class MainActivity extends BaseActivity {
                     .diskCacheStrategy(DiskCacheStrategy.NONE)
                     .error(R.drawable.ic_header)
                     .into(ivHeader);
+            mapSideFragment.updateHead();
         } else {
             Glide.with(this)
                     .load(ImageUtil.getHeadUrl(MyApp.getHead()))
@@ -195,19 +203,19 @@ public class MainActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         new Handler().postDelayed(() -> {
-            if (isFirst){
+            if (isFirst) {
                 showToast("欢迎您 " + MyApp.getUserName());
                 isFirst = false;
             }
         }, 2000);
-
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         //监听MoreFragment的返回键
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (moreFragment != null && ((FragmentOnKeyListener) moreFragment).onKeyDown(keyCode, event)) {
+            if (mainFragment != null && ((FragmentOnKeyListener) mainFragment).onKeyDown(keyCode, event)) {
+                //fragment监听了，则不往下传递事件
                 return true;
             }
         }
@@ -217,23 +225,59 @@ public class MainActivity extends BaseActivity {
     @Override
     public void onBackPressed() {
         long firstBackTime = System.currentTimeMillis();
-        if (firstBackTime - secondBackTime > 2000){
-            showToast("再按一次返回桌面");
-            secondBackTime = firstBackTime;
-        }else {
-            //返回桌面
-            Intent home = new Intent(Intent.ACTION_MAIN);
-            home.addCategory(Intent.CATEGORY_HOME);
-            startActivity(home);
+        if (dlMap.isDrawerOpen(GravityCompat.START)) {
+            //如果侧边栏打开的时候，先收起侧边栏
+            closeSideView();
+        } else {
+            if (getCurrentPager() == 0) {
+                if (firstBackTime - secondBackTime > 2000) {
+                    showToast("再按一次返回桌面");
+                    secondBackTime = firstBackTime;
+                } else {
+                    //返回桌面
+                    Intent home = new Intent(Intent.ACTION_MAIN);
+                    home.addCategory(Intent.CATEGORY_HOME);
+                    startActivity(home);
+                }
+            } else {
+                selectPager(0);
+            }
         }
     }
 
-    @OnClick({R.id.iv_header})
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
+
+    @OnClick({R.id.ll_top})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.iv_header:
+            case R.id.ll_top:
                 dlMap.openDrawer(GravityCompat.START);
                 break;
+        }
+    }
+
+    /**
+     * 权限申请回调
+     */
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == MapFragment.MAP_PERMISSION) {
+            if (grantResults.length > 0) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                    MyLog.e(TAG, "所有权限已同意");
+                    mainFragment.mapFragment.init();
+                } else {
+                    showToast("必须同意所有权限才能使用本程序!");
+                }
+            } else {
+                showToast("发生未知错误");
+            }
         }
     }
 

@@ -31,10 +31,10 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         //防止内存泄漏框架
-        if (LeakCanary.isInAnalyzerProcess(this)){
-            return;
-        }
-        LeakCanary.install(this);
+//        if (LeakCanary.isInAnalyzerProcess(this)){
+//            return;
+//        }
+//        LeakCanary.install(this);
 
         context = getApplicationContext();
         preferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);

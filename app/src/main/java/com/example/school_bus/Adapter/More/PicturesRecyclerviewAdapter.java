@@ -1,22 +1,18 @@
-package com.example.school_bus.Adapter;
+package com.example.school_bus.Adapter.More;
 
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.FileUtil;
-import com.example.school_bus.Utils.MyLog;
 
 import java.util.ArrayList;
 import java.util.List;

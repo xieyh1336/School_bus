@@ -1,4 +1,4 @@
-package com.example.school_bus.Fragment;
+package com.example.school_bus.Fragment.Main;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
@@ -11,6 +11,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.view.LayoutInflater;
@@ -22,7 +23,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -32,9 +32,11 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.example.school_bus.Activity.MainActivity;
 import com.example.school_bus.Entity.UserData;
+import com.example.school_bus.Fragment.BaseFragment;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.NetWork.API_login;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.BroadcastUtils;
 import com.example.school_bus.Utils.FileUtil;
 import com.example.school_bus.Utils.GlideUtils;
 import com.example.school_bus.Utils.HttpUtil;
@@ -47,6 +49,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -80,8 +84,6 @@ public class MapSideFragment extends BaseFragment {
     private final static int TAILOR_REQUEST_CODE = 300;//图片剪裁code
     private final static String IMAGE_FILE_NAME = "headImage.png";
     private final static String SAVE_AVATAR_NAME = "image.png";
-    @BindView(R.id.switch1)
-    SwitchCompat switch1;
     @BindView(R.id.ll_login_setting)
     LinearLayout llLoginSetting;
     @BindView(R.id.ll_login_out)
@@ -93,6 +95,21 @@ public class MapSideFragment extends BaseFragment {
     MyPopupWindow myPopupWindow;//自定义弹窗
     @BindView(R.id.tv_name)
     TextView tvName;
+    @BindView(R.id.ll_main)
+    LinearLayout llMain;
+    @BindView(R.id.ll_offline_map)
+    LinearLayout llOfflineMap;
+    @BindView(R.id.iv_main)
+    ImageView ivMain;
+    @BindView(R.id.tv_main)
+    TextView tvMain;
+    @BindView(R.id.iv_offline_map)
+    ImageView ivOfflineMap;
+    @BindView(R.id.tv_offline_map)
+    TextView tvOfflineMap;
+    private List<LinearLayout> linearLayouts = new ArrayList<>();
+    private List<TextView> textViews = new ArrayList<>();
+    private List<ImageView> imageViews = new ArrayList<>();
 
     public static MapSideFragment newInstance() {
         return new MapSideFragment();
@@ -109,29 +126,48 @@ public class MapSideFragment extends BaseFragment {
 
     @SuppressLint("SetTextI18n")
     private void init() {
-        if (getContext() != null){
+        //加载头像
+        if (getContext() != null) {
             Glide.with(getContext())
                     .load(ImageUtil.getHeadUrl(MyApp.getHead()))
                     .apply(RequestOptions.bitmapTransform(new CircleCrop()))
                     .error(R.drawable.ic_header)
                     .into(ivHeader);
         }
+        //加载用户名
+        tvName.setText(MyApp.getUserName());
 
-        switch1.setChecked(false);
+        //加载列表选项样式
+        linearLayouts.add(llMain);
+        linearLayouts.add(llOfflineMap);
 
-        switch1.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked){
-                Intent intent = new Intent("Map");
-                intent.putExtra("type", 0);
-                intent.putExtra("state", true);
-                Objects.requireNonNull(getActivity()).sendBroadcast(intent);
-            } else {
-                Intent intent = new Intent("Map");
-                intent.putExtra("type", 0);
-                intent.putExtra("state", false);
-                Objects.requireNonNull(getActivity()).sendBroadcast(intent);
+        textViews.add(tvMain);
+        textViews.add(tvOfflineMap);
+
+        imageViews.add(ivMain);
+        imageViews.add(ivOfflineMap);
+        initList();
+    }
+
+    /**
+     * 加载列表选项
+     */
+    public void initList() {
+        if (getActivity() != null && getContext() != null){
+            for (int i = 0; i < ((MainActivity) getActivity()).fragmentList.size(); i++){
+                if (((MainActivity) getActivity()).getCurrentPager() == i){
+                    //当前页
+                    linearLayouts.get(i).setBackgroundColor(getContext().getResources().getColor(R.color.gray));
+                    textViews.get(i).setTextColor(getContext().getResources().getColor(R.color.theme));
+                    imageViews.get(i).setImageResource(R.drawable.ic_home_blue);
+                } else {
+                    //其他页
+                    linearLayouts.get(i).setBackgroundColor(getContext().getResources().getColor(R.color.white));
+                    textViews.get(i).setTextColor(getContext().getResources().getColor(R.color.text_black));
+                    imageViews.get(i).setImageResource(R.drawable.ic_download);
+                }
             }
-        });
+        }
     }
 
     /**
@@ -248,7 +284,9 @@ public class MapSideFragment extends BaseFragment {
             mPhoto = extras.getParcelable("data");
         } else {
             try {
-                mPhoto = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(Objects.requireNonNull(data.getData())));
+                if (getContext() != null){
+                    mPhoto = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(Objects.requireNonNull(data.getData())));
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
@@ -315,18 +353,8 @@ public class MapSideFragment extends BaseFragment {
                                         SharedPreferences.Editor editor = getContext().getSharedPreferences("user", MODE_PRIVATE).edit();
                                         editor.putString("head", userData.getData().getHead());
                                         editor.apply();
-                                        //清除缓存和磁盘
-                                        MyLog.e(TAG, "Glide当前的缓存：" +  GlideUtils.getInstance().getCacheSize(getContext()));
-                                        GlideUtils.getInstance().clearImageAllCache(getContext());
-
-                                        Glide.with(getContext())
-                                                .load(ImageUtil.getHeadUrl(userData.getData().getHead()))
-                                                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                                                .skipMemoryCache(true)
-                                                .diskCacheStrategy(DiskCacheStrategy.NONE)
-                                                .error(R.drawable.ic_header)
-                                                .into(ivHeader);
-                                        ((MainActivity) getActivity()).updateHead(true);//更新主页面的头像
+                                        //更新头像
+                                        ((MainActivity) getActivity()).updateHead(true);
                                     }
                                 }
                             } else {
@@ -345,6 +373,25 @@ public class MapSideFragment extends BaseFragment {
 
                         }
                     });
+        }
+    }
+
+    /**
+     * 更新头像
+     */
+    public void updateHead(){
+        if (getContext() != null){
+            //清除缓存和磁盘
+            MyLog.e(TAG, "Glide当前的缓存：" + GlideUtils.getInstance().getCacheSize(getContext()));
+            GlideUtils.getInstance().clearImageAllCache(getContext());
+
+            Glide.with(getContext())
+                    .load(ImageUtil.getHeadUrl(MyApp.getHead()))
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .error(R.drawable.ic_header)
+                    .into(ivHeader);
         }
     }
 
@@ -377,18 +424,43 @@ public class MapSideFragment extends BaseFragment {
         super.onDestroy();
     }
 
-    @OnClick({R.id.ll_login_setting, R.id.ll_login_out, R.id.ll_close, R.id.iv_header})
+    @OnClick({R.id.ll_login_setting, R.id.ll_login_out, R.id.ll_close, R.id.iv_header, R.id.ll_main, R.id.ll_offline_map})
     public void onViewClicked(View view) {
         switch (view.getId()) {
+            case R.id.ll_main:
+                //点击首页
+                if (getActivity() != null){
+                    ((MainActivity) getActivity()).closeSideView();//关闭侧边栏
+                    new Handler().postDelayed(() -> {
+                        ((MainActivity) getActivity()).selectPager(0);//选择首页分页
+                    }, 200);
+                }
+                break;
+            case R.id.ll_offline_map:
+                //点击离线地图
+                if (getActivity() != null){
+                    ((MainActivity) getActivity()).closeSideView();//关闭侧边栏
+                    new Handler().postDelayed(() -> {
+                        ((MainActivity) getActivity()).selectPager(1);//选择离线地图分页
+                    }, 200);
+                }
+                break;
             case R.id.ll_login_setting:
+                //设置
                 break;
             case R.id.ll_login_out:
+                //登出
                 MyApp.clearToken();
                 startLogin();
-                Objects.requireNonNull(getActivity()).finish();
+                if (getContext() != null) {
+                    BroadcastUtils.sendFinishActivityBroadcast(getContext());
+                }
                 break;
             case R.id.ll_close:
-                Objects.requireNonNull(getActivity()).finish();
+                //关闭app
+                if (getContext() != null) {
+                    BroadcastUtils.sendFinishActivityBroadcast(getContext());
+                }
                 break;
             case R.id.iv_header:
                 //更换头像，选择图片

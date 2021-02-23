@@ -1,4 +1,4 @@
-package com.example.school_bus.Fragment.More;
+package com.example.school_bus.Fragment.Main.More;
 
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
@@ -8,17 +8,15 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.school_bus.Adapter.PicturesRecyclerviewAdapter;
+import com.example.school_bus.Adapter.More.PicturesRecyclerviewAdapter;
 import com.example.school_bus.Fragment.FragmentOnKeyListener;
-import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
+import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Mvp.PicturesFMvp;
 import com.example.school_bus.Presenter.PicturesFPresenter;
 import com.example.school_bus.R;
@@ -37,7 +35,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import indi.liyi.viewer.ImageViewer;
-import indi.liyi.viewer.listener.OnItemLongPressListener;
 
 /**
  * @作者 yonghe Xie
@@ -46,7 +43,7 @@ import indi.liyi.viewer.listener.OnItemLongPressListener;
  * @所在包 com\example\school_bus\Fragment\PicturesFragment.java
  * 更多页面，图片分页
  */
-public class PicturesFragment extends ViewPager2LazyLoadFragment implements PicturesFMvp.view, OnRefreshListener, OnLoadMoreListener, FragmentOnKeyListener {
+public class PicturesFragment extends BaseVp2LazyLoadFragment implements PicturesFMvp.view, OnRefreshListener, OnLoadMoreListener, FragmentOnKeyListener {
 
     private static String TAG = "PicturesFragment";
     @BindView(R.id.rv)
@@ -93,33 +90,28 @@ public class PicturesFragment extends ViewPager2LazyLoadFragment implements Pict
         picturesRecyclerviewAdapter = new PicturesRecyclerviewAdapter(getContext());
         rv.setAdapter(picturesRecyclerviewAdapter);
 
-        iv.setOnItemLongPressListener(new OnItemLongPressListener() {
-            @Override
-            public boolean onItemLongPress(int position, ImageView imageView) {
-                if (myPopupWindow == null){
-                    myPopupWindow = new MyPopupWindow(getContext());
-                }
-                myPopupWindow.showPicture();
-                myPopupWindow.setOnClickListener(new MyPopupWindow.OnClickListener() {
-                    @Override
-                    public void onClick(String type) {
-                        switch (type){
-                            case MyPopupWindow.SAVE_PICTURE:
-                                //保存照片
-                                Bitmap bitmap = FileUtil.drawableToBitmap(imageView.getDrawable());
-                                Thread thread = new Thread(() -> {
-                                    FileUtil.SaveBitmapFromView(bitmap, getContext());
-                                    Looper.prepare();
-                                    showToast("保存成功");
-                                    Looper.loop();
-                                });
-                                thread.start();
-                                break;
-                        }
-                    }
-                });
-                return true;
+        //长按弹出菜单
+        iv.setOnItemLongPressListener((position, imageView) -> {
+            if (myPopupWindow == null){
+                myPopupWindow = new MyPopupWindow(getContext());
             }
+            myPopupWindow.showPicture();
+            myPopupWindow.setOnClickListener(type -> {
+                switch (type){
+                    case MyPopupWindow.SAVE_PICTURE:
+                        //保存照片
+                        Bitmap bitmap = FileUtil.drawableToBitmap(imageView.getDrawable());
+                        Thread thread = new Thread(() -> {
+                            FileUtil.SaveBitmapFromView(bitmap, getContext());
+                            Looper.prepare();
+                            showToast("保存成功");
+                            Looper.loop();
+                        });
+                        thread.start();
+                        break;
+                }
+            });
+            return true;
         });
         getData();
     }

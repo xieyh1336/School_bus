@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tl="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:fitsSystemWindows="true">
 
     <androidx.drawerlayout.widget.DrawerLayout
@@ -22,33 +23,44 @@
                 android:background="#1878FF"
                 android:gravity="center_vertical">
 
-                <ImageView
-                    android:id="@+id/iv_header"
-                    android:layout_width="60dp"
-                    android:layout_height="60dp"
-                    android:padding="10dp"
-                    android:src="@drawable/ic_header"/>
+                <LinearLayout
+                    android:id="@+id/ll_top"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <ImageView
+                        android:id="@+id/iv_header"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:padding="10dp"
+                        android:src="@drawable/ic_header"/>
+
+                    <ImageView
+                        android:id="@+id/iv_header2"
+                        android:layout_width="20dp"
+                        android:layout_height="60dp"
+                        android:paddingVertical="20dp"
+                        android:paddingLeft="-20dp"
+                        android:src="@mipmap/ic_menu_white"/>
+
+                    <TextView
+                        android:id="@+id/tv_header"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="离线地图"
+                        android:textSize="18sp"
+                        android:textColor="@color/white"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/vp"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"/>
-
-            <com.flyco.tablayout.CommonTabLayout
-                android:id="@+id/tl"
-                android:layout_width="match_parent"
-                android:layout_height="54dp"
-                android:background="#ffffff"
-                tl:tl_iconHeight="23dp"
-                tl:tl_iconWidth="23dp"
-                tl:tl_indicator_color="#1296DB"
-                tl:tl_indicator_width="30dp"
-                tl:tl_textSelectColor="#2C97DE"
-                tl:tl_textUnselectColor="#66000000"
-                tl:tl_textsize="12sp"/>
+                android:layout_height="match_parent"/>
 
         </LinearLayout>
 

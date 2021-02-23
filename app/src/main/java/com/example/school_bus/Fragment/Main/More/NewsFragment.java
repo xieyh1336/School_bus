@@ -1,4 +1,4 @@
-package com.example.school_bus.Fragment.More;
+package com.example.school_bus.Fragment.Main.More;
 
 import android.content.Context;
 import android.content.Intent;
@@ -18,9 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.school_bus.Activity.WebActivity;
-import com.example.school_bus.Adapter.NewsRecyclerviewAdapter;
+import com.example.school_bus.Adapter.More.NewsRecyclerviewAdapter;
 import com.example.school_bus.Entity.NewsData;
-import com.example.school_bus.Fragment.LazyLoad.ViewPager2LazyLoadFragment;
+import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Mvp.NewsFMvp;
 import com.example.school_bus.Presenter.NewsFPresenter;
 import com.example.school_bus.R;
@@ -43,7 +43,7 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Fragment\NewsFragment.java
  * 更多页面，新闻分页
  */
-public class NewsFragment extends ViewPager2LazyLoadFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
+public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
 
     private static String TAG = "NewsFragment";
     @BindView(R.id.bannerView)

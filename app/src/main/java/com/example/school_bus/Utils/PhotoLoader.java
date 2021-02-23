@@ -18,36 +18,27 @@ public class PhotoLoader extends ImageLoader {
     public void displayImage(final Object src, ImageView imageView, final LoadCallback callback) {
         Glide.with(imageView.getContext())
                 .load(src)
-//                .into(imageView);
                 .into(new CustomViewTarget<ImageView, Drawable>(imageView) {
-
                     @Override
                     protected void onResourceLoading(@Nullable Drawable placeholder) {
                         super.onResourceLoading(placeholder);
-//                        ProgressController.registerListener(src, new OnProgressListener() {
-//                            @Override
-//                            public void onProgress(float progress, long totalSize) {
-//                                callback.onLoading(progress);
-//                            }
-//                        });
-                        if(callback!=null){
+                        if(callback != null){
                             callback.onLoadStarted(placeholder);
                         }
                     }
 
                     @Override
                     public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-                        if(callback!=null) {
+                        if(callback != null) {
                             callback.onLoadSucceed(resource);
                         }
                     }
 
                     @Override
                     public void onLoadFailed(@Nullable Drawable errorDrawable) {
-                        if(callback!=null) {
+                        if(callback != null) {
                             callback.onLoadFailed(errorDrawable);
                         }
-//                        ProgressController.unregisterListener(src);
                     }
 
                     @Override
