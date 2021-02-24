@@ -1,6 +1,7 @@
 package com.example.school_bus.Fragment.OfflineMap;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -35,6 +36,7 @@ public class OfflineMapListFragment extends BaseVp2LazyLoadFragment {
     EditText etSearch;
     @BindView(R.id.rv_list)
     RecyclerView rvList;
+    private boolean isClick = false;//用于防止recyclerView实时刷新无法点击
 
     public static OfflineMapListFragment newInstance() {
         return new OfflineMapListFragment();
@@ -55,6 +57,8 @@ public class OfflineMapListFragment extends BaseVp2LazyLoadFragment {
             MyLog.e(TAG, "加载所有离线地图列表数据");
             OfflineMapList1Adapter offlineMapList1Adapter = new OfflineMapList1Adapter(getContext());
             rvList.setAdapter(offlineMapList1Adapter);
+            rvList.setHasFixedSize(true);
+            rvList.setItemViewCacheSize(60);
             offlineMapList1Adapter.setData(mkOfflineMap);
 
             ((MainActivity) getActivity()).offlineMapFragment.setOfflineListener(new OfflineMapFragment.OfflineListener() {
@@ -68,22 +72,23 @@ public class OfflineMapListFragment extends BaseVp2LazyLoadFragment {
                     // state - 事件状态:
                     // 当type为TYPE_NEW_OFFLINE时，表示新安装的离线地图数目.
                     // 当type为TYPE_DOWNLOAD_UPDATE时，表示更新的城市ID.
-                    MyLog.e(TAG, "离线地图：");
-                    MyLog.e(TAG, "type：" + type);
-                    MyLog.e(TAG, "state：" + state);
+                    if (!isClick){
+                        offlineMapList1Adapter.notifyDataSetChanged();
+                    }
                 }
             });
-            rvList.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+            //防止刷新和点击冲突
+            offlineMapList1Adapter.setCallback(new OfflineMapList1Adapter.Callback() {
                 @Override
-                public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
-                    return false;
-                }
-
-                @Override
-                public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                public boolean rv2Listener(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                    MyLog.e(TAG, "onInterceptTouchEvent");
                     switch (e.getAction()){
                         case MotionEvent.ACTION_DOWN:
                             MyLog.e(TAG, "DOWN");
+                            isClick = true;
+                            new Handler().postDelayed(() -> {
+                                isClick = false;
+                            }, 500);
                             break;
                         case MotionEvent.ACTION_MOVE:
                             MyLog.e(TAG, "MOVE");
@@ -95,6 +100,45 @@ public class OfflineMapListFragment extends BaseVp2LazyLoadFragment {
                             MyLog.e(TAG, "CANCEL");
                             break;
                     }
+                    return false;
+                }
+
+                @Override
+                public void scrollPosition(int position) {
+                    MyLog.e(TAG, "滑动到当前位置");
+                    rvList.scrollToPosition(position);
+                }
+            });
+            //防止刷新和点击冲突
+            rvList.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+                @Override
+                public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                    MyLog.e(TAG, "onInterceptTouchEvent");
+                    switch (e.getAction()){
+                        case MotionEvent.ACTION_DOWN:
+                            MyLog.e(TAG, "DOWN");
+                            isClick = true;
+                            new Handler().postDelayed(() -> {
+                                isClick = false;
+                                offlineMapList1Adapter.notifyDataSetChanged();
+                            }, 500);
+                            break;
+                        case MotionEvent.ACTION_MOVE:
+                            MyLog.e(TAG, "MOVE");
+                            break;
+                        case MotionEvent.ACTION_UP:
+                            MyLog.e(TAG, "UP");
+                            break;
+                        case MotionEvent.ACTION_CANCEL:
+                            MyLog.e(TAG, "CANCEL");
+                            break;
+                    }
+                    return false;
+                }
+
+                @Override
+                public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+
                 }
 
                 @Override

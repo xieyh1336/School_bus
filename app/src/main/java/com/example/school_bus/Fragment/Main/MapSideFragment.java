@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -293,7 +294,8 @@ public class MapSideFragment extends BaseFragment {
         }
         if (mPhoto != null) {
             //上传
-            upHead(saveMyBitmap(mPhoto));
+//            upHead(saveMyBitmap(mPhoto));
+            upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
         }
     }
 
@@ -301,6 +303,7 @@ public class MapSideFragment extends BaseFragment {
      * 将照片保存到本地
      */
     private String saveMyBitmap(Bitmap bitmap) {
+
         File dir = new File(Environment.getExternalStorageDirectory() + "/head/");
         if (!dir.exists()) {
             dir.mkdir();
@@ -325,6 +328,7 @@ public class MapSideFragment extends BaseFragment {
      * 更换头像
      */
     private void upHead(String path) {
+        MyLog.e(TAG, "保存的路径：" + path);
         File file = new File(path);
         if (file.exists()) {
             MyLog.e(TAG, "更换头像，图片文件存在，图片名：" + file.getName());
@@ -528,14 +532,19 @@ public class MapSideFragment extends BaseFragment {
                 //相册回调
                 MyLog.e(TAG, "相册回调");
                 if (data != null && data.getData() != null) {
+                    MyLog.e(TAG, "更新头像");
                     upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
                 }
                 break;
             case TAILOR_REQUEST_CODE:
                 //图片剪裁回调
                 MyLog.e(TAG, "图片剪裁回调");
-                if (data != null) {
-                    setImageToView(data);
+//                if (data != null) {
+//                    setImageToView(data);
+//                }
+                if (data != null && data.getData() != null) {
+                    MyLog.e(TAG, "更新头像");
+                    upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
                 }
         }
     }

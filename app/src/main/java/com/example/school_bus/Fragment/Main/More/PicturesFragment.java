@@ -102,9 +102,13 @@ public class PicturesFragment extends BaseVp2LazyLoadFragment implements Picture
                         //保存照片
                         Bitmap bitmap = FileUtil.drawableToBitmap(imageView.getDrawable());
                         Thread thread = new Thread(() -> {
-                            FileUtil.SaveBitmapFromView(bitmap, getContext());
+                            boolean a = FileUtil.SaveBitmapFromView(bitmap, getContext());
                             Looper.prepare();
-                            showToast("保存成功");
+                            if (a) {
+                                showToast("保存成功");
+                            } else {
+                                showToast("保存失败");
+                            }
                             Looper.loop();
                         });
                         thread.start();

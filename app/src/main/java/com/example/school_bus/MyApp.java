@@ -9,10 +9,14 @@ import android.os.StrictMode;
 import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.school_bus.Utils.DynamicTimeFormat;
+import com.example.school_bus.Utils.MyLog;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
 import com.scwang.smartrefresh.layout.header.ClassicsHeader;
 import com.squareup.leakcanary.LeakCanary;
+import com.tencent.bugly.crashreport.CrashReport;
+
+import java.util.Arrays;
 
 /**
  * @作者 yonghe Xie
@@ -36,9 +40,22 @@ public class MyApp extends Application {
 //        }
 //        LeakCanary.install(this);
 
+        //腾讯bugly
+        CrashReport.initCrashReport(getApplicationContext(), "53f0218029", false);
+
         context = getApplicationContext();
         preferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);
 
+        MyLog.e(TAG, "系统信息：");
+        MyLog.e(TAG, "版本号VERSION：" + Build.VERSION.SDK_INT);
+        MyLog.e(TAG, "版本MODEL：" + Build.MODEL);
+        MyLog.e(TAG, "设备参数：" + Build.DEVICE);
+        MyLog.e(TAG, "android系统定制商：" + Build.BRAND);
+        MyLog.e(TAG, "主板：" + Build.BOARD);
+        MyLog.e(TAG, "boot版本：" + Build.BOOTLOADER);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            MyLog.e(TAG, "CPU指令集：" + Arrays.toString(Build.SUPPORTED_ABIS));
+        }
         //兼容Android7.0拍照闪退
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
             StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();

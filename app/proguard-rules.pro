@@ -20,6 +20,11 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
+#百度地图api
 -keep class com.baidu.** {*;}
--keep class mapsdkvi.com.** {*;}    
+-keep class mapsdkvi.com.** {*;}
+#腾讯bugly
+-dontwarn com.tencent.bugly.**
+-keep public class com.tencent.bugly.**{*;}
+
 -dontwarn com.baidu.**

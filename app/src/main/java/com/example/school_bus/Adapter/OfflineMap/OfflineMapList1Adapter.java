@@ -2,14 +2,16 @@ package com.example.school_bus.Adapter.OfflineMap;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.os.Handler;
+import android.graphics.Color;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.baidu.mapapi.map.offline.MKOLSearchRecord;
@@ -35,6 +37,19 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
     private Context context;
     private MKOfflineMap mkOfflineMap;
     private List<MKOLSearchRecord> allCity;//所有支持离线的城市
+    private boolean isOpenList = false;//当前是否打开二级地图
+    private boolean isScroll = false;
+    private int openPosition = 0;//打开二级地图索引
+    private Callback callback;
+
+    public void setCallback(Callback callback) {
+        this.callback = callback;
+    }
+
+    public interface Callback{
+        boolean rv2Listener(@NonNull RecyclerView rv, @NonNull MotionEvent e);
+        void scrollPosition(int position);
+    }
 
     public OfflineMapList1Adapter(Context context) {
         this.context = context;
@@ -58,58 +73,155 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.tvName.setText(allCity.get(position).cityName);//城市名
         holder.tvSize.setText(FileUtil.getFormatSize(allCity.get(position).dataSize));//包大小
-        holder.tvState.setVisibility(View.GONE);//隐藏“已下载”
-        holder.vDownload.setVisibility(View.GONE);//隐藏下载圈
-        holder.tvFunction.setVisibility(View.VISIBLE);//显示下载按钮
-        holder.tvFunction.setText("下载");
-        //查找已下载的城市列表，如果一个都没有下载的话则列表为空对象
-        if (mkOfflineMap.getAllUpdateInfo() != null && mkOfflineMap.getAllUpdateInfo().size() != 0){
-            for (int i = 0; i < mkOfflineMap.getAllUpdateInfo().size(); i++){
-                if (mkOfflineMap.getAllUpdateInfo().get(i).cityID == allCity.get(position).cityID){
-                    //离线地图存在时
-                    switch (mkOfflineMap.getAllUpdateInfo().get(i).status){
-                        case MKOLUpdateElement.FINISHED:
-                            //已下载完成的
-                            MyLog.e(TAG, "下载完成");
-                            holder.tvState.setVisibility(View.VISIBLE);
-                            holder.tvState.setText("已下载");
-                            holder.tvFunction.setVisibility(View.GONE);
-                            break;
-                        case MKOLUpdateElement.WAITING:
-                            //等待下载的
-                            MyLog.e(TAG, "等待下载");
-                            holder.tvState.setVisibility(View.VISIBLE);
-                            holder.tvState.setText("正在等待");
-                            holder.tvFunction.setVisibility(View.GONE);
-                            holder.vDownload.setVisibility(View.VISIBLE);
-                            holder.vDownload.setMax(allCity.get(position).dataSize);//设置最大值
-                            holder.vDownload.setCurrent(mkOfflineMap.getAllUpdateInfo().get(i).size);//当前已下载的数据大小
-                            holder.vDownload.setState(DownloadView.START);//开始状态的
-                            break;
-                        case MKOLUpdateElement.SUSPENDED:
-                            //已暂停的
-                            MyLog.e(TAG, "已暂停");
-                            holder.tvState.setVisibility(View.VISIBLE);
-                            holder.tvState.setText("已暂停");
-                            holder.tvFunction.setVisibility(View.GONE);
-                            holder.vDownload.setVisibility(View.VISIBLE);
-                            holder.vDownload.setMax(allCity.get(position).dataSize);//设置最大值
-                            holder.vDownload.setCurrent(mkOfflineMap.getAllUpdateInfo().get(i).size);//当前已下载的数据大小
-                            holder.vDownload.setState(DownloadView.PAUSE);//暂停状态的
-                            break;
-                        case MKOLUpdateElement.DOWNLOADING:
-                            //正在下载的
-                            MyLog.e(TAG, "正在下载");
-                            holder.tvState.setVisibility(View.VISIBLE);
-                            holder.tvState.setText(FileUtil.getFormatSize(mkOfflineMap.getAllUpdateInfo().get(i).size) + "/" + FileUtil.getFormatSize(allCity.get(position).dataSize));
-                            holder.tvFunction.setVisibility(View.GONE);
-                            holder.vDownload.setVisibility(View.VISIBLE);
-                            holder.vDownload.setMax(allCity.get(position).dataSize);//设置最大值
-                            holder.vDownload.setCurrent(mkOfflineMap.getAllUpdateInfo().get(i).size);//当前已下载的数据大小
-                            holder.vDownload.setState(DownloadView.START);//开始状态的
-                            break;
+        holder.rvList.setNestedScrollingEnabled(false);
+        if (allCity.get(position).cityType == 0 || allCity.get(position).cityType == 2){
+            //全国基础包，2级城市
+            holder.tvState.setVisibility(View.GONE);//隐藏“已下载”
+            holder.vDownload.setVisibility(View.GONE);//隐藏下载圈
+            holder.tvFunction.setVisibility(View.VISIBLE);//显示下载按钮
+            holder.tvFunction.setText("下载");
+            holder.rvList.setVisibility(View.GONE);//隐藏二级列表
+            holder.ivRight.setImageResource(R.drawable.ic_arrow_right);//右方向箭头
+            //查找已下载的城市列表，如果一个都没有下载的话则列表为空对象
+            if (mkOfflineMap.getAllUpdateInfo() != null && mkOfflineMap.getAllUpdateInfo().size() != 0){
+                for (int i = 0; i < mkOfflineMap.getAllUpdateInfo().size(); i++){
+                    if (mkOfflineMap.getAllUpdateInfo().get(i).cityID == allCity.get(position).cityID){
+                        //离线地图存在时
+                        MyLog.e(TAG, "status：" + mkOfflineMap.getAllUpdateInfo().get(i).status);
+                        switch (mkOfflineMap.getAllUpdateInfo().get(i).status){
+                            case MKOLUpdateElement.FINISHED:
+                                //已下载完成的
+                                MyLog.e(TAG, "下载完成");
+                                holder.tvState.setVisibility(View.VISIBLE);
+                                holder.tvState.setText("已下载");
+                                holder.tvFunction.setVisibility(View.GONE);
+                                break;
+                            case MKOLUpdateElement.WAITING:
+                                //等待下载的
+                                MyLog.e(TAG, "等待下载");
+                                holder.tvState.setVisibility(View.VISIBLE);
+                                holder.tvState.setText("正在等待");
+                                holder.tvFunction.setVisibility(View.GONE);
+                                holder.vDownload.setVisibility(View.VISIBLE);
+                                holder.vDownload.setMax(allCity.get(position).dataSize);//设置最大值
+                                holder.vDownload.setCurrent(mkOfflineMap.getAllUpdateInfo().get(i).size);//当前已下载的数据大小
+                                holder.vDownload.setState(DownloadView.START);//开始状态的
+                                break;
+                            case MKOLUpdateElement.SUSPENDED:
+                                //已暂停的
+                                MyLog.e(TAG, "已暂停");
+                                holder.tvState.setVisibility(View.VISIBLE);
+                                holder.tvState.setText("已暂停");
+                                holder.tvFunction.setVisibility(View.GONE);
+                                holder.vDownload.setVisibility(View.VISIBLE);
+                                holder.vDownload.setMax(allCity.get(position).dataSize);//设置最大值
+                                holder.vDownload.setCurrent(mkOfflineMap.getAllUpdateInfo().get(i).size);//当前已下载的数据大小
+                                holder.vDownload.setState(DownloadView.PAUSE);//暂停状态的
+                                break;
+                            case MKOLUpdateElement.DOWNLOADING:
+                                //正在下载的
+                                MyLog.e(TAG, "正在下载");
+                                holder.tvState.setVisibility(View.VISIBLE);
+                                holder.tvState.setText(FileUtil.getFormatSize(mkOfflineMap.getAllUpdateInfo().get(i).size) + "/" + FileUtil.getFormatSize(allCity.get(position).dataSize));
+                                holder.tvFunction.setVisibility(View.GONE);
+                                holder.vDownload.setVisibility(View.VISIBLE);
+                                holder.vDownload.setMax(allCity.get(position).dataSize);//设置最大值
+                                holder.vDownload.setCurrent(mkOfflineMap.getAllUpdateInfo().get(i).size);//当前已下载的数据大小
+                                holder.vDownload.setState(DownloadView.START);//开始状态的
+                                break;
+                            case MKOLUpdateElement.eOLDSInstalling:
+                                //离线包导入中
+                                MyLog.e(TAG, "离线包导入中");
+                                holder.tvState.setVisibility(View.VISIBLE);
+                                holder.tvState.setText("导入中...");
+                                holder.itemView.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        notifyDataSetChanged();
+                                    }
+                                });
+                                break;
+                        }
                     }
                 }
+            }
+        } else if (allCity.get(position).cityType == 1){
+            //1级城市
+            holder.tvState.setVisibility(View.GONE);//隐藏“已下载”
+            holder.vDownload.setVisibility(View.GONE);//隐藏下载圈
+            holder.tvFunction.setVisibility(View.GONE);//隐藏下载按钮
+            holder.rvList.setVisibility(View.GONE);//隐藏二级列表
+            holder.ivRight.setImageResource(R.drawable.ic_arrow_bottom);//下方向箭头
+            holder.rvList.setHasFixedSize(true);
+            holder.rvList.setItemViewCacheSize(60);
+            //设置背景
+            holder.rvList.setBackgroundColor(Color.parseColor("#DCDCDC"));
+            OfflineMapList2Adapter offlineMapList2Adapter = new OfflineMapList2Adapter(context);
+            holder.rvList.setAdapter(offlineMapList2Adapter);
+            if (holder.rvList.getLayoutManager() != null){
+                ((LinearLayoutManager) holder.rvList.getLayoutManager()).setInitialPrefetchItemCount(allCity.size());
+            }
+            offlineMapList2Adapter.setData(mkOfflineMap, allCity.get(position).childCities);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (openPosition == position){
+                        isOpenList = !isOpenList;
+                    } else {
+                        openPosition = position;
+                        isOpenList = false;
+                    }
+                    if (!isOpenList){
+                        isScroll = true;
+                    }
+                    notifyDataSetChanged();
+                }
+            });
+            //回调点击状态，防止刷新和点击冲突
+            holder.rvList.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+                @Override
+                public boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+                    if (callback != null){
+                        return callback.rv2Listener(rv, e);
+                    }
+                    return false;
+                }
+
+                @Override
+                public void onTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e) {
+
+                }
+
+                @Override
+                public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+                }
+            });
+
+            //判断列表是否打开
+            if (position == openPosition){
+                //如果打开的是当前的地图
+                if (isOpenList){
+                    //当前正在打开的，则关闭
+                    holder.rvList.setVisibility(View.GONE);
+                    holder.ivRight.setImageResource(R.drawable.ic_arrow_bottom);
+                } else {
+                    //当前正在关闭的，则打开
+                    holder.rvList.setVisibility(View.VISIBLE);
+                    holder.ivRight.setImageResource(R.drawable.ic_arrow_top);
+                    holder.itemView.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (callback != null && isScroll){
+                                callback.scrollPosition(position);
+                                isScroll = false;
+                            }
+                        }
+                    });
+                }
+            } else {
+                holder.rvList.setVisibility(View.GONE);
+                holder.ivRight.setImageResource(R.drawable.ic_arrow_bottom);
             }
         }
 
@@ -172,6 +284,7 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
         TextView tvName, tvSize, tvState, tvFunction;
         RecyclerView rvList;
         DownloadView vDownload;
+        ImageView ivRight;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvName = itemView.findViewById(R.id.tv_name);
@@ -180,6 +293,7 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
             tvFunction = itemView.findViewById(R.id.tv_function);
             rvList = itemView.findViewById(R.id.rv_list);
             vDownload = itemView.findViewById(R.id.v_download);
+            ivRight = itemView.findViewById(R.id.iv_right);
         }
     }
 }
