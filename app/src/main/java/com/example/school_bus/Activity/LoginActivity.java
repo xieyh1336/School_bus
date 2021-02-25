@@ -12,10 +12,9 @@ import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
 import com.example.school_bus.Entity.UserData;
-import com.example.school_bus.Mvp.LoginAMvp;
+import com.example.school_bus.Mvp.LoginMvp;
 import com.example.school_bus.Presenter.LoginPresenter;
 import com.example.school_bus.R;
-import com.example.school_bus.Utils.HttpUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -28,7 +27,7 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Activity\LoginActivity.java
  * 登录页面
  */
-public class LoginActivity extends BaseActivity implements LoginAMvp.view {
+public class LoginActivity extends BaseActivity implements LoginMvp.view {
 
     private static String TAG = "LoginActivity";
     @BindView(R.id.login_account)
@@ -107,7 +106,7 @@ public class LoginActivity extends BaseActivity implements LoginAMvp.view {
 
     @Override
     public void onError(Throwable e) {
-        HttpUtil.onError(this, e);
+
     }
 
     @Override

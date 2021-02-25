@@ -2,7 +2,6 @@ package com.example.school_bus.Presenter;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 
@@ -13,20 +12,20 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.example.school_bus.Mvp.PicturesFMvp;
+import com.example.school_bus.Mvp.PicturesMvp;
 import com.example.school_bus.Utils.MyLog;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class PicturesFPresenter implements PicturesFMvp.presenter {
+public class PicturesPresenter implements PicturesMvp.presenter {
 
-    private PicturesFMvp.view view;
+    private PicturesMvp.view view;
     private int i = 0;
     private Handler handler;
     private Runnable runnable;
     private List<Drawable> list;
-    public PicturesFPresenter(PicturesFMvp.view view) {
+    public PicturesPresenter(PicturesMvp.view view) {
         this.view = view;
     }
 

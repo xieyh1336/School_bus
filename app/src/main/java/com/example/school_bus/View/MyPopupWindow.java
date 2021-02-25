@@ -98,24 +98,30 @@ public class MyPopupWindow extends PopupWindow implements View.OnClickListener {
                 if (onClickListener != null){
                     onClickListener.onClick(TAKE_PHOTO);
                 }
+                if (photoWindow.isShowing()){
+                    photoWindow.dismiss();
+                }
                 break;
             case R.id.tv_select_photo:
                 //选择相册
                 if (onClickListener != null){
                     onClickListener.onClick(SELECT_PHOTO);
                 }
+                if (photoWindow.isShowing()){
+                    photoWindow.dismiss();
+                }
                 break;
             case R.id.tv_save:
                 //保存图片
                 if (onClickListener != null){
                     onClickListener.onClick(SAVE_PICTURE);
-                    if (pictureWindow.isShowing()){
-                        pictureWindow.dismiss();
-                    }
+                }
+                if (pictureWindow.isShowing()){
+                    pictureWindow.dismiss();
                 }
                 break;
             case R.id.tv_cancel:
-                //点击任何一项就关闭弹窗
+                //取消键
                 if (photoWindow != null){
                     if (photoWindow.isShowing()){
                         photoWindow.dismiss();

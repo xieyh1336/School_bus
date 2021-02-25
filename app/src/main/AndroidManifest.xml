@@ -55,7 +55,7 @@
             android:value="6sugZ9bbTBvaMhGsFn7G3H2Tmur8lkdG" /> <!-- 兼容Android7.0拍照闪退 -->
         <provider
             android:name="androidx.core.content.FileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:authorities="com.example.camera.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data

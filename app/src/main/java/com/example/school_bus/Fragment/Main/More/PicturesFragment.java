@@ -17,8 +17,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.school_bus.Adapter.More.PicturesRecyclerviewAdapter;
 import com.example.school_bus.Fragment.FragmentOnKeyListener;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
-import com.example.school_bus.Mvp.PicturesFMvp;
-import com.example.school_bus.Presenter.PicturesFPresenter;
+import com.example.school_bus.Mvp.PicturesMvp;
+import com.example.school_bus.Presenter.PicturesPresenter;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.FileUtil;
 import com.example.school_bus.Utils.MyLog;
@@ -43,7 +43,7 @@ import indi.liyi.viewer.ImageViewer;
  * @所在包 com\example\school_bus\Fragment\PicturesFragment.java
  * 更多页面，图片分页
  */
-public class PicturesFragment extends BaseVp2LazyLoadFragment implements PicturesFMvp.view, OnRefreshListener, OnLoadMoreListener, FragmentOnKeyListener {
+public class PicturesFragment extends BaseVp2LazyLoadFragment implements PicturesMvp.view, OnRefreshListener, OnLoadMoreListener, FragmentOnKeyListener {
 
     private static String TAG = "PicturesFragment";
     @BindView(R.id.rv)
@@ -56,7 +56,7 @@ public class PicturesFragment extends BaseVp2LazyLoadFragment implements Picture
     LinearLayout errorView;
     @BindView(R.id.refresh)
     SmartRefreshLayout refresh;
-    private PicturesFPresenter picturesFPresenter = new PicturesFPresenter(this);
+    private PicturesPresenter picturesPresenter = new PicturesPresenter(this);
     private boolean isLoading = false;
     private PicturesRecyclerviewAdapter picturesRecyclerviewAdapter;
     private PhotoLoader loader = new PhotoLoader();
@@ -121,7 +121,7 @@ public class PicturesFragment extends BaseVp2LazyLoadFragment implements Picture
     }
 
     private void getData(){
-        picturesFPresenter.getPictures2(10, getContext());
+        picturesPresenter.getPictures2(10, getContext());
     }
 
     @Override

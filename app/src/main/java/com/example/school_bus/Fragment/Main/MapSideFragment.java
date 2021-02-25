@@ -3,11 +3,11 @@ package com.example.school_bus.Fragment.Main;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -26,6 +26,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
+import androidx.core.os.EnvironmentCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -34,34 +36,24 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.school_bus.Activity.MainActivity;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Fragment.BaseFragment;
+import com.example.school_bus.Mvp.MapSideMvp;
 import com.example.school_bus.MyApp;
-import com.example.school_bus.NetWork.API_login;
+import com.example.school_bus.Presenter.MapSidePresenter;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.BroadcastUtils;
 import com.example.school_bus.Utils.FileUtil;
 import com.example.school_bus.Utils.GlideUtils;
-import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
 import com.example.school_bus.View.MyPopupWindow;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -75,7 +67,7 @@ import static android.content.Context.MODE_PRIVATE;
  * @所在包 com\example\school_bus\Fragment\MapSideFragment.java
  * 主页面侧边栏
  */
-public class MapSideFragment extends BaseFragment {
+public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
 
     private static String TAG = "MapSideFragment";
     private final static int PHOTO_REQUEST_CAMERA = 10;//相机权限请求
@@ -83,8 +75,7 @@ public class MapSideFragment extends BaseFragment {
     private final static int CAMERA_REQUEST_CODE = 100;//相机跳转code
     private final static int ALBUM_REQUEST_CODE = 200;//相册跳转code
     private final static int TAILOR_REQUEST_CODE = 300;//图片剪裁code
-    private final static String IMAGE_FILE_NAME = "headImage.png";
-    private final static String SAVE_AVATAR_NAME = "image.png";
+    private final static String SAVE_AVATAR_NAME = "head.png";//需要上传的图片的文件名
     @BindView(R.id.ll_login_setting)
     LinearLayout llLoginSetting;
     @BindView(R.id.ll_login_out)
@@ -111,6 +102,10 @@ public class MapSideFragment extends BaseFragment {
     private List<LinearLayout> linearLayouts = new ArrayList<>();
     private List<TextView> textViews = new ArrayList<>();
     private List<ImageView> imageViews = new ArrayList<>();
+    private Uri imageUri;//需要上传的图片的Uri
+    private File file;//需要上传的图片的文件
+    private boolean isAndroidQ = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q;
+    private MapSidePresenter mapSidePresenter = new MapSidePresenter(this);
 
     public static MapSideFragment newInstance() {
         return new MapSideFragment();
@@ -229,20 +224,85 @@ public class MapSideFragment extends BaseFragment {
         });
     }
 
+
     /**
-     * 打开相机
+     * 转到相机
+     * Android10以上返回Uri
+     * Android10以下返回文件路径
      * 操作完成后回调{@link MapSideFragment#onActivityResult(int, int, Intent)}
      */
     private void openCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        //判断存储卡是否可用，可用则存储
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            Uri uri = Uri.fromFile(new File(Environment.getExternalStorageDirectory(), IMAGE_FILE_NAME));
-            //指定照片保存路径（SD卡），headImage.png为一个临时文件，每次拍照后这个图片都被替换
-            intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        //判断是否有相机
+        if (getActivity() != null && getContext() != null && intent.resolveActivity(getActivity().getPackageManager()) != null){
+            File file;
+            Uri uri = null;
+            if (isAndroidQ){
+                //适配Android10
+                uri = createImageUri(getContext());
+            } else {
+                //Android10以下
+                file = createImageFile(getContext());
+                if (file != null){
+                    //Android10以下
+                    //需要上传的图片的保存路径
+                    String imagePath = file.getAbsolutePath();
+                    MyLog.e(TAG, "相机保存的图片路径：" + imagePath);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N){
+                        //适配Android7.0文件权限
+                        uri = FileProvider.getUriForFile(getContext(), "com.example.camera.fileprovider", file);
+                    } else {
+                        uri = Uri.fromFile(file);
+                    }
+                }
+            }
+            imageUri = uri;
+            MyLog.e(TAG, "相机保存的图片Uri：" + imageUri);
+            if (uri != null){
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+                intent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                startActivityForResult(intent, CAMERA_REQUEST_CODE);
+            }
         }
-        //Android7.0拍照闪退，已在MyApp和文件清单做了处理
-        startActivityForResult(intent, CAMERA_REQUEST_CODE);
+    }
+
+    /**
+     * Android10创建图片uri，用来保存拍照后的图片
+     * @return uri
+     */
+    private Uri createImageUri(@NonNull Context context){
+        String status = Environment.getExternalStorageState();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(MediaStore.Images.Media.DISPLAY_NAME, SAVE_AVATAR_NAME);
+        contentValues.put(MediaStore.Images.Media.MIME_TYPE, "image/*");
+        contentValues.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/0/");
+        //判断是否有SD卡
+        if (status.equals(Environment.MEDIA_MOUNTED)){
+            return context.getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues);
+        } else {
+            return context.getContentResolver().insert(MediaStore.Images.Media.INTERNAL_CONTENT_URI, contentValues);
+        }
+    }
+
+    /**
+     * Android10以下创建图片file，用来保存拍照后的照片
+     * @return file
+     */
+    private File createImageFile(@NonNull Context context){
+        File file = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (file != null && !file.exists()){
+            if (file.mkdir()){
+                MyLog.e(TAG, "文件夹创建成功");
+            } else {
+                MyLog.e(TAG, "file为空或者文件夹创建失败");
+            }
+        }
+        File tempFile = new File(file, SAVE_AVATAR_NAME);
+        MyLog.e(TAG, "临时文件路径：" + tempFile.getAbsolutePath());
+        if (!Environment.MEDIA_MOUNTED.equals(EnvironmentCompat.getStorageState(tempFile))){
+            return null;
+        }
+        return tempFile;
     }
 
     /**
@@ -260,7 +320,12 @@ public class MapSideFragment extends BaseFragment {
      * 操作完成后回调{@link MapSideFragment#onActivityResult(int, int, Intent)}
      */
     private void openTailor(Uri uri) {
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED) && getContext() != null){
+            file = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/0"), SAVE_AVATAR_NAME);
+            MyLog.e(TAG, "裁剪图片存放路径：" + file.getAbsolutePath());
+        }
         Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         intent.setDataAndType(uri, "image/*");
         // 设置裁剪
         intent.putExtra("crop", "true");
@@ -270,6 +335,8 @@ public class MapSideFragment extends BaseFragment {
         // 裁剪后输出图片的尺寸大小
         intent.putExtra("outputX", 250);
         intent.putExtra("outputY", 250);
+        //适配Android10，存放图片路径
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(file));
         // 图片格式
         intent.putExtra("outputFormat", "PNG");
         intent.putExtra("noFaceDetection", true);// 取消人脸识别
@@ -277,106 +344,19 @@ public class MapSideFragment extends BaseFragment {
         startActivityForResult(intent, TAILOR_REQUEST_CODE);
     }
 
-    //保存裁剪之后的图片数据
-    private void setImageToView(Intent data) {
-        Bundle extras = data.getExtras();
-        Bitmap mPhoto = null;
-        if (extras != null) {
-            mPhoto = extras.getParcelable("data");
-        } else {
-            try {
-                if (getContext() != null){
-                    mPhoto = BitmapFactory.decodeStream(getContext().getContentResolver().openInputStream(Objects.requireNonNull(data.getData())));
-                }
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            }
-        }
-        if (mPhoto != null) {
-            //上传
-//            upHead(saveMyBitmap(mPhoto));
-            upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
-        }
-    }
-
-    /**
-     * 将照片保存到本地
-     */
-    private String saveMyBitmap(Bitmap bitmap) {
-
-        File dir = new File(Environment.getExternalStorageDirectory() + "/head/");
-        if (!dir.exists()) {
-            dir.mkdir();
-        }
-        File f = new File(dir.getPath() + SAVE_AVATAR_NAME);
-        try {
-            f.createNewFile();
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(f));
-            bitmap.compress(Bitmap.CompressFormat.PNG, 80, bos);
-            bos.flush();
-            bos.close();
-            MyLog.e(TAG, "照片名：" + f.getName());
-            MyLog.e(TAG, "照片绝对路径：" + f.getAbsoluteFile());
-            return f.getAbsolutePath();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     /**
      * 更换头像
      */
-    private void upHead(String path) {
-        MyLog.e(TAG, "保存的路径：" + path);
-        File file = new File(path);
+    private void upHead(File file) {
         if (file.exists()) {
             MyLog.e(TAG, "更换头像，图片文件存在，图片名：" + file.getName());
             //以下将图片转化上传
             RequestBody requestBody = RequestBody.create(MediaType.parse("multipart/form-data"), file);
             MultipartBody.Part body = MultipartBody.Part.createFormData("upload", file.getName(), requestBody);
-
-            Observable<UserData> observable = API_login.createApi().upHead(body);
-            observable
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(new Observer<UserData>() {
-                        @Override
-                        public void onSubscribe(Disposable d) {
-
-                        }
-
-                        @Override
-                        public void onNext(UserData userData) {
-                            if (userData.isSuccess()) {
-                                MyLog.e(TAG, "上传成功，图片地址：" + userData.getData().getHead());
-                                showToast("上传成功");
-                                if (getActivity() != null) {
-                                    MyLog.e(TAG, "真实地址：" + ImageUtil.getHeadUrl(userData.getData().getHead()));
-                                    if (getContext() != null) {
-                                        SharedPreferences.Editor editor = getContext().getSharedPreferences("user", MODE_PRIVATE).edit();
-                                        editor.putString("head", userData.getData().getHead());
-                                        editor.apply();
-                                        //更新头像
-                                        ((MainActivity) getActivity()).updateHead(true);
-                                    }
-                                }
-                            } else {
-                                MyLog.e(TAG, "上传失败，原因：" + userData.getMessage());
-                                showToast(userData.getMessage());
-                            }
-                        }
-
-                        @Override
-                        public void onError(Throwable e) {
-                            HttpUtil.onError(getContext(), e);
-                        }
-
-                        @Override
-                        public void onComplete() {
-
-                        }
-                    });
+            mapSidePresenter.upHead(body);
+        } else {
+            showToast("头像更新失败");
+            MyLog.e(TAG, "文件不存在");
         }
     }
 
@@ -387,8 +367,8 @@ public class MapSideFragment extends BaseFragment {
         if (getContext() != null){
             //清除缓存和磁盘
             MyLog.e(TAG, "Glide当前的缓存：" + GlideUtils.getInstance().getCacheSize(getContext()));
+            MyLog.e(TAG, "清除Glide的缓存");
             GlideUtils.getInstance().clearImageAllCache(getContext());
-
             Glide.with(getContext())
                     .load(ImageUtil.getHeadUrl(MyApp.getHead()))
                     .apply(RequestOptions.bitmapTransform(new CircleCrop()))
@@ -474,6 +454,37 @@ public class MapSideFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void upHead(UserData userData) {
+        if (userData.isSuccess()) {
+            MyLog.e(TAG, "上传成功，图片地址：" + userData.getData().getHead());
+            showToast("上传成功");
+            if (getActivity() != null) {
+                MyLog.e(TAG, "真实地址：" + ImageUtil.getHeadUrl(userData.getData().getHead()));
+                if (getContext() != null) {
+                    SharedPreferences.Editor editor = getContext().getSharedPreferences("user", MODE_PRIVATE).edit();
+                    editor.putString("head", userData.getData().getHead());
+                    editor.apply();
+                    //更新头像
+                    ((MainActivity) getActivity()).updateHead(true);
+                }
+            }
+        } else {
+            MyLog.e(TAG, "上传失败，原因：" + userData.getMessage());
+            showToast(userData.getMessage());
+        }
+    }
+
+    @Override
+    public void onError(Throwable e) {
+
+    }
+
+    @Override
+    public void onComplete() {
+
+    }
+
     /**
      * 权限申请回调
      */
@@ -508,6 +519,7 @@ public class MapSideFragment extends BaseFragment {
                         showMissingPermissionDialog("存储");
                     }
                 }
+                break;
         }
     }
 
@@ -517,35 +529,39 @@ public class MapSideFragment extends BaseFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        switch (requestCode) {
-            case CAMERA_REQUEST_CODE:
-                //相机回调
-                MyLog.e(TAG, "相机回调");
-                if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                    File file = new File(Environment.getExternalStorageDirectory(), IMAGE_FILE_NAME);
-                    openTailor(Uri.fromFile(file));//对照片进行裁剪
-                } else {
-                    showToast("未找到存储卡");
-                }
-                break;
-            case ALBUM_REQUEST_CODE:
-                //相册回调
-                MyLog.e(TAG, "相册回调");
-                if (data != null && data.getData() != null) {
-                    MyLog.e(TAG, "更新头像");
-                    upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
-                }
-                break;
-            case TAILOR_REQUEST_CODE:
-                //图片剪裁回调
-                MyLog.e(TAG, "图片剪裁回调");
-//                if (data != null) {
-//                    setImageToView(data);
-//                }
-                if (data != null && data.getData() != null) {
-                    MyLog.e(TAG, "更新头像");
-                    upHead(FileUtil.getFilePathByUri(getContext(), data.getData()));
-                }
+        if (resultCode == -1){
+            //回调成功
+            switch (requestCode) {
+                case CAMERA_REQUEST_CODE:
+                    //相机回调
+                    MyLog.e(TAG, "相机回调");
+                    if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                        //照片裁剪
+                        openTailor(imageUri);
+                    } else {
+                        showToast("未找到存储卡");
+                    }
+                    break;
+                case ALBUM_REQUEST_CODE:
+                    //相册回调
+                    MyLog.e(TAG, "相册回调");
+                    MyLog.e(TAG, "弹窗是否显示：" + myPopupWindow.isShowing());
+                    if (data != null && data.getData() != null && getContext() != null) {
+                        upHead(FileUtil.uriToFile(data.getData(), getContext()));
+                    } else {
+                        showToast("更新头像失败");
+                    }
+                    break;
+                case TAILOR_REQUEST_CODE:
+                    //图片剪裁回调
+                    MyLog.e(TAG, "图片剪裁回调");
+                    MyLog.e(TAG, "弹窗是否显示：" + myPopupWindow.isShowing());
+                    upHead(file);
+                    break;
+            }
+        } else {
+            //取消
+            showToast("取消");
         }
     }
 }

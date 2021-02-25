@@ -21,8 +21,8 @@ import com.example.school_bus.Activity.WebActivity;
 import com.example.school_bus.Adapter.More.NewsRecyclerviewAdapter;
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
-import com.example.school_bus.Mvp.NewsFMvp;
-import com.example.school_bus.Presenter.NewsFPresenter;
+import com.example.school_bus.Mvp.NewsMvp;
+import com.example.school_bus.Presenter.NewsPresenter;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.MyLog;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
@@ -43,7 +43,7 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Fragment\NewsFragment.java
  * 更多页面，新闻分页
  */
-public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsFMvp.view, OnRefreshListener, OnLoadMoreListener {
+public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsMvp.view, OnRefreshListener, OnLoadMoreListener {
 
     private static String TAG = "NewsFragment";
     @BindView(R.id.bannerView)
@@ -58,7 +58,7 @@ public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsFMvp.vi
     LinearLayout errorView;
     @BindView(R.id.ll_news)
     LinearLayout llNews;
-    private NewsFPresenter newsFPresenter = new NewsFPresenter(this);;
+    private NewsPresenter newsPresenter = new NewsPresenter(this);;
     private NewsRecyclerviewAdapter newsRecyclerviewAdapter;
     private NewsData bannerData;//轮播图数据
     private int page = 2;
@@ -120,10 +120,10 @@ public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsFMvp.vi
 
     public void getData() {
         //获取轮播图新闻
-        newsFPresenter.getNews("1", "7", false);
+        newsPresenter.getNews("1", "7", false);
         //获取下方新闻，同一个接口同时请求时服务器会繁忙，第二个数据需要延迟请求
         Handler handler = new Handler();
-        Runnable runnable = () -> newsFPresenter.getNews(String.valueOf(page), "7", isLoadMore);
+        Runnable runnable = () -> newsPresenter.getNews(String.valueOf(page), "7", isLoadMore);
         handler.postDelayed(runnable, 200);
     }
 
@@ -189,7 +189,7 @@ public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsFMvp.vi
         page += 1;
         //获取下方新闻
         isLoadMore = true;
-        newsFPresenter.getNews(String.valueOf(page), "7", isLoadMore);
+        newsPresenter.getNews(String.valueOf(page), "7", isLoadMore);
     }
 
     @OnClick({R.id.error_view})

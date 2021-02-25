@@ -1,7 +1,7 @@
 package com.example.school_bus.Presenter;
 
 import com.example.school_bus.Entity.NewsData;
-import com.example.school_bus.Mvp.NewsFMvp;
+import com.example.school_bus.Mvp.NewsMvp;
 import com.example.school_bus.NetWork.API_1;
 
 import io.reactivex.Observable;
@@ -11,11 +11,11 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 
-public class NewsFPresenter implements NewsFMvp.presenter {
+public class NewsPresenter implements NewsMvp.presenter {
 
-    public NewsFMvp.view view;
+    public NewsMvp.view view;
 
-    public NewsFPresenter(NewsFMvp.view view) {
+    public NewsPresenter(NewsMvp.view view) {
         this.view = view;
     }
 

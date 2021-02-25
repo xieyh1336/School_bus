@@ -7,7 +7,7 @@ import com.example.school_bus.Entity.PicturesData;
 
 import java.util.List;
 
-public interface PicturesFMvp {
+public interface PicturesMvp {
     interface view{
         void getPicturesResult2(List<Drawable> list);
     }

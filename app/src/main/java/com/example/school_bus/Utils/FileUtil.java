@@ -1,5 +1,6 @@
 package com.example.school_bus.Utils;
 
+import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.ContentUris;
 import android.content.ContentValues;
@@ -14,8 +15,11 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.os.FileUtils;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
+import android.webkit.MimeTypeMap;
 import android.widget.Toast;
 
 import com.google.gson.internal.$Gson$Types;
@@ -23,6 +27,7 @@ import com.google.gson.internal.$Gson$Types;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +51,7 @@ public class FileUtil {
 
     /**
      * 保存图片的方法
+     * 已适配Android10
      * @param bitmap 图片
      * @param context 上下文
      * @return 是否保存成功
@@ -56,12 +62,17 @@ public class FileUtil {
             return false;
         }
         String fileName = System.currentTimeMillis() + ".jpg";//图片名
-        if (Build.VERSION.SDK_INT < 29){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
             //文件夹
-            File appDir = new File(Environment.getExternalStorageDirectory(), "蓝梦地图");
+            File appDir = new File(Environment.DIRECTORY_PICTURES, "蓝梦地图");
             //如果没有文件夹，则创建文件夹
             if (!appDir.exists()){
-                appDir.mkdir();
+                if (appDir.mkdir()){
+                    MyLog.e(TAG, "文件夹创建成功");
+                } else {
+                    MyLog.e(TAG, "文件夹创建失败");
+                    return false;
+                }
             }
             //图片
             File file = new File(appDir, fileName);
@@ -115,6 +126,86 @@ public class FileUtil {
     }
 
     /**
+     * Uri转File的方法
+     * 已适配Android10
+     * @param uri uri
+     * @param context 上下文
+     * @return file
+     */
+    public static File uriToFile(Uri uri, Context context){
+        File file = null;
+        if (uri == null){
+            return null;
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
+            //Android10以下
+            try {
+                @SuppressLint("Recycle")
+                Cursor cursor = context.getContentResolver().query(uri, null, null, null, null);
+                if (cursor != null) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    cursor.moveToFirst();
+                    String name = cursor.getString(index);
+                    file = new File(context.getFilesDir(), name);
+                    InputStream inputStream = context.getContentResolver().openInputStream(uri);
+                    FileOutputStream outputStream = new FileOutputStream(file);
+                    int read;
+                    int maxBufferSize = 1024 * 1024;
+                    if (inputStream != null) {
+                        int bytesAvailable = inputStream.available();
+                        int bufferSize = Math.min(bytesAvailable, maxBufferSize);
+                        final byte[] buffers = new byte[bufferSize];
+                        while ((read = inputStream.read(buffers)) != -1){
+                            outputStream.write(buffers, 0, read);
+                        }
+                        cursor.close();
+                        inputStream.close();
+                        outputStream.close();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            //Android10以上
+            if (uri.getScheme() != null){
+                if (uri.getScheme().equals(ContentResolver.SCHEME_FILE) && uri.getPath() != null){
+                    file = new File(uri.getPath());
+                } else if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)){
+                    //将文件复制到沙盒目录中
+                    ContentResolver contentResolver = context.getContentResolver();
+
+                    String displayName = System.currentTimeMillis() + Math.round((Math.random() + 1) * 1000)
+                            + "." + MimeTypeMap.getSingleton().getExtensionFromMimeType(contentResolver.getType(uri));
+                    //以下方法可以获取原文件的文件名，但是比较耗时
+//                    @SuppressLint("Recycle")
+//                    Cursor cursor = contentResolver.query(uri, null, null, null, null);
+//                    if ( cursor != null && cursor.moveToFirst()){
+//                        String displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+//                    }
+
+                    try {
+                        InputStream inputStream = contentResolver.openInputStream(uri);
+                        if (context.getExternalCacheDir() != null){
+                            File cache = new File(context.getExternalCacheDir().getAbsolutePath(), displayName);
+                            FileOutputStream fileOutputStream = new FileOutputStream(cache);
+                            if (inputStream != null) {
+                                FileUtils.copy(inputStream, fileOutputStream);
+                                file = cache;
+                                fileOutputStream.close();
+                                inputStream.close();
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        return file;
+    }
+
+    /**
      * 将drawable转换为bitmap
      * @param drawable drawable
      * @return bitmap
@@ -134,7 +225,7 @@ public class FileUtil {
     }
 
     /**
-     * 将Uri转化为path
+     * 将Uri转化为path路径
      * @param context 上下文
      * @param uri Uri
      * @return path路径

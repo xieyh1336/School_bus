@@ -1,27 +1,35 @@
 package com.example.school_bus.Presenter;
 
+import android.content.SharedPreferences;
+
+import com.example.school_bus.Activity.MainActivity;
 import com.example.school_bus.Entity.UserData;
-import com.example.school_bus.Mvp.LoginMvp;
+import com.example.school_bus.Mvp.MapSideMvp;
 import com.example.school_bus.NetWork.API_login;
+import com.example.school_bus.Utils.ImageUtil;
+import com.example.school_bus.Utils.MyLog;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.MultipartBody;
 
-public class LoginPresenter implements LoginMvp.presenter{
+import static android.content.Context.MODE_PRIVATE;
 
-    private LoginMvp.view view;
+public class MapSidePresenter implements MapSideMvp.presenter {
 
-    public LoginPresenter(LoginMvp.view view) {
+    private MapSideMvp.view view;
+
+    public MapSidePresenter(MapSideMvp.view view) {
         this.view = view;
     }
 
     @Override
-    public void login(String username, String password, String phone, int type) {
-        Observable<UserData> newsDataObservable = API_login.createApi().login(username, password, phone, type);
-        newsDataObservable
+    public void upHead(MultipartBody.Part body) {
+        Observable<UserData> observable = API_login.createApi().upHead(body);
+        observable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<UserData>() {
@@ -32,12 +40,12 @@ public class LoginPresenter implements LoginMvp.presenter{
 
                     @Override
                     public void onNext(UserData userData) {
-                        view.loginResult(userData);
+                        view.upHead(userData);
                     }
 
                     @Override
                     public void onError(Throwable e) {
-                        view.onError(e);
+
                     }
 
                     @Override
