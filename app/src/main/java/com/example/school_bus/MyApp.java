@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 
 import com.example.school_bus.Utils.DynamicTimeFormat;
 import com.example.school_bus.Utils.MyLog;
+import com.example.school_bus.Utils.MyToast;
 import com.scwang.smartrefresh.layout.SmartRefreshLayout;
 import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
 import com.scwang.smartrefresh.layout.header.ClassicsHeader;
@@ -45,6 +46,8 @@ public class MyApp extends Application {
 
         context = getApplicationContext();
         preferences = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+
+        MyToast.init(this);
 
         MyLog.e(TAG, "系统信息：");
         MyLog.e(TAG, "版本号VERSION：" + Build.VERSION.SDK_INT);

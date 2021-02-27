@@ -43,6 +43,7 @@ import com.example.school_bus.R;
 import com.example.school_bus.Utils.BroadcastUtils;
 import com.example.school_bus.Utils.FileUtil;
 import com.example.school_bus.Utils.GlideUtils;
+import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
 import com.example.school_bus.View.MyPopupWindow;
@@ -477,12 +478,7 @@ public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
 
     @Override
     public void onError(Throwable e) {
-
-    }
-
-    @Override
-    public void onComplete() {
-
+        HttpUtil.onError(e);
     }
 
     /**

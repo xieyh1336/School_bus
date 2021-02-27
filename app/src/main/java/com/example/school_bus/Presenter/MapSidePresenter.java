@@ -1,13 +1,8 @@
 package com.example.school_bus.Presenter;
 
-import android.content.SharedPreferences;
-
-import com.example.school_bus.Activity.MainActivity;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.MapSideMvp;
 import com.example.school_bus.NetWork.API_login;
-import com.example.school_bus.Utils.ImageUtil;
-import com.example.school_bus.Utils.MyLog;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -16,7 +11,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
 
-import static android.content.Context.MODE_PRIVATE;
 
 public class MapSidePresenter implements MapSideMvp.presenter {
 

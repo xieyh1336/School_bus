@@ -3,7 +3,6 @@ package com.example.school_bus.NetWork;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.Utils.MyLog;
-import com.google.gson.Gson;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -83,7 +82,7 @@ public class API_login {
         Retrofit retrofit = new Retrofit.Builder()
                 .client(okHttpClient)
                 .baseUrl(ServerBaseUrl)
-                .addConverterFactory(LenientGsonConverterFactory.create(new Gson()))
+                .addConverterFactory(MyGsonConverterFactory.create())
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         return retrofit.create(Api.class);

@@ -15,6 +15,7 @@ import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.LoginMvp;
 import com.example.school_bus.Presenter.LoginPresenter;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.HttpUtil;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -106,7 +107,7 @@ public class LoginActivity extends BaseActivity implements LoginMvp.view {
 
     @Override
     public void onError(Throwable e) {
-
+        HttpUtil.onError(e);
     }
 
     @Override

@@ -8,7 +8,6 @@ public interface MapSideMvp {
     interface view{
         void upHead(UserData userData);
         void onError(Throwable e);
-        void onComplete();
     }
 
     interface presenter{

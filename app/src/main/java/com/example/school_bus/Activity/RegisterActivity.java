@@ -69,6 +69,6 @@ public class RegisterActivity extends BaseActivity implements RegisterMvp.view {
 
     @Override
     public void onError(Throwable e) {
-
+        HttpUtil.onError(e);
     }
 }

@@ -12,7 +12,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.MainMvp;
-import com.example.school_bus.MyApp;
+import com.example.school_bus.NetWork.MyServerException;
 import com.example.school_bus.Presenter.MainPresenter;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.HttpUtil;
@@ -76,16 +76,15 @@ public class GuideActivity extends BaseActivity implements MainMvp.view {
         } else {
             //跳转登陆页面
             MyLog.e(TAG, "token已过期，跳转登录页面");
-            startActivity(new Intent(GuideActivity.this, LoginActivity.class));
+            startLogin();
         }
         finish();
     }
 
     @Override
     public void onError(Throwable e, String type) {
-        if ("tokenLogin".equals(type)) {//跳转登陆页面
-            MyLog.e(TAG, "token自动登录访问出错，跳转登录页面");
-            MyLog.e(TAG, "e：" + e.getMessage());
+        if ("tokenLogin".equals(type)) {//跳转登录页面
+            HttpUtil.onError(e);
             startLogin();
             finish();
         }

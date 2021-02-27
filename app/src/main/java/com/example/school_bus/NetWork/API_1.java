@@ -9,6 +9,7 @@ import io.reactivex.Observable;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
@@ -33,7 +34,7 @@ public class API_1 {
         interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
         retrofit = new Retrofit.Builder()
                 .baseUrl(ServerBaseUrl)
-                .addConverterFactory(LenientGsonConverterFactory.create(new Gson()))
+                .addConverterFactory(GsonConverterFactory.create(new Gson()))
                 .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
         return retrofit.create(Api.class);

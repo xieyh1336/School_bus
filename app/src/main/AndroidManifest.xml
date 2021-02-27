@@ -49,10 +49,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Activity.BaseActivity" /> <!-- 百度地图 -->
+        <activity android:name=".Activity.BaseActivity" />
+        <!-- 百度地图 -->
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
-            android:value="6sugZ9bbTBvaMhGsFn7G3H2Tmur8lkdG" /> <!-- 兼容Android7.0拍照闪退 -->
+            android:value="6sugZ9bbTBvaMhGsFn7G3H2Tmur8lkdG" />
+        <!-- 兼容Android7.0拍照闪退 -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="com.example.camera.fileprovider"
@@ -61,7 +63,8 @@
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
-        </provider> <!-- 百度地图服务 -->
+        </provider>
+        <!-- 百度地图服务 -->
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
