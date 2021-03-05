@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.school_bus.Activity.WebActivity;
-import com.example.school_bus.Adapter.More.NewsRecyclerviewAdapter;
+import com.example.school_bus.Adapter.More.NewsAdapter;
 import com.example.school_bus.Entity.NewsData;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Mvp.NewsMvp;
@@ -59,7 +59,7 @@ public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsMvp.vie
     @BindView(R.id.ll_news)
     LinearLayout llNews;
     private NewsPresenter newsPresenter = new NewsPresenter(this);;
-    private NewsRecyclerviewAdapter newsRecyclerviewAdapter;
+    private NewsAdapter newsAdapter;
     private NewsData bannerData;//轮播图数据
     private int page = 2;
     private boolean isLoadMore = false;
@@ -91,12 +91,12 @@ public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsMvp.vie
         loadingView.setVisibility(View.VISIBLE);
         errorView.setVisibility(View.GONE);
 
-        newsRecyclerviewAdapter = new NewsRecyclerviewAdapter(getContext());
-        recyclerView.setAdapter(newsRecyclerviewAdapter);
-        newsRecyclerviewAdapter.setOnClickListener(position -> {
-            if (newsRecyclerviewAdapter.getData() != null){
+        newsAdapter = new NewsAdapter(getContext());
+        recyclerView.setAdapter(newsAdapter);
+        newsAdapter.setOnClickListener(position -> {
+            if (newsAdapter.getData() != null){
                 Intent intent = new Intent(getContext(), WebActivity.class);
-                intent.putExtra("Url", newsRecyclerviewAdapter.getData().get(position).getPath());
+                intent.putExtra("Url", newsAdapter.getData().get(position).getPath());
                 startActivity(intent);
             }
         });
@@ -149,9 +149,9 @@ public class NewsFragment extends BaseVp2LazyLoadFragment implements NewsMvp.vie
     @Override
     public void getNewsResult2(NewsData data, boolean isLoadMore) {
         if (isLoadMore) {
-            newsRecyclerviewAdapter.addData(data.getResult());
+            newsAdapter.addData(data.getResult());
         } else {
-            newsRecyclerviewAdapter.setData(data.getResult());
+            newsAdapter.setData(data.getResult());
         }
     }
 

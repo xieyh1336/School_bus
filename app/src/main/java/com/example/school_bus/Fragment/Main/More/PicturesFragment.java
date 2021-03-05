@@ -14,7 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.school_bus.Adapter.More.PicturesRecyclerviewAdapter;
+import com.example.school_bus.Adapter.More.PicturesAdapter;
 import com.example.school_bus.Fragment.FragmentOnKeyListener;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Mvp.PicturesMvp;
@@ -58,7 +58,7 @@ public class PicturesFragment extends BaseVp2LazyLoadFragment implements Picture
     SmartRefreshLayout refresh;
     private PicturesPresenter picturesPresenter = new PicturesPresenter(this);
     private boolean isLoading = false;
-    private PicturesRecyclerviewAdapter picturesRecyclerviewAdapter;
+    private PicturesAdapter picturesAdapter;
     private PhotoLoader loader = new PhotoLoader();
     private MyPopupWindow myPopupWindow;//自定义弹窗
 
@@ -87,8 +87,8 @@ public class PicturesFragment extends BaseVp2LazyLoadFragment implements Picture
         refresh.setOnLoadMoreListener(this);
         refresh.setOnRefreshListener(this);
 
-        picturesRecyclerviewAdapter = new PicturesRecyclerviewAdapter(getContext());
-        rv.setAdapter(picturesRecyclerviewAdapter);
+        picturesAdapter = new PicturesAdapter(getContext());
+        rv.setAdapter(picturesAdapter);
 
         //长按弹出菜单
         iv.setOnItemLongPressListener((position, imageView) -> {
@@ -127,15 +127,15 @@ public class PicturesFragment extends BaseVp2LazyLoadFragment implements Picture
     @Override
     public void getPicturesResult2(List<Drawable> list) {
         if (isLoading){
-            picturesRecyclerviewAdapter.addData(list);
+            picturesAdapter.addData(list);
         } else {
-            picturesRecyclerviewAdapter.setData(list);
+            picturesAdapter.setData(list);
         }
         //大图加载器
         iv.overlayStatusBar(true)//是否会占据 StatusBar 的空间
-                .imageData(picturesRecyclerviewAdapter.getData())
+                .imageData(picturesAdapter.getData())
                 .imageLoader(loader);
-        picturesRecyclerviewAdapter.setOnClickListener(position -> {
+        picturesAdapter.setOnClickListener(position -> {
             iv.bindViewGroup(rv);
             iv.watch(position);
         });

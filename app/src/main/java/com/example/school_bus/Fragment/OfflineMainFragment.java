@@ -1,11 +1,16 @@
 package com.example.school_bus.Fragment;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -16,9 +21,8 @@ import com.baidu.mapapi.map.offline.MKOfflineMap;
 import com.baidu.mapapi.map.offline.MKOfflineMapListener;
 import com.example.school_bus.Activity.MainActivity;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
-import com.example.school_bus.Fragment.Main.MapSideFragment;
-import com.example.school_bus.Fragment.OfflineMap.OfflineMapListFragment;
-import com.example.school_bus.Fragment.OfflineMap.OfflineMapManageFragment;
+import com.example.school_bus.Fragment.OfflineMap.OfflineListFragment;
+import com.example.school_bus.Fragment.OfflineMap.OfflineManageFragment;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.MyLog;
 import com.google.android.material.tabs.TabLayout;
@@ -33,27 +37,40 @@ import butterknife.ButterKnife;
 /**
  * @作者 yonghe Xie
  * @创建/修改日期 2021-02-22 15:19
- * @类名 OfflineMapFragment
- * @所在包 com\example\school_bus\Fragment\OfflineMapFragment.java
+ * @类名 OfflineMainFragment
+ * @所在包 com\example\school_bus\Fragment\OfflineMainFragment.java
  * 离线地图
  */
-public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
+public class OfflineMainFragment extends BaseVp2LazyLoadFragment {
 
-    private static String TAG = "OfflineMapFragment";
+    private static String TAG = "OfflineMainFragment";
     @BindView(R.id.tab)
     TabLayout tab;
     @BindView(R.id.vp)
     ViewPager2 vp;
     //tab
     private List<Fragment> fragmentList = new ArrayList<>();
-    private OfflineMapManageFragment offlineMapManageFragment = OfflineMapManageFragment.newInstance();//下载管理
-    private OfflineMapListFragment offlineMapListFragment = OfflineMapListFragment.newInstance();//下载列表
+    private OfflineManageFragment offlineManageFragment = OfflineManageFragment.newInstance();//下载管理
+    private OfflineListFragment offlineListFragment = OfflineListFragment.newInstance();//下载列表
 
     private MKOfflineMap mkOfflineMap;//离线地图
     private OfflineListener offlineListener;//下载监听接口
+    private OfflineListener2 offlineListener2;
+    private OfflineBroadcast offlineBroadcast;
 
-    public static OfflineMapFragment newInstance() {
-        return new OfflineMapFragment();
+    public static OfflineMainFragment newInstance() {
+        return new OfflineMainFragment();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        offlineBroadcast = new OfflineBroadcast();
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("offline");
+        if (getContext() != null){
+            getContext().registerReceiver(offlineBroadcast, intentFilter);
+        }
     }
 
     @Override
@@ -77,15 +94,12 @@ public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
         mkOfflineMap.init(new MKOfflineMapListener() {
             @Override
             public void onGetOfflineMapState(int type, int state) {
-                //更新过程中的回调进度，可查看更新进度、新离线地图安装、版本更新提示。
-                //type - 事件类型:
-                // MKOfflineMap.TYPE_NEW_OFFLINE,
-                // MKOfflineMap.TYPE_DOWNLOAD_UPDATE,
-                // MKOfflineMap.TYPE_VER_UPDATE.
-                //state - 事件状态: 当type为TYPE_NEW_OFFLINE时，表示新安装的离线地图数目. 当type为TYPE_DOWNLOAD_UPDATE时，表示更新的城市ID.
+                //回调到离线地图
                 if (offlineListener != null){
-                    //回调到离线地图
                     offlineListener.mapListener(type, state);
+                }
+                if (offlineListener2 != null){
+                    offlineListener2.mapListener(type, state);
                 }
             }
         });
@@ -96,7 +110,8 @@ public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
             MyLog.e(TAG, "城市名：" + list.get(i).cityName);
             MyLog.e(TAG, "子城市名：" + list.get(i).childCities);
             MyLog.e(TAG, "城市ID：" + list.get(i).cityID);
-            MyLog.e(TAG, "城市类型：" + list.get(i).cityType);//城市类型0:全国；1：省份；2：城市,如果是省份，可以通过childCities得到子城市列表
+            //城市类型0:全国；1：省份；2：城市,如果是省份，可以通过childCities得到子城市列表
+            MyLog.e(TAG, "城市类型：" + list.get(i).cityType);
             MyLog.e(TAG, "数据大小：" + list.get(i).dataSize);
             MyLog.e(TAG, "-----------------------------------");
         }
@@ -136,8 +151,8 @@ public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
         tab1.setText("城市列表");
         tab.addTab(tab1);
 
-        fragmentList.add(offlineMapManageFragment);
-        fragmentList.add(offlineMapListFragment);
+        fragmentList.add(offlineManageFragment);
+        fragmentList.add(offlineListFragment);
         MyPagerAdapter myPagerAdapter = new MyPagerAdapter(this);
         vp.setAdapter(myPagerAdapter);
     }
@@ -172,6 +187,15 @@ public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
         return mkOfflineMap;
     }
 
+    public void deleteMap(int cityID){
+        if (mkOfflineMap.remove(cityID)){
+            MyLog.e(TAG, "删除成功");
+            showToast("删除成功");
+        } else {
+            showToast("删除失败");
+        }
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -181,11 +205,27 @@ public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
         }
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (getContext() != null && offlineBroadcast != null){
+            getContext().unregisterReceiver(offlineBroadcast);
+        }
+    }
+
     public void setOfflineListener(OfflineListener offlineListener) {
         this.offlineListener = offlineListener;
     }
 
+    public void setOfflineListener2(OfflineListener2 offlineListener2) {
+        this.offlineListener2 = offlineListener2;
+    }
+
     public interface OfflineListener{
+        void mapListener(int type, int state);
+    }
+
+    public interface OfflineListener2{
         void mapListener(int type, int state);
     }
 
@@ -204,6 +244,20 @@ public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
         @Override
         public int getItemCount() {
             return fragmentList.size();
+        }
+    }
+
+    public class OfflineBroadcast extends BroadcastReceiver{
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            MyLog.e(TAG, "接收到广播");
+            switch (intent.getIntExtra("type", 0)){
+                case 1:
+                    //删除
+                    deleteMap(intent.getIntExtra("cityID", 0));
+                    break;
+            }
         }
     }
 }

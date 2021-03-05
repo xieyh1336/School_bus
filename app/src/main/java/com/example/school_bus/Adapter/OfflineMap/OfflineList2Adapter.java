@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.baidu.mapapi.map.offline.MKOLSearchRecord;
 import com.baidu.mapapi.map.offline.MKOLUpdateElement;
 import com.baidu.mapapi.map.offline.MKOfflineMap;
+import com.example.school_bus.Activity.InsideOfflineActivity;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.FileUtil;
 import com.example.school_bus.Utils.MyLog;
@@ -26,18 +27,18 @@ import java.util.List;
 /**
  * @作者 yonghe Xie
  * @创建/修改日期 2021-02-23 15:54
- * @类名 OfflineMapList2Adapter
- * @所在包 com\example\school_bus\Adapter\OfflineMap\OfflineMapList2Adapter.java
+ * @类名 OfflineList2Adapter
+ * @所在包 com\example\school_bus\Adapter\OfflineMap\OfflineList2Adapter.java
  * 离线地图，全部城市2级适配器
  */
-public class OfflineMapList2Adapter extends RecyclerView.Adapter<OfflineMapList2Adapter.ViewHolder> {
+public class OfflineList2Adapter extends RecyclerView.Adapter<OfflineList2Adapter.ViewHolder> {
 
-    private static String TAG = "OfflineMapList2Adapter";
+    private static String TAG = "OfflineList2Adapter";
     private Context context;
     private MKOfflineMap mkOfflineMap;
     private List<MKOLSearchRecord> allCity;//所有支持离线的城市
 
-    public OfflineMapList2Adapter(Context context) {
+    public OfflineList2Adapter(Context context) {
         this.context = context;
     }
 
@@ -122,6 +123,7 @@ public class OfflineMapList2Adapter extends RecyclerView.Adapter<OfflineMapList2
                             MyLog.e(TAG, "离线包导入中");
                             holder.tvState.setVisibility(View.VISIBLE);
                             holder.tvState.setText("导入中...");
+                            holder.tvFunction.setVisibility(View.GONE);
                             holder.itemView.post(this::notifyDataSetChanged);
                             break;
                     }
@@ -158,16 +160,10 @@ public class OfflineMapList2Adapter extends RecyclerView.Adapter<OfflineMapList2
                 }
             }
         });
-        //测试，长按删除
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onLongClick(View v) {
-                if (mkOfflineMap.remove(allCity.get(position).cityID)){
-                    MyLog.e(TAG, "删除成功");
-                    notifyDataSetChanged();
-                    return true;
-                }
-                return false;
+            public void onClick(View v) {
+                InsideOfflineActivity.getInstance(context, allCity.get(position).cityID, allCity.get(position).cityName, FileUtil.getFormatSize(allCity.get(position).dataSize));
             }
         });
     }

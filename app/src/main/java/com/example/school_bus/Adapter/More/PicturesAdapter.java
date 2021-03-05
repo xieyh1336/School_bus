@@ -20,17 +20,17 @@ import java.util.List;
 /**
  * @作者 yonghe Xie
  * @创建/修改日期 2021-02-03 14:17
- * @类名 PicturesRecyclerviewAdapter
- * @所在包 com\example\school_bus\Adapter\PicturesRecyclerviewAdapter.java
+ * @类名 PicturesAdapter
+ * @所在包 com\example\school_bus\Adapter\PicturesAdapter.java
  * 更多，美图适配器
  */
-public class PicturesRecyclerviewAdapter extends RecyclerView.Adapter<PicturesRecyclerviewAdapter.ViewHolder> {
+public class PicturesAdapter extends RecyclerView.Adapter<PicturesAdapter.ViewHolder> {
 
     private Context context;
     private List<Drawable> list = new ArrayList<>();
     private OnClickListener onClickListener;
 
-    public PicturesRecyclerviewAdapter(Context context) {
+    public PicturesAdapter(Context context) {
         this.context = context;
     }
 

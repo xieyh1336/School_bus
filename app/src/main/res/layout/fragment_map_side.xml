@@ -40,18 +40,30 @@
 
         </com.example.school_bus.View.WaveView>
 
-        <ImageView
-            android:id="@+id/iv_header"
+        <RelativeLayout
+            android:id="@+id/rl_header"
             android:layout_width="80dp"
             android:layout_height="80dp"
-            android:src="@drawable/ic_header"
-            android:layout_centerInParent="true"/>
+            android:layout_centerInParent="true">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_header"/>
+
+            <ImageView
+                android:id="@+id/iv_header"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_header"/>
+
+        </RelativeLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
-            android:layout_below="@id/iv_header"
+            android:layout_below="@id/rl_header"
             android:gravity="center">
 
             <TextView

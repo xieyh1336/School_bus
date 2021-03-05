@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Activity.InsideOfflineMapActivity"></activity>
+        <activity android:name=".Activity.InsideOfflineActivity"></activity>
         <activity
             android:name=".Activity.RegisterActivity"
             android:launchMode="singleTask"

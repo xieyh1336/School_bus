@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -30,7 +31,7 @@ import com.example.school_bus.Fragment.FragmentOnKeyListener;
 import com.example.school_bus.Fragment.Main.MapFragment;
 import com.example.school_bus.Fragment.Main.MapSideFragment;
 import com.example.school_bus.Fragment.MainFragment;
-import com.example.school_bus.Fragment.OfflineMapFragment;
+import com.example.school_bus.Fragment.OfflineMainFragment;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.ImageUtil;
@@ -68,6 +69,8 @@ public class MainActivity extends BaseActivity {
     ImageView ivHeader2;
     @BindView(R.id.tv_header)
     TextView tvHeader;
+    @BindView(R.id.rl_header)
+    RelativeLayout rlHeader;
     private boolean isFirst = true;
 
     //viewPager
@@ -75,7 +78,7 @@ public class MainActivity extends BaseActivity {
     public MapSideFragment mapSideFragment = MapSideFragment.newInstance();//侧边栏
 
     public MainFragment mainFragment = MainFragment.newInstance();//首页fragment
-    public OfflineMapFragment offlineMapFragment = OfflineMapFragment.newInstance();//离线地图
+    public OfflineMainFragment offlineMainFragment = OfflineMainFragment.newInstance();//离线地图
 
     private long secondBackTime;
 
@@ -92,7 +95,7 @@ public class MainActivity extends BaseActivity {
         updateHead(false);
 
         fragmentList.add(mainFragment);
-        fragmentList.add(offlineMapFragment);
+        fragmentList.add(offlineMainFragment);
 
         ivHeader.setVisibility(View.VISIBLE);
         ivHeader2.setVisibility(View.GONE);
@@ -145,12 +148,12 @@ public class MainActivity extends BaseActivity {
      */
     public void selectPager(int i) {
         vp.setCurrentItem(i, false);
-        if (i == 0){
-            ivHeader.setVisibility(View.VISIBLE);
+        if (i == 0) {
+            rlHeader.setVisibility(View.VISIBLE);
             ivHeader2.setVisibility(View.GONE);
             tvHeader.setVisibility(View.GONE);
-        } else if (i == 1){
-            ivHeader.setVisibility(View.GONE);
+        } else if (i == 1) {
+            rlHeader.setVisibility(View.GONE);
             ivHeader2.setVisibility(View.VISIBLE);
             tvHeader.setVisibility(View.VISIBLE);
             tvHeader.setText("离线地图");
@@ -159,7 +162,6 @@ public class MainActivity extends BaseActivity {
 
     /**
      * 获取当前页面
-     *
      * @return 页码
      */
     public int getCurrentPager() {
@@ -175,7 +177,6 @@ public class MainActivity extends BaseActivity {
 
     /**
      * 加载头像
-     *
      * @param isUp 是否更新了头像
      */
     public void updateHead(boolean isUp) {

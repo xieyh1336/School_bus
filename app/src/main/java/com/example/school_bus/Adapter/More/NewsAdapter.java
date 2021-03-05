@@ -20,17 +20,17 @@ import java.util.List;
 /**
  * @作者 yonghe Xie
  * @创建/修改日期 2021-02-03 14:55
- * @类名 NewsRecyclerviewAdapter
- * @所在包 com\example\school_bus\Adapter\NewsRecyclerviewAdapter.java
+ * @类名 NewsAdapter
+ * @所在包 com\example\school_bus\Adapter\NewsAdapter.java
  * 更多，新闻适配器
  */
-public class NewsRecyclerviewAdapter extends RecyclerView.Adapter<NewsRecyclerviewAdapter.ViewHolder> {
+public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.ViewHolder> {
 
     private Context context;
     private List<NewsData.ResultBean> list;
     private OnClickListener onClickListener;
 
-    public NewsRecyclerviewAdapter(Context context) {
+    public NewsAdapter(Context context) {
         this.context = context;
     }
 

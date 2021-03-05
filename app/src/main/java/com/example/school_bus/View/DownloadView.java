@@ -87,6 +87,9 @@ public class DownloadView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        circlePaint.setStrokeWidth((float) width / 12);
+        canvas.drawCircle((float) width / 2, (float) height / 2, (float) width * 11 / 24, circlePaint);
+
         circleWidth = width / 6;
         circlePaint.setStrokeWidth(circleWidth);
         if (rectF == null){

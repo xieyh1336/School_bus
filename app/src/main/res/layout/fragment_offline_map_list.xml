@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".Fragment.OfflineMap.OfflineMapListFragment">
+    tools:context=".Fragment.OfflineMap.OfflineListFragment">
 
     <EditText
         android:id="@+id/et_search"
