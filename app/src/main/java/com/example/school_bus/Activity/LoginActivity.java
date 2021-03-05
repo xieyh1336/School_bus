@@ -88,6 +88,7 @@ public class LoginActivity extends BaseActivity implements LoginMvp.view {
 
     @Override
     public void loginResult(UserData userData) {
+        hideLoading();
         if (userData.isSuccess()){
             //存储输入的账号密码
             SharedPreferences.Editor editor = getSharedPreferences("user", MODE_PRIVATE).edit();
@@ -97,7 +98,6 @@ public class LoginActivity extends BaseActivity implements LoginMvp.view {
             editor.putString("token", userData.getData().getToken());
             editor.putString("head", userData.getData().getHead());
             editor.apply();
-            hideLoading();
             startActivity(new Intent(LoginActivity.this, MainActivity.class));
             finish();
         }else {
@@ -108,6 +108,7 @@ public class LoginActivity extends BaseActivity implements LoginMvp.view {
     @Override
     public void onError(Throwable e) {
         HttpUtil.onError(e);
+        hideLoading();
     }
 
     @Override

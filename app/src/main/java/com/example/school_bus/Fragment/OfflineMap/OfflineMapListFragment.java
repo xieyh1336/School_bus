@@ -2,6 +2,8 @@ package com.example.school_bus.Fragment.OfflineMap;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -51,21 +53,19 @@ public class OfflineMapListFragment extends BaseVp2LazyLoadFragment {
 
     @Override
     public void lazyLoad() {
+        OfflineMapList1Adapter offlineMapList1Adapter = new OfflineMapList1Adapter(getContext());
         if (getActivity() != null){
             MKOfflineMap mkOfflineMap = ((MainActivity) getActivity()).offlineMapFragment.getMkOfflineMap();
 
             MyLog.e(TAG, "加载所有离线地图列表数据");
-            OfflineMapList1Adapter offlineMapList1Adapter = new OfflineMapList1Adapter(getContext());
             rvList.setAdapter(offlineMapList1Adapter);
-            rvList.setHasFixedSize(true);
-            rvList.setItemViewCacheSize(60);
             offlineMapList1Adapter.setData(mkOfflineMap);
 
             ((MainActivity) getActivity()).offlineMapFragment.setOfflineListener(new OfflineMapFragment.OfflineListener() {
                 @Override
                 public void mapListener(int type, int state) {
-                    //更新过程中的回调进度，可查看更新进度、新离线地图安装、版本更新提示。
-                    //type - 事件类型:
+                    // 更新过程中的回调进度，可查看更新进度、新离线地图安装、版本更新提示。
+                    // type - 事件类型:
                     // MKOfflineMap.TYPE_NEW_OFFLINE,
                     // MKOfflineMap.TYPE_DOWNLOAD_UPDATE,
                     // MKOfflineMap.TYPE_VER_UPDATE.
@@ -147,5 +147,26 @@ public class OfflineMapListFragment extends BaseVp2LazyLoadFragment {
                 }
             });
         }
+        etSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                MyLog.e(TAG, "输入长度：" + etSearch.getText().toString().replaceAll(" ", "").length());
+                if (etSearch.getText().toString().replaceAll(" ", "").length() > 0){
+                    offlineMapList1Adapter.setIsSearch(true, etSearch.getText().toString().replaceAll(" ", ""));
+                } else {
+                    offlineMapList1Adapter.setIsSearch(false, null);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
     }
 }

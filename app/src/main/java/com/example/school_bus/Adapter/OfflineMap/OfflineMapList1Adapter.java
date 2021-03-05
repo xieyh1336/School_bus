@@ -20,6 +20,7 @@ import com.baidu.mapapi.map.offline.MKOfflineMap;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.FileUtil;
 import com.example.school_bus.Utils.MyLog;
+import com.example.school_bus.Utils.MyToast;
 import com.example.school_bus.View.DownloadView;
 
 import java.util.List;
@@ -36,7 +37,7 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
     private static String TAG = "OfflineMapList1Adapter";
     private Context context;
     private MKOfflineMap mkOfflineMap;
-    private List<MKOLSearchRecord> allCity;//所有支持离线的城市
+    private List<MKOLSearchRecord> allCity;//所有支持离线的城市，搜索城市
     private boolean isOpenList = false;//当前是否打开二级地图
     private boolean isScroll = false;
     private int openPosition = 0;//打开二级地图索引
@@ -61,6 +62,16 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
         notifyDataSetChanged();
     }
 
+    public void setIsSearch(boolean isSearch, String text){
+        isOpenList = true;
+        if (isSearch){
+            allCity = mkOfflineMap.searchCity(text);
+        } else {
+            allCity = mkOfflineMap.getOfflineCityList();
+        }
+        notifyDataSetChanged();
+    }
+
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -74,6 +85,7 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
         holder.tvName.setText(allCity.get(position).cityName);//城市名
         holder.tvSize.setText(FileUtil.getFormatSize(allCity.get(position).dataSize));//包大小
         holder.rvList.setNestedScrollingEnabled(false);
+        holder.setIsRecyclable(false);//不复用
         if (allCity.get(position).cityType == 0 || allCity.get(position).cityType == 2){
             //全国基础包，2级城市
             holder.tvState.setVisibility(View.GONE);//隐藏“已下载”
@@ -134,12 +146,7 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
                                 MyLog.e(TAG, "离线包导入中");
                                 holder.tvState.setVisibility(View.VISIBLE);
                                 holder.tvState.setText("导入中...");
-                                holder.itemView.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        notifyDataSetChanged();
-                                    }
-                                });
+                                holder.itemView.post(this::notifyDataSetChanged);
                                 break;
                         }
                     }
@@ -152,30 +159,27 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
             holder.tvFunction.setVisibility(View.GONE);//隐藏下载按钮
             holder.rvList.setVisibility(View.GONE);//隐藏二级列表
             holder.ivRight.setImageResource(R.drawable.ic_arrow_bottom);//下方向箭头
-            holder.rvList.setHasFixedSize(true);
-            holder.rvList.setItemViewCacheSize(60);
             //设置背景
             holder.rvList.setBackgroundColor(Color.parseColor("#DCDCDC"));
-            OfflineMapList2Adapter offlineMapList2Adapter = new OfflineMapList2Adapter(context);
-            holder.rvList.setAdapter(offlineMapList2Adapter);
-            if (holder.rvList.getLayoutManager() != null){
-                ((LinearLayoutManager) holder.rvList.getLayoutManager()).setInitialPrefetchItemCount(allCity.size());
+            if (holder.rvList.getAdapter() == null){
+                OfflineMapList2Adapter offlineMapList2Adapter = new OfflineMapList2Adapter(context);
+                holder.rvList.setAdapter(offlineMapList2Adapter);
+                offlineMapList2Adapter.setData(mkOfflineMap, allCity.get(position).childCities);
             }
-            offlineMapList2Adapter.setData(mkOfflineMap, allCity.get(position).childCities);
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if (openPosition == position){
-                        isOpenList = !isOpenList;
-                    } else {
-                        openPosition = position;
-                        isOpenList = false;
-                    }
-                    if (!isOpenList){
-                        isScroll = true;
-                    }
-                    notifyDataSetChanged();
+            holder.itemView.setOnClickListener(v -> {
+                MyLog.e(TAG, "isOpen：" + isOpenList);
+                if (openPosition == position){
+                    MyLog.e(TAG, "openPosition == position");
+                    isOpenList = !isOpenList;
+                } else {
+                    MyLog.e(TAG, "openPosition != position");
+                    openPosition = position;
+                    isOpenList = false;
                 }
+                if (!isOpenList){
+                    isScroll = true;
+                }
+                notifyDataSetChanged();
             });
             //回调点击状态，防止刷新和点击冲突
             holder.rvList.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
@@ -209,13 +213,10 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
                     //当前正在关闭的，则打开
                     holder.rvList.setVisibility(View.VISIBLE);
                     holder.ivRight.setImageResource(R.drawable.ic_arrow_top);
-                    holder.itemView.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (callback != null && isScroll){
-                                callback.scrollPosition(position);
-                                isScroll = false;
-                            }
+                    holder.itemView.post(() -> {
+                        if (callback != null && isScroll){
+                            callback.scrollPosition(position);
+                            isScroll = false;
                         }
                     });
                 }
@@ -226,46 +227,37 @@ public class OfflineMapList1Adapter extends RecyclerView.Adapter<OfflineMapList1
         }
 
         //功能键
-        holder.tvFunction.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MyLog.e(TAG, "点击了" + holder.tvFunction.getText().toString());
-               if (holder.tvFunction.getText().toString().equals("下载")){
-                   mkOfflineMap.start(allCity.get(position).cityID);//开始下载
-                   notifyDataSetChanged();
-               }
+        holder.tvFunction.setOnClickListener(v -> {
+            MyLog.e(TAG, "点击了" + holder.tvFunction.getText().toString());
+            if (holder.tvFunction.getText().toString().equals("下载")){
+                mkOfflineMap.start(allCity.get(position).cityID);//开始下载
+                notifyDataSetChanged();
             }
         });
-        holder.vDownload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MyLog.e(TAG, "点击了下载圈");
-                if (holder.vDownload.getState() == DownloadView.START){
-                    //开始状态的，则暂停
-                    if (mkOfflineMap.pause(allCity.get(position).cityID)){
-                        //暂停成功
-                        notifyDataSetChanged();
-                    }
-                } else {
-                    //暂停状态的，则继续
-                    if (mkOfflineMap.start(allCity.get(position).cityID)){
-                        //开始成功
-                        notifyDataSetChanged();
-                    }
+        holder.vDownload.setOnClickListener(v -> {
+            MyLog.e(TAG, "点击了下载圈");
+            if (holder.vDownload.getState() == DownloadView.START){
+                //开始状态的，则暂停
+                if (mkOfflineMap.pause(allCity.get(position).cityID)){
+                    //暂停成功
+                    notifyDataSetChanged();
+                }
+            } else {
+                //暂停状态的，则继续
+                if (mkOfflineMap.start(allCity.get(position).cityID)){
+                    //开始成功
+                    notifyDataSetChanged();
                 }
             }
         });
         //测试，长按删除
-        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if (mkOfflineMap.remove(allCity.get(position).cityID)){
-                    MyLog.e(TAG, "删除成功");
-                    notifyDataSetChanged();
-                    return true;
-                }
-                return false;
+        holder.itemView.setOnLongClickListener(v -> {
+            if (mkOfflineMap.remove(allCity.get(position).cityID)){
+                MyLog.e(TAG, "删除成功");
+                notifyDataSetChanged();
+                return true;
             }
+            return false;
         });
 
     }

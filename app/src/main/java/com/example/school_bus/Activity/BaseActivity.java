@@ -29,10 +29,6 @@ import java.util.Objects;
  * Activity基类
  */
 public abstract class BaseActivity extends AppCompatActivity {
-    //以下是关闭app的广播字段
-    public final static String RECEIVER_ACTION_FINISH_MAIN = "receiver_action_finish_main";
-    public final static String RECEIVER_ACTION_FINISH_OFFLINE_MAP = "receiver_action_finish_offline_map";
-    private FinishActivityReceiver finishActivityReceiver;
 
     //以下是loading和toast
     protected Dialog loadingDialog;
@@ -84,33 +80,10 @@ public abstract class BaseActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //关闭activity广播
-        finishActivityReceiver = new FinishActivityReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(RECEIVER_ACTION_FINISH_MAIN);
-        intentFilter.addAction(RECEIVER_ACTION_FINISH_OFFLINE_MAP);
-        registerReceiver(finishActivityReceiver, intentFilter);
     }
 
     @Override
     protected void onDestroy() {
-        if (finishActivityReceiver != null){
-            unregisterReceiver(finishActivityReceiver);
-        }
         super.onDestroy();
-    }
-
-    /**
-     * 结束activity广播类
-     */
-    private class FinishActivityReceiver extends BroadcastReceiver{
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (RECEIVER_ACTION_FINISH_MAIN.equals(intent.getAction()) ||
-                    RECEIVER_ACTION_FINISH_OFFLINE_MAP.equals(intent.getAction())){
-                BaseActivity.this.finish();
-            }
-        }
     }
 }

@@ -12,12 +12,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.MainMvp;
-import com.example.school_bus.NetWork.MyServerException;
 import com.example.school_bus.Presenter.MainPresenter;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.ImageUtil;
 import com.example.school_bus.Utils.MyLog;
+import com.example.school_bus.Utils.ScreenUtils;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -45,6 +45,7 @@ public class GuideActivity extends BaseActivity implements MainMvp.view {
     }
 
     private void init() {
+        ScreenUtils.transparencyBar(this);
         Animation animation = AnimationUtils.loadAnimation(this, R.anim.to_big);
         animation.setFillAfter(true);
         ivLoading.startAnimation(animation);

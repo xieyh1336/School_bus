@@ -40,7 +40,6 @@ import com.example.school_bus.Mvp.MapSideMvp;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.Presenter.MapSidePresenter;
 import com.example.school_bus.R;
-import com.example.school_bus.Utils.BroadcastUtils;
 import com.example.school_bus.Utils.FileUtil;
 import com.example.school_bus.Utils.GlideUtils;
 import com.example.school_bus.Utils.HttpUtil;
@@ -437,14 +436,14 @@ public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
                 //登出
                 MyApp.clearToken();
                 startLogin();
-                if (getContext() != null) {
-                    BroadcastUtils.sendFinishActivityBroadcast(getContext());
+                if (getActivity() != null){
+                    getActivity().finish();
                 }
                 break;
             case R.id.ll_close:
                 //关闭app
-                if (getContext() != null) {
-                    BroadcastUtils.sendFinishActivityBroadcast(getContext());
+                if (getActivity() != null){
+                    getActivity().finish();
                 }
                 break;
             case R.id.iv_header:

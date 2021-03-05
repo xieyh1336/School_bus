@@ -84,6 +84,7 @@ public class OfflineMapFragment extends BaseVp2LazyLoadFragment {
                 // MKOfflineMap.TYPE_VER_UPDATE.
                 //state - 事件状态: 当type为TYPE_NEW_OFFLINE时，表示新安装的离线地图数目. 当type为TYPE_DOWNLOAD_UPDATE时，表示更新的城市ID.
                 if (offlineListener != null){
+                    //回调到离线地图
                     offlineListener.mapListener(type, state);
                 }
             }

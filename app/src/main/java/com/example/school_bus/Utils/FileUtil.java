@@ -53,14 +53,13 @@ public class FileUtil {
         String fileName = System.currentTimeMillis() + ".jpg";//图片名
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q){
             //文件夹
-            File appDir = new File(Environment.DIRECTORY_PICTURES, "蓝梦地图");
+            File appDir = new File(Environment.getExternalStorageDirectory(), "蓝梦地图");
             //如果没有文件夹，则创建文件夹
             if (!appDir.exists()){
                 if (appDir.mkdir()){
                     MyLog.e(TAG, "文件夹创建成功");
                 } else {
                     MyLog.e(TAG, "文件夹创建失败");
-                    return false;
                 }
             }
             //图片

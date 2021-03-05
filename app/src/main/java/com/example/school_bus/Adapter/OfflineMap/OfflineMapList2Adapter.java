@@ -69,6 +69,7 @@ public class OfflineMapList2Adapter extends RecyclerView.Adapter<OfflineMapList2
         holder.tvFunction.setText("下载");
         holder.rvList.setVisibility(View.GONE);//隐藏二级列表
         holder.ivRight.setImageResource(R.drawable.ic_arrow_right);//右方向箭头
+        holder.setIsRecyclable(false);//不复用
         //查找已下载的城市列表，如果一个都没有下载的话则列表为空对象
         if (mkOfflineMap.getAllUpdateInfo() != null && mkOfflineMap.getAllUpdateInfo().size() != 0) {
             for (int i = 0; i < mkOfflineMap.getAllUpdateInfo().size(); i++) {
@@ -121,12 +122,7 @@ public class OfflineMapList2Adapter extends RecyclerView.Adapter<OfflineMapList2
                             MyLog.e(TAG, "离线包导入中");
                             holder.tvState.setVisibility(View.VISIBLE);
                             holder.tvState.setText("导入中...");
-                            holder.itemView.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    notifyDataSetChanged();
-                                }
-                            });
+                            holder.itemView.post(this::notifyDataSetChanged);
                             break;
                     }
                 }
