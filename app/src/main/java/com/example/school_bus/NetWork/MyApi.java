@@ -23,8 +23,8 @@ import retrofit2.http.POST;
 import retrofit2.http.Part;
 import retrofit2.http.Query;
 
-public class API_login {
-    private static String TAG = "API_login";
+public class MyApi {
+    private static String TAG = "MyApi";
     public final static String ServerBaseUrl = "http://8.129.224.197/";
 
     public interface Api {
@@ -44,6 +44,10 @@ public class API_login {
         @Multipart
         @POST("school_bus/api/v1/upHeadImage.php")
         Observable<UserData> upHead(@Part MultipartBody.Part body);
+
+        //上传位置信息
+        @GET("school_bus/api/v1/upLocation.php")
+        Observable<UserData> upLocation(@Query("latitude") double latitude, @Query("longitude") double longitude);
     }
 
     public static Api createApi() {

@@ -27,6 +27,8 @@ public class UserData extends BaseData {
         private String time_out;
         private String token;
         private String head;
+        private String latitude;
+        private String longitude;
 
         public String getUsername() {
             return username;
@@ -74,6 +76,22 @@ public class UserData extends BaseData {
 
         public void setHead(String head) {
             this.head = head;
+        }
+
+        public String getLatitude() {
+            return latitude;
+        }
+
+        public void setLatitude(String latitude) {
+            this.latitude = latitude;
+        }
+
+        public String getLongitude() {
+            return longitude;
+        }
+
+        public void setLongitude(String longitude) {
+            this.longitude = longitude;
         }
     }
 }

@@ -2,7 +2,7 @@ package com.example.school_bus.Presenter;
 
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.MapSideMvp;
-import com.example.school_bus.NetWork.API_login;
+import com.example.school_bus.NetWork.MyApi;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -22,7 +22,7 @@ public class MapSidePresenter implements MapSideMvp.presenter {
 
     @Override
     public void upHead(MultipartBody.Part body) {
-        Observable<UserData> observable = API_login.createApi().upHead(body);
+        Observable<UserData> observable = MyApi.createApi().upHead(body);
         observable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

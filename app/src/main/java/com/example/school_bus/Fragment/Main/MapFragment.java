@@ -40,6 +40,8 @@ import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
 import com.example.school_bus.Entity.MapData;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
+import com.example.school_bus.Mvp.MapMvp;
+import com.example.school_bus.Presenter.MapPresenter;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.MyLog;
 
@@ -57,7 +59,7 @@ import butterknife.OnClick;
  * @所在包 com\example\school_bus\Fragment\MapFragment.java
  * 地图页面主页
  */
-public class MapFragment extends BaseVp2LazyLoadFragment {
+public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view {
     private static String TAG = "MapFragment";
     public final static int MAP_PERMISSION = 100;//地图权限申请码
     @BindView(R.id.mapView)
@@ -92,6 +94,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment {
     private MapBroadcast mapBroadcast;//我的广播
     private boolean isFirst = true;//是否第一次进入app
     private boolean isLoading = true;//地图是否正在加载
+    private MapPresenter mapPresenter = new MapPresenter(this);
 
     public static MapFragment newInstance() {
         return new MapFragment();
@@ -346,6 +349,8 @@ public class MapFragment extends BaseVp2LazyLoadFragment {
      * 刷新数据
      */
     private void notifyLocation(){
+        //上传位置信息
+        mapPresenter.upLocation(myLocation.getLatitude(), myLocation.getLongitude());
         MyLog.e(TAG, "当前地址：" + myLocation.getAddrStr());
         MyLog.e(TAG, "当前国家：" + myLocation.getCountry());
         MyLog.e(TAG, "当前省份：" + myLocation.getProvince());

@@ -2,7 +2,7 @@ package com.example.school_bus.Presenter;
 
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.LoginMvp;
-import com.example.school_bus.NetWork.API_login;
+import com.example.school_bus.NetWork.MyApi;
 
 import io.reactivex.Observable;
 import io.reactivex.Observer;
@@ -20,7 +20,7 @@ public class LoginPresenter implements LoginMvp.presenter{
 
     @Override
     public void login(String username, String password, String phone, int type) {
-        Observable<UserData> newsDataObservable = API_login.createApi().login(username, password, phone, type);
+        Observable<UserData> newsDataObservable = MyApi.createApi().login(username, password, phone, type);
         newsDataObservable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

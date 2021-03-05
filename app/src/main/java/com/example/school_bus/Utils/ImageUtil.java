@@ -2,7 +2,7 @@ package com.example.school_bus.Utils;
 
 import androidx.annotation.NonNull;
 
-import com.example.school_bus.NetWork.API_login;
+import com.example.school_bus.NetWork.MyApi;
 
 /**
  * @作者 yonghe Xie
@@ -13,7 +13,7 @@ import com.example.school_bus.NetWork.API_login;
  */
 public class ImageUtil {
 
-    public static String head = API_login.ServerBaseUrl + "school_bus/api/v1/upload/";
+    public static String head = MyApi.ServerBaseUrl + "school_bus/api/v1/upload/";
 
     /**
      * 获取头像的真实地址
