@@ -1,5 +1,6 @@
 package com.example.school_bus.Presenter;
 
+import com.example.school_bus.Entity.TestBus;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.MapMvp;
 import com.example.school_bus.NetWork.MyApi;
@@ -33,6 +34,64 @@ public class MapPresenter implements MapMvp.presenter {
                     @Override
                     public void onNext(UserData userData) {
 
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void testInsertBus(double latitude, double longitude) {
+        Observable<UserData> observable = MyApi.createApi().testInsertBus(latitude, longitude);
+        observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<UserData>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(UserData userData) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void testGetBus() {
+        Observable<TestBus> observable = MyApi.createApi().testGetBus();
+        observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<TestBus>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(TestBus testBus) {
+                        view.testGetBusResult(testBus);
                     }
 
                     @Override

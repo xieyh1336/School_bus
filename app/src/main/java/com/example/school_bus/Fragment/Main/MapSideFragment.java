@@ -540,7 +540,6 @@ public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
                 case ALBUM_REQUEST_CODE:
                     //相册回调
                     MyLog.e(TAG, "相册回调");
-                    MyLog.e(TAG, "弹窗是否显示：" + myPopupWindow.isShowing());
                     if (data != null && data.getData() != null && getContext() != null) {
                         upHead(FileUtil.uriToFile(data.getData(), getContext()));
                     } else {
@@ -550,7 +549,6 @@ public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
                 case TAILOR_REQUEST_CODE:
                     //图片剪裁回调
                     MyLog.e(TAG, "图片剪裁回调");
-                    MyLog.e(TAG, "弹窗是否显示：" + myPopupWindow.isShowing());
                     upHead(file);
                     break;
             }

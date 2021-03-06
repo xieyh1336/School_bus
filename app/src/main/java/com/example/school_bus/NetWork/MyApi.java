@@ -1,6 +1,7 @@
 package com.example.school_bus.NetWork;
 
 import com.example.school_bus.Entity.UserData;
+import com.example.school_bus.Entity.TestBus;
 import com.example.school_bus.MyApp;
 import com.example.school_bus.Utils.MyLog;
 
@@ -48,6 +49,14 @@ public class MyApi {
         //上传位置信息
         @GET("school_bus/api/v1/upLocation.php")
         Observable<UserData> upLocation(@Query("latitude") double latitude, @Query("longitude") double longitude);
+
+        //校车上传位置测试
+        @GET("school_bus/api/v1/testInsertBus.php")
+        Observable<UserData> testInsertBus(@Query("latitude") double latitude, @Query("longitude") double longitude);
+
+        //获取校车路线测试
+        @GET("school_bus/api/v1/testGetBus.php")
+        Observable<TestBus> testGetBus();
     }
 
     public static Api createApi() {
