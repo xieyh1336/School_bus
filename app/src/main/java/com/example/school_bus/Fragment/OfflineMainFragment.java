@@ -19,7 +19,7 @@ import com.baidu.mapapi.map.offline.MKOLSearchRecord;
 import com.baidu.mapapi.map.offline.MKOLUpdateElement;
 import com.baidu.mapapi.map.offline.MKOfflineMap;
 import com.baidu.mapapi.map.offline.MKOfflineMapListener;
-import com.example.school_bus.Activity.MainActivity;
+import com.example.school_bus.Activity.StudentActivity;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Fragment.OfflineMap.OfflineListFragment;
 import com.example.school_bus.Fragment.OfflineMap.OfflineManageFragment;
@@ -201,7 +201,7 @@ public class OfflineMainFragment extends BaseVp2LazyLoadFragment {
         super.onResume();
         if (getActivity() != null){
             //刷新列表样式
-            ((MainActivity) getActivity()).mapSideFragment.initList();
+            ((StudentActivity) getActivity()).mapSideFragment.initList();
         }
     }
 

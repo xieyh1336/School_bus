@@ -23,7 +23,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Activity.InsideOfflineActivity"></activity>
+        <activity android:name=".Activity.DriverActivity"></activity>
+        <activity android:name=".Activity.InsideOfflineActivity" />
         <activity
             android:name=".Activity.RegisterActivity"
             android:launchMode="singleTask"
@@ -33,7 +34,7 @@
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".Activity.MainActivity"
+            android:name=".Activity.StudentActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait" />
         <activity

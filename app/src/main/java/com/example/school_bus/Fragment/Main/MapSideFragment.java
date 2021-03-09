@@ -33,7 +33,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
-import com.example.school_bus.Activity.MainActivity;
+import com.example.school_bus.Activity.StudentActivity;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Fragment.BaseFragment;
 import com.example.school_bus.Mvp.MapSideMvp;
@@ -150,8 +150,8 @@ public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
      */
     public void initList() {
         if (getActivity() != null && getContext() != null){
-            for (int i = 0; i < ((MainActivity) getActivity()).fragmentList.size(); i++){
-                if (((MainActivity) getActivity()).getCurrentPager() == i){
+            for (int i = 0; i < ((StudentActivity) getActivity()).fragmentList.size(); i++){
+                if (((StudentActivity) getActivity()).getCurrentPager() == i){
                     //当前页
                     linearLayouts.get(i).setBackgroundColor(getContext().getResources().getColor(R.color.gray));
                     textViews.get(i).setTextColor(getContext().getResources().getColor(R.color.theme));
@@ -414,18 +414,18 @@ public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
             case R.id.ll_main:
                 //点击首页
                 if (getActivity() != null){
-                    ((MainActivity) getActivity()).closeSideView();//关闭侧边栏
+                    ((StudentActivity) getActivity()).closeSideView();//关闭侧边栏
                     new Handler().postDelayed(() -> {
-                        ((MainActivity) getActivity()).selectPager(0);//选择首页分页
+                        ((StudentActivity) getActivity()).selectPager(0);//选择首页分页
                     }, 200);
                 }
                 break;
             case R.id.ll_offline_map:
                 //点击离线地图
                 if (getActivity() != null){
-                    ((MainActivity) getActivity()).closeSideView();//关闭侧边栏
+                    ((StudentActivity) getActivity()).closeSideView();//关闭侧边栏
                     new Handler().postDelayed(() -> {
-                        ((MainActivity) getActivity()).selectPager(1);//选择离线地图分页
+                        ((StudentActivity) getActivity()).selectPager(1);//选择离线地图分页
                     }, 200);
                 }
                 break;
@@ -466,7 +466,7 @@ public class MapSideFragment extends BaseFragment implements MapSideMvp.view {
                     editor.putString("head", userData.getData().getHead());
                     editor.apply();
                     //更新头像
-                    ((MainActivity) getActivity()).updateHead(true);
+                    ((StudentActivity) getActivity()).updateHead(true);
                 }
             }
         } else {

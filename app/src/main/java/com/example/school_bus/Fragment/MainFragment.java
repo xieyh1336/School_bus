@@ -11,7 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.example.school_bus.Activity.MainActivity;
+import com.example.school_bus.Activity.StudentActivity;
 import com.example.school_bus.Entity.TabEntityData;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Fragment.Main.MapFragment;
@@ -125,7 +125,7 @@ public class MainFragment extends BaseVp2LazyLoadFragment implements FragmentOnK
         super.onResume();
         if (getActivity() != null){
             //刷新列表样式
-            ((MainActivity) getActivity()).mapSideFragment.initList();
+            ((StudentActivity) getActivity()).mapSideFragment.initList();
         }
     }
 

@@ -46,15 +46,15 @@ import butterknife.OnClick;
 /**
  * @作者 yonghe Xie
  * @创建/修改日期 2021-01-06 16:37
- * @类名 MainActivity
- * @所在包 com\example\school_bus\Activity\MainActivity.java
+ * @类名 StudentActivity
+ * @所在包 com\example\school_bus\Activity\StudentActivity.java
  * 主页面
  * fragment：
  * 侧边栏：{@link MapSideFragment}
  */
-public class MainActivity extends BaseActivity {
+public class StudentActivity extends BaseActivity {
 
-    private static String TAG = "MainActivity";
+    private static String TAG = "StudentActivity";
     @BindView(R.id.vp)
     ViewPager2 vp;
     @BindView(R.id.iv_header)

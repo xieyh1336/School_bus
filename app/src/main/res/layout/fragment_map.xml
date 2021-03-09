@@ -91,6 +91,19 @@
 
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/tv_up"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/white"
+            android:text="上传"
+            android:textSize="17sp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp"
+            android:visibility="gone"
+            android:padding="10dp"/>
+
     </RelativeLayout>
 
 </LinearLayout>

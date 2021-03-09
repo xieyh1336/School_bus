@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.baidu.mapapi.map.offline.MKOfflineMap;
-import com.example.school_bus.Activity.MainActivity;
+import com.example.school_bus.Activity.StudentActivity;
 import com.example.school_bus.Adapter.OfflineMap.OfflineList1Adapter;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Fragment.OfflineMainFragment;
@@ -51,13 +51,13 @@ public class OfflineManageFragment extends BaseVp2LazyLoadFragment {
     public void lazyLoad() {
         offlineList1Adapter = new OfflineList1Adapter(getContext(), false);
         if (getActivity() != null) {
-            MKOfflineMap mkOfflineMap = ((MainActivity) getActivity()).offlineMainFragment.getMkOfflineMap();
+            MKOfflineMap mkOfflineMap = ((StudentActivity) getActivity()).offlineMainFragment.getMkOfflineMap();
 
             MyLog.e(TAG, "加载已下载地图列表数据");
             rvList.setAdapter(offlineList1Adapter);
             offlineList1Adapter.setData(mkOfflineMap);
 
-            ((MainActivity) getActivity()).offlineMainFragment.setOfflineListener2(new OfflineMainFragment.OfflineListener2() {
+            ((StudentActivity) getActivity()).offlineMainFragment.setOfflineListener2(new OfflineMainFragment.OfflineListener2() {
                 @Override
                 public void mapListener(int type, int state) {
                     // 更新过程中的回调进度，可查看更新进度、新离线地图安装、版本更新提示。

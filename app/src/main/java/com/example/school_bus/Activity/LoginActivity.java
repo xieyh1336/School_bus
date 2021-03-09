@@ -98,7 +98,11 @@ public class LoginActivity extends BaseActivity implements LoginMvp.view {
             editor.putString("token", userData.getData().getToken());
             editor.putString("head", userData.getData().getHead());
             editor.apply();
-            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+            if (userData.getData().getIs_student().equals("1")){
+                startActivity(new Intent(LoginActivity.this, StudentActivity.class));
+            } else {
+                startActivity(new Intent(LoginActivity.this, DriverActivity.class));
+            }
             finish();
         }else {
             showToast(userData.getMessage());

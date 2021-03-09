@@ -73,7 +73,11 @@ public class GuideActivity extends BaseActivity implements MainMvp.view {
             editor.putString("token", userData.getData().getToken());
             editor.putString("head", userData.getData().getHead());
             editor.apply();
-            startActivity(new Intent(GuideActivity.this, MainActivity.class));
+            if (userData.getData().getIs_student().equals("1")){
+                startActivity(new Intent(GuideActivity.this, StudentActivity.class));
+            } else {
+                startActivity(new Intent(GuideActivity.this, DriverActivity.class));
+            }
         } else {
             //跳转登陆页面
             MyLog.e(TAG, "token已过期，跳转登录页面");

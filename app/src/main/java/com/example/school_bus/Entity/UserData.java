@@ -23,12 +23,11 @@ public class UserData extends BaseData {
 
         private String username;
         private String password;
+        private String is_student;
         private String phone;
         private String time_out;
         private String token;
         private String head;
-        private String latitude;
-        private String longitude;
 
         public String getUsername() {
             return username;
@@ -44,6 +43,14 @@ public class UserData extends BaseData {
 
         public void setPassword(String password) {
             this.password = password;
+        }
+
+        public String getIs_student() {
+            return is_student;
+        }
+
+        public void setIs_student(String is_student) {
+            this.is_student = is_student;
         }
 
         public String getPhone() {
@@ -76,22 +83,6 @@ public class UserData extends BaseData {
 
         public void setHead(String head) {
             this.head = head;
-        }
-
-        public String getLatitude() {
-            return latitude;
-        }
-
-        public void setLatitude(String latitude) {
-            this.latitude = latitude;
-        }
-
-        public String getLongitude() {
-            return longitude;
-        }
-
-        public void setLongitude(String longitude) {
-            this.longitude = longitude;
         }
     }
 }

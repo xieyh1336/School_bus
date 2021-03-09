@@ -1,10 +1,6 @@
 package com.example.school_bus.Fragment.Main;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -44,13 +40,13 @@ import com.baidu.mapapi.model.LatLng;
 import com.example.school_bus.Entity.MapData;
 import com.example.school_bus.Entity.TestBus;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
+import com.example.school_bus.Manage.MapDrawManage;
 import com.example.school_bus.Mvp.MapMvp;
 import com.example.school_bus.Presenter.MapPresenter;
 import com.example.school_bus.R;
 import com.example.school_bus.Utils.MyLog;
 import com.example.school_bus.View.MyPopupWindow;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -90,6 +86,8 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     TextView tvRightClick;
     @BindView(R.id.tv_right_me)
     TextView tvRightMe;
+    @BindView(R.id.tv_up)
+    TextView tvUp;
     private LocationClient locationClient;//用于发起定位
     private BDLocation myLocation = new BDLocation();//监听，我的位置
     private BDLocation clickLocation = new BDLocation();//点击位置
@@ -97,14 +95,14 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     private BaiduMap baiduMap;//定位图层
     private MapStatusUpdate mapStatusUpdate;
     private UiSettings uiSettings;//UI设置
-    private MarkerOptions markerOptions = new MarkerOptions();//用于在地图上添加Market
-    private DecimalFormat decimalFormat = new DecimalFormat("#.00");//保留小数点后两位
     private boolean isFirst = true;//是否第一次进入app
     private boolean isLoading = true;//地图是否正在加载
     private MyPopupWindow myPopupWindow;//功能区
     private boolean switch1 = false, switch2 = false, switch3 = false;//功能区选择框
-    private List<LatLng> points;//校车路线数据
-    private OverlayOptions testBus, options;//绘制
+    private MapDrawManage mapDrawManage;//绘制管理类
+    private MarkerOptions markerOptions = new MarkerOptions();//绘制点击点
+    private OverlayOptions testBus;//绘制
+    private double clickLatitude, clickLongitude;
     private MapPresenter mapPresenter = new MapPresenter(this);
 
     public static MapFragment newInstance() {
@@ -131,7 +129,6 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
 
     @Override
     public void lazyLoad() {
-        MyLog.e(TAG, "MapFragment懒加载");
         isLoading = true;
 
         llRight.setVisibility(View.GONE);
@@ -148,15 +145,15 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     }
 
     /**
-     *  申请权限
+     * 申请权限
      */
     public void requestPermissions() {
-        if (getContext() != null){
+        if (getContext() != null) {
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
                     || ContextCompat.checkSelfPermission(getContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                 //申请权限
-                if (getActivity() != null){
+                if (getActivity() != null) {
                     ActivityCompat.requestPermissions(getActivity(), new String[]{
                             Manifest.permission.ACCESS_FINE_LOCATION,
                             Manifest.permission.READ_PHONE_STATE,
@@ -176,6 +173,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
         //监听
         setListener();
         isLoading = false;
+        mapDrawManage = new MapDrawManage(baiduMap, markerOptions);
     }
 
     public void initMap() {
@@ -239,6 +237,9 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
                 MyLog.e(TAG, "点击了地图：");
                 MyLog.e(TAG, "纬度：" + latLng.latitude);
                 MyLog.e(TAG, "经度：" + latLng.longitude);
+                //记录点击位置
+                clickLatitude = latLng.latitude;
+                clickLongitude = latLng.longitude;
 
                 //记录点击位置的经纬度
                 clickLocation.setLatitude(latLng.latitude);
@@ -252,17 +253,18 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
                 tvRightClickLongitude.setText(String.format(Locale.getDefault(), "%.6f", clickLocation.getLongitude()));
 
                 //如果开启了绘制点视图功能
-                if (switch2){
-                    //添加之前把上一次点击的图标清空
-                    baiduMap.clear();
-                    if (switch3){
-                        baiduMap.addOverlay(testBus);
-                    }
-                    //构建MarkerOption，用于在地图上添加Market
-                    markerOptions.position(latLng);
-                    options = markerOptions;
-                    //在地图上添加Marker，并显示
-                    baiduMap.addOverlay(options);
+                if (switch2) {
+                    mapDrawManage.updateClick(latLng);
+//                    //添加之前把上一次点击的图标清空
+//                    baiduMap.clear();
+//                    if (switch3) {
+//                        baiduMap.addOverlay(testBus);
+//                    }
+//                    //构建MarkerOption，用于在地图上添加Market
+//                    markerOptions.position(latLng);
+//                    options = markerOptions;
+//                    //在地图上添加Marker，并显示
+//                    baiduMap.addOverlay(options);
                 }
             }
 
@@ -299,7 +301,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
              */
             @Override
             public void onMapStatusChangeStart(MapStatus mapStatus, int reason) {
-                switch (reason){
+                switch (reason) {
                     case REASON_GESTURE:
                         //用户手势触发导致地图状态改变
                         MyLog.e(TAG, "用户手势触发地图状态改变，mapStatus：" + mapStatus);
@@ -364,55 +366,65 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
         });
     }
 
-    private void setListener(){
-            myPopupWindow.setOnSwitchListener(new MyPopupWindow.OnSwitchListener() {
-                @Override
-                public void onSwitch(CompoundButton buttonView, int num, boolean isSelect) {
-                    switch (num){
-                        case 1:
-                            //是否显示坐标
-                            switch1 = isSelect;
+    private void setListener() {
+        myPopupWindow.setOnSwitchListener(new MyPopupWindow.OnSwitchListener() {
+            @Override
+            public void onSwitch(CompoundButton buttonView, int num, boolean isSelect) {
+                switch (num) {
+                    case 1:
+                        //是否显示坐标
+                        switch1 = isSelect;
+                        if (isSelect) {
+                            llRight.setVisibility(View.VISIBLE);
+                        } else {
+                            llRight.setVisibility(View.GONE);
+                        }
+                        break;
+                    case 2:
+                        //是否绘制点视图
+                        switch2 = isSelect;
+                        if (isSelect){
+                            mapDrawManage.showClick();
+                        } else {
+                            mapDrawManage.hideClick();
+                        }
+//                        if (!isSelect) {
+//                            baiduMap.clear();//清空视图
+//                            if (switch3) {
+//                                baiduMap.addOverlay(testBus);
+//                            }
+//                        }
+                        break;
+                    case 3:
+                        //测试：是否绘制校车轨迹
+                        MyLog.e(TAG, "测试" + testBus);
+                        if (testBus != null) {
                             if (isSelect){
-                                llRight.setVisibility(View.VISIBLE);
+                                mapDrawManage.add(testBus);
                             } else {
-                                llRight.setVisibility(View.GONE);
+                                mapDrawManage.clear(testBus);
                             }
-                            break;
-                        case 2:
-                            //是否绘制点视图
-                            switch2 = isSelect;
-                            if (!isSelect){
-                                baiduMap.clear();//清空视图
-                                if (switch3){
-                                    baiduMap.addOverlay(testBus);
-                                }
-                            }
-                            break;
-                        case 3:
-                            //测试：是否绘制校车轨迹
-                            MyLog.e(TAG, "测试" + testBus);
-                            if (testBus != null){
-                                if (isSelect){
-                                    MyLog.e(TAG, "绘制校车路线");
-                                    baiduMap.addOverlay(testBus);
-                                } else {
-                                    baiduMap.clear();
-                                    if (switch2){
-                                        baiduMap.addOverlay(options);
-                                    }
-                                }
-                            }
-                            switch3 = isSelect;
-                            break;
-                    }
+//                            if (isSelect) {
+//                                MyLog.e(TAG, "绘制校车路线");
+//                                baiduMap.addOverlay(testBus);
+//                            } else {
+//                                baiduMap.clear();
+//                                if (switch2) {
+//                                    baiduMap.addOverlay(options);
+//                                }
+//                            }
+                        }
+                        switch3 = isSelect;
+                        break;
                 }
-            });
+            }
+        });
     }
 
     /**
      * 刷新数据
      */
-    private void notifyLocation(){
+    private void notifyLocation() {
         //上传位置信息
         mapPresenter.upLocation(myLocation.getLatitude(), myLocation.getLongitude());
         MyLog.e(TAG, "当前地址：" + myLocation.getAddrStr());
@@ -453,16 +465,16 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
         }
     }
 
-    @OnClick({R.id.iv_my_location,R.id.ic_menu})
+    @OnClick({R.id.iv_my_location, R.id.ic_menu, R.id.tv_up})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_my_location:
-                if (!isLoading){
+                if (!isLoading) {
                     //移动到我的位置
                     LatLng latLng = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
                     mapStatusUpdate = MapStatusUpdateFactory.newLatLng(latLng);
                     baiduMap.animateMapStatus(mapStatusUpdate);
-                    if (!isLock){
+                    if (!isLock) {
                         //锁定状态
                         ivMyLocation.setImageResource(R.mipmap.positioning_select);
                         isLock = true;
@@ -475,17 +487,22 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
                 }
                 break;
             case R.id.ic_menu:
-                if (myPopupWindow != null){
-                    if (myPopupWindow.getPopup() == null){
+                if (myPopupWindow != null) {
+                    if (myPopupWindow.getPopup() == null) {
                         myPopupWindow.showMapFunction(ivMenu);
                     } else {
-                        if (myPopupWindow.getPopup().isShowing()){
+                        if (myPopupWindow.getPopup().isShowing()) {
                             myPopupWindow.hide();
                         } else {
                             myPopupWindow.showMapFunction(ivMenu);
                         }
                     }
                 }
+                break;
+            case R.id.tv_up:
+                //上传路线
+                mapPresenter.testInsertBus(clickLatitude, clickLongitude);
+                showToast("上传成功");
                 break;
         }
     }
@@ -505,7 +522,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (locationClient != null){
+        if (locationClient != null) {
             locationClient.stop();
         }
         mapView.onDestroy();
@@ -516,8 +533,9 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     public void testGetBusResult(TestBus testBus) {
         MyLog.e(TAG, "回调");
         //获取测试校车路线点
-        points = new ArrayList<>();
-        for (int i = 0; i < testBus.getData().size(); i++){
+        //校车路线数据
+        List<LatLng> points = new ArrayList<>();
+        for (int i = 0; i < testBus.getData().size(); i++) {
             LatLng p = new LatLng(Double.parseDouble(testBus.getData().get(i).getLatitude()), Double.parseDouble(testBus.getData().get(i).getLongitude()));
             points.add(p);
         }
