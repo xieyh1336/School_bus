@@ -1,8 +1,5 @@
 package com.example.school_bus.Utils;
 
-import android.content.Context;
-import android.widget.Toast;
-
 import com.example.school_bus.NetWork.MyServerException;
 
 import okhttp3.OkHttpClient;

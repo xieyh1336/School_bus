@@ -38,11 +38,9 @@
     </LinearLayout>
 
     <include
-        android:id="@+id/loading_view"
         layout="@layout/loading_view"/>
 
     <include
-        android:id="@+id/error_view"
         layout="@layout/error_view"/>
 
 </LinearLayout>

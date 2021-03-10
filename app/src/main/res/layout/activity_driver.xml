@@ -8,6 +8,12 @@
     android:background="@color/gray"
     tools:context=".Activity.DriverActivity">
 
+    <include layout="@layout/loading_view"
+        android:visibility="gone"/>
+
+    <include layout="@layout/error_view"
+        android:visibility="gone"/>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -82,6 +88,13 @@
             android:layout_height="wrap_content"
             android:textSize="16sp"
             tools:text="当前状态：未发车"/>
+
+        <TextView
+            android:id="@+id/tv_plates"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            tools:text="当前车辆：桂C_E4561"/>
 
     </LinearLayout>
 

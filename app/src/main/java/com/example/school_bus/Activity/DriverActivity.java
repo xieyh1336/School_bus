@@ -1,16 +1,20 @@
 package com.example.school_bus.Activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.core.view.GravityCompat;
 
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
@@ -25,9 +29,14 @@ import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
+import com.example.school_bus.Entity.BaseData;
+import com.example.school_bus.Entity.DriverStateData;
 import com.example.school_bus.Fragment.Main.MapFragment;
+import com.example.school_bus.Mvp.DriverMvp;
 import com.example.school_bus.MyApp;
+import com.example.school_bus.Presenter.DriverPresenter;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.MyLog;
 
 import java.util.Objects;
@@ -36,8 +45,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class DriverActivity extends BaseActivity {
+public class DriverActivity extends BaseActivity implements DriverMvp.view {
 
+    public static final int RUNNING = 200;
     private static String TAG = "DriverActivity";
     public final static int MAP_PERMISSION = 100;//地图权限申请码
     @BindView(R.id.tv_login_out)
@@ -56,11 +66,18 @@ public class DriverActivity extends BaseActivity {
     TextView tvState;
     @BindView(R.id.mapView)
     MapView mapView;
+    @BindView(R.id.loading_view)
+    LinearLayout loadingView;
+    @BindView(R.id.error_view)
+    LinearLayout errorView;
+    @BindView(R.id.tv_plates)
+    TextView tvPlates;
     private BDLocation myLocation = new BDLocation();//监听，我的位置
     private BaiduMap baiduMap;//定位图层
     private LocationClient locationClient;//用于发起定位
-    private UiSettings uiSettings;//UI设置
     private long secondBackTime;
+    private boolean isRunning = false;
+    private DriverPresenter driverPresenter = new DriverPresenter(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +89,8 @@ public class DriverActivity extends BaseActivity {
         SDKInitializer.setCoordType(CoordType.BD09LL);
         setContentView(R.layout.activity_driver);
         ButterKnife.bind(this);
+        loadingView.setVisibility(View.VISIBLE);
+        errorView.setVisibility(View.GONE);
         requestPermissions();
     }
 
@@ -79,31 +98,34 @@ public class DriverActivity extends BaseActivity {
      * 申请权限
      */
     public void requestPermissions() {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
-                    || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                //申请权限
-                    ActivityCompat.requestPermissions(this, new String[]{
-                            Manifest.permission.ACCESS_FINE_LOCATION,
-                            Manifest.permission.READ_PHONE_STATE,
-                            Manifest.permission.WRITE_EXTERNAL_STORAGE
-                    }, MAP_PERMISSION);
-
-            } else {
-                init();
-            }
-
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
+                || ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            //申请权限
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, MAP_PERMISSION);
+        } else {
+            init();
+        }
     }
 
-    private void init(){
+    private void init() {
         tvDriverName.setText(MyApp.getUserName());
+        tvState.setText("当前状态：待发车");
+        new Handler().postDelayed(() -> {
+            driverPresenter.getDriverState();//获取当前司机状态
+        }, 1000);
         //定位初始化
         locationClient = new LocationClient(this);
         //地图的定位图层
         baiduMap = mapView.getMap();
         //开启地图的定位图层
         baiduMap.setMyLocationEnabled(true);
-        uiSettings = baiduMap.getUiSettings();
+        //UI设置
+        UiSettings uiSettings = baiduMap.getUiSettings();
         uiSettings.setScrollGesturesEnabled(false);//禁止手势
         //服务基本设置
         LocationClientOption option = new LocationClientOption();
@@ -127,7 +149,7 @@ public class DriverActivity extends BaseActivity {
         locationClient.start();
     }
 
-    private void notifyLocation(){
+    private void notifyLocation() {
         tvLatitude.setText(String.valueOf(myLocation.getLatitude()));
         tvLongitude.setText(String.valueOf(myLocation.getLongitude()));
 
@@ -146,17 +168,38 @@ public class DriverActivity extends BaseActivity {
         baiduMap.animateMapStatus(mapStatusUpdate);
     }
 
-    @OnClick({R.id.tv_run, R.id.tv_arrive, R.id.tv_login_out})
+    @OnClick({R.id.tv_run, R.id.tv_arrive, R.id.tv_login_out, R.id.error_view})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.tv_run:
+                if (isRunning) {
+                    showToast("当前正在出车，不能再发车！");
+                } else {
+                    startActivityForResult(new Intent(DriverActivity.this, WaitingBusListActivity.class), RUNNING);
+                }
                 break;
             case R.id.tv_arrive:
+                if (isRunning){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(DriverActivity.this);
+                    builder.setMessage("确定到达吗？");
+                    builder.setPositiveButton("确定", (dialog, which) -> {
+                        driverPresenter.arriveBus();
+                    });
+                    builder.setNegativeButton("取消", null);
+                    builder.show();
+                } else {
+                    showToast("当前未发车，请发车到达目的地后再点击到达");
+                }
                 break;
             case R.id.tv_login_out:
                 MyApp.clearToken();
                 startLogin();
                 finish();
+                break;
+            case R.id.error_view:
+                driverPresenter.getDriverState();//获取当前司机状态
+                errorView.setVisibility(View.GONE);
+                loadingView.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -187,7 +230,7 @@ public class DriverActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (locationClient != null){
+        if (locationClient != null) {
             locationClient.stop();
         }
         mapView.onDestroy();
@@ -213,6 +256,84 @@ public class DriverActivity extends BaseActivity {
             } else {
                 showToast("发生未知错误");
             }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == RUNNING && resultCode == RUNNING) {
+            //选择车次回调
+            if (data != null) {
+                String id = data.getStringExtra("id");
+                if (id != null) {
+                    driverPresenter.runBus(id);//发车
+                } else {
+                    showToast("未知错误");
+                }
+            } else {
+                showToast("取消发车");
+            }
+        }
+    }
+
+    @Override
+    public void runBusResult(BaseData baseData) {
+        if (baseData.isSuccess()) {
+            showToast("发车成功");
+            new Handler().postDelayed(() -> {
+                driverPresenter.getDriverState();//获取当前司机状态
+            }, 1000);
+        } else {
+            showToast("发车失败，请重试");
+        }
+    }
+
+    @SuppressLint("SetTextI18n")
+    @Override
+    public void getDriverStateResult(DriverStateData driverStateData) {
+        if (driverStateData.isSuccess()) {
+            errorView.setVisibility(View.GONE);
+            loadingView.setVisibility(View.GONE);
+            if (driverStateData.getData().getState().equals("0")) {
+                isRunning = false;
+                tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
+                tvPlates.setText("当前车辆：无");
+            } else if (driverStateData.getData().getState().equals("1")) {
+                isRunning = true;
+                tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
+                tvPlates.setText("当前车辆：" + driverStateData.getData().getPlate());
+            }
+        } else {
+            errorView.setVisibility(View.VISIBLE);
+            loadingView.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void arriveBusResult(BaseData baseData) {
+        if (baseData.isSuccess()){
+            showToast("到达成功");
+            new Handler().postDelayed(() -> {
+                driverPresenter.getDriverState();//获取当前司机状态
+            }, 1000);
+        } else {
+            showToast("到达失败，请重试");
+        }
+    }
+
+    @Override
+    public void onError(Throwable e, String type) {
+        switch (type) {
+            case "runBus":
+            case "arriveBus":
+                HttpUtil.onError(e);
+                break;
+            case "getDriverState":
+                errorView.setVisibility(View.VISIBLE);
+                loadingView.setVisibility(View.GONE);
+                HttpUtil.onError(e);
+                break;
         }
     }
 

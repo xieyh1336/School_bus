@@ -7,12 +7,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <include
-        android:id="@+id/loading_view"
         layout="@layout/loading_view"
         android:visibility="gone"/>
 
     <include
-        android:id="@+id/error_view"
         layout="@layout/error_view"
         android:visibility="gone"/>
 

@@ -1,5 +1,8 @@
 package com.example.school_bus.NetWork;
 
+import com.example.school_bus.Entity.BaseData;
+import com.example.school_bus.Entity.BusListData;
+import com.example.school_bus.Entity.DriverStateData;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Entity.TestBus;
 import com.example.school_bus.MyApp;
@@ -49,6 +52,29 @@ public class MyApi {
         //上传位置信息
         @GET("school_bus/api/v1/upLocation.php")
         Observable<UserData> upLocation(@Query("latitude") double latitude, @Query("longitude") double longitude);
+
+        //获取校车路线
+        @GET("school_bus/api/v1/getBusWay.php")
+        Observable<UserData> getBusWay(@Query("type") int type);
+
+        //获取等待的车辆
+        @GET("school_bus/api/v1/getAllWaitingBus.php")
+        Observable<BusListData> getAllWaitingBus();
+
+        //获取司机当前状态
+        @GET("school_bus/api/v1/getDriverState.php")
+        Observable<DriverStateData> getDriverState();
+
+        //发车
+        @GET("school_bus/api/v1/runBus.php")
+        Observable<BaseData> runBus(@Query("id") String id);
+
+        //到达
+        @GET("school_bus/api/v1/arriveBus.php")
+        Observable<BaseData> arriveBus();
+
+
+        //---------------------------------------------test-----------------------------------------------------------
 
         //校车上传位置测试
         @GET("school_bus/api/v1/testInsertBus.php")
