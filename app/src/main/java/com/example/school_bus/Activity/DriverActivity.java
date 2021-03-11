@@ -76,7 +76,14 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
     private BaiduMap baiduMap;//定位图层
     private LocationClient locationClient;//用于发起定位
     private long secondBackTime;
+    //司机状态
     private boolean isRunning = false;
+    private DriverStateData driverStateData;
+    //定时器
+    private Handler handler = new Handler();
+    private Runnable runnable;
+    private int handlerTime = 5000;
+
     private DriverPresenter driverPresenter = new DriverPresenter(this);
 
     @Override
@@ -113,11 +120,16 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
     }
 
     private void init() {
+        //初始化定时器
+        runnable = () -> {
+            MyLog.e(TAG, "定时器，上传行驶过程的位置信息");
+            driverPresenter.upBusLocation(myLocation.getLatitude(), myLocation.getLongitude());
+            handler.postDelayed(runnable, handlerTime);
+        };
+
         tvDriverName.setText(MyApp.getUserName());
         tvState.setText("当前状态：待发车");
-        new Handler().postDelayed(() -> {
-            driverPresenter.getDriverState();//获取当前司机状态
-        }, 1000);
+        getDriverState(true);//初始化获取司机状态
         //定位初始化
         locationClient = new LocationClient(this);
         //地图的定位图层
@@ -168,6 +180,37 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
         baiduMap.animateMapStatus(mapStatusUpdate);
     }
 
+    /**
+     * 是否发车
+     * @param isRunning 是否发车
+     */
+    @SuppressLint("SetTextI18n")
+    private void runBus(boolean isRunning){
+        MyLog.e(TAG, "是否发车");
+        if (isRunning){
+            //发车
+            this.isRunning = true;
+            tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
+            tvPlates.setText("当前车辆：" + driverStateData.getData().getPlate());
+            handler.postDelayed(runnable, handlerTime);
+            showToast("发车成功");
+        } else {
+            this.isRunning = false;
+            tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
+            tvPlates.setText("当前车辆：无");
+            showToast("到达成功");
+        }
+    }
+
+    private void getDriverState(boolean isInit){
+        if (!isInit){
+            showLoading("加载中...");
+        }
+        new Handler().postDelayed(() -> {
+            driverPresenter.getDriverState();//获取当前司机状态
+        }, 1000);
+    }
+
     @OnClick({R.id.tv_run, R.id.tv_arrive, R.id.tv_login_out, R.id.error_view})
     public void onViewClicked(View view) {
         switch (view.getId()) {
@@ -183,7 +226,8 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
                     AlertDialog.Builder builder = new AlertDialog.Builder(DriverActivity.this);
                     builder.setMessage("确定到达吗？");
                     builder.setPositiveButton("确定", (dialog, which) -> {
-                        driverPresenter.arriveBus();
+                        handler.removeCallbacksAndMessages(null);
+                        new Handler().postDelayed(() -> driverPresenter.arriveBus(myLocation.getLatitude() , myLocation.getLongitude()), 1000);
                     });
                     builder.setNegativeButton("取消", null);
                     builder.show();
@@ -267,7 +311,7 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
             if (data != null) {
                 String id = data.getStringExtra("id");
                 if (id != null) {
-                    driverPresenter.runBus(id);//发车
+                    driverPresenter.runBus(id, myLocation.getLatitude() , myLocation.getLongitude());//发车
                 } else {
                     showToast("未知错误");
                 }
@@ -280,29 +324,23 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
     @Override
     public void runBusResult(BaseData baseData) {
         if (baseData.isSuccess()) {
-            showToast("发车成功");
-            new Handler().postDelayed(() -> {
-                driverPresenter.getDriverState();//获取当前司机状态
-            }, 1000);
+            getDriverState(false);//发车成功获取司机状态
         } else {
             showToast("发车失败，请重试");
         }
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public void getDriverStateResult(DriverStateData driverStateData) {
+        this.driverStateData = driverStateData;
+        hideLoading();
         if (driverStateData.isSuccess()) {
             errorView.setVisibility(View.GONE);
             loadingView.setVisibility(View.GONE);
             if (driverStateData.getData().getState().equals("0")) {
-                isRunning = false;
-                tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
-                tvPlates.setText("当前车辆：无");
+                runBus(false);
             } else if (driverStateData.getData().getState().equals("1")) {
-                isRunning = true;
-                tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
-                tvPlates.setText("当前车辆：" + driverStateData.getData().getPlate());
+                runBus(true);
             }
         } else {
             errorView.setVisibility(View.VISIBLE);
@@ -313,12 +351,18 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
     @Override
     public void arriveBusResult(BaseData baseData) {
         if (baseData.isSuccess()){
-            showToast("到达成功");
-            new Handler().postDelayed(() -> {
-                driverPresenter.getDriverState();//获取当前司机状态
-            }, 1000);
+            getDriverState(false);//到达成功获取司机状态
         } else {
             showToast("到达失败，请重试");
+        }
+    }
+
+    @Override
+    public void upBusLocationResult(BaseData baseData) {
+        if (baseData.isSuccess()){
+            MyLog.e(TAG, "行驶过程位置信息上传成功");
+        } else {
+            MyLog.e(TAG, "行驶过程信息上传失败");
         }
     }
 

@@ -20,8 +20,8 @@ public class DriverPresenter implements DriverMvp.presenter {
     }
 
     @Override
-    public void runBus(String id) {
-        Observable<BaseData> observable = MyApi.createApi().runBus(id);
+    public void runBus(String id, double latitude, double longitude) {
+        Observable<BaseData> observable = MyApi.createApi().runBus(id, latitude, longitude);
         observable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -78,8 +78,8 @@ public class DriverPresenter implements DriverMvp.presenter {
     }
 
     @Override
-    public void arriveBus() {
-        Observable<BaseData> observable = MyApi.createApi().arriveBus();
+    public void arriveBus(double latitude, double longitude) {
+        Observable<BaseData> observable = MyApi.createApi().arriveBus(latitude, longitude);
         observable
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -92,6 +92,35 @@ public class DriverPresenter implements DriverMvp.presenter {
                     @Override
                     public void onNext(BaseData baseData) {
                         view.arriveBusResult(baseData);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        view.onError(e, "arriveBus");
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void upBusLocation(double latitude, double longitude) {
+        Observable<BaseData> observable = MyApi.createApi().upBusLocation(latitude, longitude);
+        observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseData>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(BaseData baseData) {
+                        view.upBusLocationResult(baseData);
                     }
 
                     @Override

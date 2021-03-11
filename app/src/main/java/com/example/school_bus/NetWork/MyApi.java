@@ -67,11 +67,15 @@ public class MyApi {
 
         //发车
         @GET("school_bus/api/v1/runBus.php")
-        Observable<BaseData> runBus(@Query("id") String id);
+        Observable<BaseData> runBus(@Query("id") String id, @Query("latitude") double latitude, @Query("longitude") double longitude);
 
         //到达
         @GET("school_bus/api/v1/arriveBus.php")
-        Observable<BaseData> arriveBus();
+        Observable<BaseData> arriveBus(@Query("latitude") double latitude, @Query("longitude") double longitude);
+
+        //行驶过程中位置上传
+        @GET("school_bus/api/v1/upBusLocation.php")
+        Observable<BaseData> upBusLocation(@Query("latitude") double latitude, @Query("longitude") double longitude);
 
 
         //---------------------------------------------test-----------------------------------------------------------
