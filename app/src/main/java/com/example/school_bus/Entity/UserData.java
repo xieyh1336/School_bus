@@ -28,6 +28,7 @@ public class UserData extends BaseData {
         private String time_out;
         private String token;
         private String head;
+        private String state;
 
         public String getUsername() {
             return username;
@@ -83,6 +84,14 @@ public class UserData extends BaseData {
 
         public void setHead(String head) {
             this.head = head;
+        }
+
+        public String getState() {
+            return state;
+        }
+
+        public void setState(String state) {
+            this.state = state;
         }
     }
 }

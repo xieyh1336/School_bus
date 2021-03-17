@@ -83,6 +83,7 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
     private Handler handler = new Handler();
     private Runnable runnable;
     private int handlerTime = 5000;
+    private boolean isFirst = true;
 
     private DriverPresenter driverPresenter = new DriverPresenter(this);
 
@@ -193,12 +194,21 @@ public class DriverActivity extends BaseActivity implements DriverMvp.view {
             tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
             tvPlates.setText("当前车辆：" + driverStateData.getData().getPlate());
             handler.postDelayed(runnable, handlerTime);
-            showToast("发车成功");
+            if (!isFirst){
+                showToast("发车成功");
+            } else {
+                showToast("行驶中");
+                isFirst = false;
+            }
         } else {
             this.isRunning = false;
             tvState.setText("当前状态：" + driverStateData.getData().getMessageX());
             tvPlates.setText("当前车辆：无");
-            showToast("到达成功");
+            if (!isFirst){
+                showToast("到达成功");
+            } else {
+                isFirst = false;
+            }
         }
     }
 

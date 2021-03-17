@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/gray"
+    android:keepScreenOn="true"
     tools:context=".Activity.DriverActivity">
 
     <include layout="@layout/loading_view"

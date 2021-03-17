@@ -1,8 +1,10 @@
 package com.example.school_bus.NetWork;
 
+import com.example.school_bus.Entity.AllOrderData;
 import com.example.school_bus.Entity.BaseData;
 import com.example.school_bus.Entity.BusListData;
 import com.example.school_bus.Entity.DriverStateData;
+import com.example.school_bus.Entity.MyStateData;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Entity.TestBus;
 import com.example.school_bus.MyApp;
@@ -77,6 +79,21 @@ public class MyApi {
         @GET("school_bus/api/v1/upBusLocation.php")
         Observable<BaseData> upBusLocation(@Query("latitude") double latitude, @Query("longitude") double longitude);
 
+        //预约校车
+        @GET("school_bus/api/v1/orderBus.php")
+        Observable<BaseData> orderBus(@Query("id") String id);
+
+        //取消预约
+        @GET("school_bus/api/v1/cancelOrder.php")
+        Observable<BaseData> cancelOrder();
+
+        //获取所有订单
+        @GET("school_bus/api/v1/getAllOrder.php")
+        Observable<AllOrderData> getAllOrder();
+
+        //获取我的状态
+        @GET("school_bus/api/v1/getMyState.php")
+        Observable<MyStateData> getMyState();
 
         //---------------------------------------------test-----------------------------------------------------------
 

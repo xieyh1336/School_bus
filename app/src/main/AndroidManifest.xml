@@ -23,7 +23,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Activity.WaitingBusListActivity"></activity>
+        <activity android:name=".Activity.MyOrderActivity"></activity>
+        <activity android:name=".Activity.WaitingBusListActivity" />
         <activity android:name=".Activity.DriverActivity" />
         <activity android:name=".Activity.InsideOfflineActivity" />
         <activity

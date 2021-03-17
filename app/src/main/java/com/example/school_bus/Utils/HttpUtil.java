@@ -42,6 +42,9 @@ public class HttpUtil {
                 case MyServerException.TOKEN_CHECK_FAIL2:
                     MyToast.showToast("未知错误");
                     break;
+                default:
+                    MyToast.showToast(e.getMessage());
+                    break;
             }
         } else if (e instanceof HttpException){
             MyToast.showToast("服务器异常，请稍后重试");
