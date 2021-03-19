@@ -1,9 +1,11 @@
 package com.example.school_bus.Fragment.Main;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,13 +39,16 @@ import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.UiSettings;
 import com.baidu.mapapi.model.LatLng;
+import com.example.school_bus.Entity.BaseData;
 import com.example.school_bus.Entity.MapData;
+import com.example.school_bus.Entity.MyStateData;
 import com.example.school_bus.Entity.TestBus;
 import com.example.school_bus.Fragment.LazyLoad.BaseVp2LazyLoadFragment;
 import com.example.school_bus.Manage.MapDrawManage;
 import com.example.school_bus.Mvp.MapMvp;
 import com.example.school_bus.Presenter.MapPresenter;
 import com.example.school_bus.R;
+import com.example.school_bus.Utils.HttpUtil;
 import com.example.school_bus.Utils.MyLog;
 import com.example.school_bus.View.MyPopupWindow;
 
@@ -88,6 +93,24 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     TextView tvRightMe;
     @BindView(R.id.tv_up)
     TextView tvUp;
+    @BindView(R.id.tv_state)
+    TextView tvState;
+    @BindView(R.id.tv_on_bus)
+    TextView tvOnBus;
+    @BindView(R.id.tv_name)
+    TextView tvName;
+    @BindView(R.id.tv_bus_id)
+    TextView tvBusId;
+    @BindView(R.id.tv_plates)
+    TextView tvPlates;
+    @BindView(R.id.tv_run_time)
+    TextView tvRunTime;
+    @BindView(R.id.ll_bus_information)
+    LinearLayout llBusInformation;
+    @BindView(R.id.tv_up_bus)
+    TextView tvUpBus;
+    @BindView(R.id.tv_down_bus)
+    TextView tvDownBus;
     private LocationClient locationClient;//用于发起定位
     private BDLocation myLocation = new BDLocation();//监听，我的位置
     private BDLocation clickLocation = new BDLocation();//点击位置
@@ -135,6 +158,9 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
         tvRightClick.setVisibility(View.GONE);
         tvRightClickLatitude.setVisibility(View.GONE);
         tvRightClickLongitude.setVisibility(View.GONE);
+        llBusInformation.setVisibility(View.GONE);
+        tvUpBus.setVisibility(View.GONE);
+        tvDownBus.setVisibility(View.GONE);
         tvRightClickLatitude.setText("0");
         tvRightClickLongitude.setText("0");
 
@@ -170,12 +196,16 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
         //地图有关的初始化
         initMap();
         mapListener();
+        getMyState();
         //监听
         setListener();
         isLoading = false;
         mapDrawManage = new MapDrawManage(baiduMap, markerOptions);
     }
 
+    /**
+     * 地图初始化
+     */
     public void initMap() {
         //定位初始化
         locationClient = new LocationClient(getContext());
@@ -366,6 +396,10 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
         });
     }
 
+    private void getMyState() {
+        mapPresenter.getMyState();
+    }
+
     private void setListener() {
         myPopupWindow.setOnSwitchListener(new MyPopupWindow.OnSwitchListener() {
             @Override
@@ -383,7 +417,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
                     case 2:
                         //是否绘制点视图
                         switch2 = isSelect;
-                        if (isSelect){
+                        if (isSelect) {
                             mapDrawManage.showClick();
                         } else {
                             mapDrawManage.hideClick();
@@ -399,7 +433,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
                         //测试：是否绘制校车轨迹
                         MyLog.e(TAG, "测试" + testBus);
                         if (testBus != null) {
-                            if (isSelect){
+                            if (isSelect) {
                                 mapDrawManage.add(testBus);
                             } else {
                                 mapDrawManage.clear(testBus);
@@ -427,6 +461,8 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     private void notifyLocation() {
         //上传位置信息
         mapPresenter.upLocation(myLocation.getLatitude(), myLocation.getLongitude());
+        //获取我的信息
+        new Handler().postDelayed(this::getMyState, 1000);
         MyLog.e(TAG, "当前地址：" + myLocation.getAddrStr());
         MyLog.e(TAG, "当前国家：" + myLocation.getCountry());
         MyLog.e(TAG, "当前省份：" + myLocation.getProvince());
@@ -465,7 +501,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
         }
     }
 
-    @OnClick({R.id.iv_my_location, R.id.ic_menu, R.id.tv_up})
+    @OnClick({R.id.iv_my_location, R.id.ic_menu, R.id.tv_up, R.id.tv_up_bus, R.id.tv_down_bus})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.iv_my_location:
@@ -504,6 +540,26 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
                 mapPresenter.testInsertBus(clickLatitude, clickLongitude);
                 showToast("上传成功");
                 break;
+            case R.id.tv_up_bus:
+                //上车
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setMessage("确定上车吗？");
+                builder.setPositiveButton("确定", (dialog, which) -> {
+                    mapPresenter.upBus();
+                });
+                builder.setNegativeButton("取消", null);
+                builder.show();
+                break;
+            case R.id.tv_down_bus:
+                //下车
+                AlertDialog.Builder builder2 = new AlertDialog.Builder(getContext());
+                builder2.setMessage("确定下车吗？");
+                builder2.setPositiveButton("确定", (dialog, which) -> {
+                    mapPresenter.downBus();
+                });
+                builder2.setNegativeButton("取消", null);
+                builder2.show();
+                break;
         }
     }
 
@@ -511,6 +567,7 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
     public void onResume() {
         super.onResume();
         mapView.onResume();
+        getMyState();
     }
 
     @Override
@@ -543,6 +600,70 @@ public class MapFragment extends BaseVp2LazyLoadFragment implements MapMvp.view 
                 .width(5)
                 .color(Color.RED)
                 .points(points);
+    }
+
+    @Override
+    public void getMyStateResult(MyStateData myStateData) {
+        tvUpBus.setVisibility(View.GONE);
+        tvDownBus.setVisibility(View.GONE);
+        switch (myStateData.getData().getState()) {
+            case "0":
+                tvState.setText("未预约");
+                llBusInformation.setVisibility(View.GONE);
+                break;
+            case "1":
+                tvState.setText("已预约");
+                llBusInformation.setVisibility(View.VISIBLE);
+                break;
+            case "2":
+                tvState.setText("校车已发车");
+                llBusInformation.setVisibility(View.VISIBLE);
+                if (myStateData.getData().getOnBus().equals("0")) {
+                    tvUpBus.setVisibility(View.VISIBLE);
+                    tvDownBus.setVisibility(View.GONE);
+                } else {
+                    tvUpBus.setVisibility(View.GONE);
+                    tvDownBus.setVisibility(View.VISIBLE);
+                }
+                break;
+        }
+        if (myStateData.getData().getOnBus().equals("0")) {
+            tvOnBus.setText("未上车");
+        } else {
+            tvOnBus.setText("已上车");
+        }
+        tvName.setText(myStateData.getData().getBus_name());
+        tvBusId.setText(myStateData.getData().getBus_id());
+        tvPlates.setText(myStateData.getData().getPlates());
+        tvRunTime.setText(myStateData.getData().getRun_time());
+    }
+
+    @Override
+    public void upBusResult(BaseData baseData) {
+        showToast("上车成功");
+        tvUpBus.setVisibility(View.GONE);
+        tvDownBus.setVisibility(View.GONE);
+        new Handler().postDelayed(this::getMyState, 1000);
+    }
+
+    @Override
+    public void downBusResult(BaseData baseData) {
+        showToast("下车成功");
+        tvUpBus.setVisibility(View.GONE);
+        tvDownBus.setVisibility(View.GONE);
+        new Handler().postDelayed(this::getMyState, 1000);
+    }
+
+    @Override
+    public void onError(Throwable e, String type) {
+        switch (type) {
+            case "getMyState":
+                break;
+            case "upBus":
+            case "downBus":
+                HttpUtil.onError(e);
+                break;
+        }
     }
 
     //获取定位数据

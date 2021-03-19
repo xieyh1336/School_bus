@@ -29,6 +29,7 @@ public class UserData extends BaseData {
         private String token;
         private String head;
         private String state;
+        private String onBus;
 
         public String getUsername() {
             return username;
@@ -92,6 +93,14 @@ public class UserData extends BaseData {
 
         public void setState(String state) {
             this.state = state;
+        }
+
+        public String getOnBus() {
+            return onBus;
+        }
+
+        public void setOnBus(String onBus) {
+            this.onBus = onBus;
         }
     }
 }

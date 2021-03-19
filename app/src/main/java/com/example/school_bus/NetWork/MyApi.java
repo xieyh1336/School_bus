@@ -95,6 +95,13 @@ public class MyApi {
         @GET("school_bus/api/v1/getMyState.php")
         Observable<MyStateData> getMyState();
 
+        //上车
+        @GET("school_bus/api/v1/upBus.php")
+        Observable<BaseData> upBus();
+
+        //下车
+        @GET("school_bus/api/v1/downBus.php")
+        Observable<BaseData> downBus();
         //---------------------------------------------test-----------------------------------------------------------
 
         //校车上传位置测试

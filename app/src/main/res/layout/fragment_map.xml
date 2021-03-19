@@ -14,6 +14,162 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/white_radius_5dp"
+            android:layout_margin="10dp"
+            android:padding="5dp">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="当前状态："/>
+
+                <TextView
+                    android:id="@+id/tv_state"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="未预约"
+                    android:text="加载中"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="是否在车上："/>
+
+                <TextView
+                    android:id="@+id/tv_on_bus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="未上车"
+                    android:text="加载中"/>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_bus_information"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="校车："/>
+
+                    <TextView
+                        android:id="@+id/tv_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="雁山-王城"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="校车id："/>
+
+                    <TextView
+                        android:id="@+id/tv_bus_id"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="校车车牌："/>
+
+                    <TextView
+                        android:id="@+id/tv_plates"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="1"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="发车时间："/>
+
+                    <TextView
+                        android:id="@+id/tv_run_time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="1"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:id="@+id/tv_up_bus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="上车"
+                android:background="@drawable/white_radius_5dp"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="20dp"/>
+
+            <TextView
+                android:id="@+id/tv_down_bus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="下车"
+                android:background="@drawable/white_radius_5dp"
+                android:paddingVertical="10dp"
+                android:paddingHorizontal="20dp"/>
+
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/iv_my_location"
             android:layout_width="40dp"

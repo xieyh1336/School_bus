@@ -25,10 +25,12 @@ public class MyStateData extends BaseData {
          */
 
         private String state;
+        private String onBus;
         private String bus_id;
         private String bus_name;
         private String plates;
         private String run_time;
+        private String bus_type;
 
         public String getState() {
             return state;
@@ -36,6 +38,14 @@ public class MyStateData extends BaseData {
 
         public void setState(String state) {
             this.state = state;
+        }
+
+        public String getOnBus() {
+            return onBus;
+        }
+
+        public void setOnBus(String onBus) {
+            this.onBus = onBus;
         }
 
         public String getBus_id() {
@@ -68,6 +78,14 @@ public class MyStateData extends BaseData {
 
         public void setRun_time(String run_time) {
             this.run_time = run_time;
+        }
+
+        public String getBus_type() {
+            return bus_type;
+        }
+
+        public void setBus_type(String bus_type) {
+            this.bus_type = bus_type;
         }
     }
 }

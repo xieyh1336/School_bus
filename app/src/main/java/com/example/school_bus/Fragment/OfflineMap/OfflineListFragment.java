@@ -107,7 +107,7 @@ public class OfflineListFragment extends BaseVp2LazyLoadFragment {
                 @Override
                 public void scrollPosition(int position) {
                     MyLog.e(TAG, "滑动到当前位置");
-                    rvList.scrollToPosition(position);
+//                    rvList.scrollToPosition(position);
                 }
             });
             //防止刷新和点击冲突

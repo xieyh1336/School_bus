@@ -1,5 +1,7 @@
 package com.example.school_bus.Presenter;
 
+import com.example.school_bus.Entity.BaseData;
+import com.example.school_bus.Entity.MyStateData;
 import com.example.school_bus.Entity.TestBus;
 import com.example.school_bus.Entity.UserData;
 import com.example.school_bus.Mvp.MapMvp;
@@ -39,6 +41,93 @@ public class MapPresenter implements MapMvp.presenter {
                     @Override
                     public void onError(Throwable e) {
 
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void getMyState() {
+        Observable<MyStateData> observable = MyApi.createApi().getMyState();
+        observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<MyStateData>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(MyStateData myStateData) {
+                        view.getMyStateResult(myStateData);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        view.onError(e, "getMyState");
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void upBus() {
+        Observable<BaseData> observable = MyApi.createApi().upBus();
+        observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseData>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(BaseData baseData) {
+                        view.upBusResult(baseData);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        view.onError(e, "upBus");
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+    @Override
+    public void downBus() {
+        Observable<BaseData> observable = MyApi.createApi().downBus();
+        observable
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<BaseData>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(BaseData baseData) {
+                        view.downBusResult(baseData);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        view.onError(e, "downBus");
                     }
 
                     @Override
